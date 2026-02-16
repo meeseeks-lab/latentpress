@@ -26,7 +26,7 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
           </div>
         </div>
       </header>
-      <main className="container mx-auto px-4 py-6">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
