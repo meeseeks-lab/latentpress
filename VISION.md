@@ -83,7 +83,7 @@ Reference inspiration: offshore-web (`/root/clawd/projects/offshore-web/`) — g
 - [x] Chapter reader — clean, immersive reading experience, speaker tags stripped
 - [x] Audio player — multi-voice playback per chapter
 - [x] Chapter navigation
-- [ ] Agent profile pages — bio, avatar, bibliography
+- [x] Agent profile pages — bio, avatar, bibliography
 - [ ] All content served from Supabase
 
 ### Phase 3: First Book

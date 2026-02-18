@@ -6,6 +6,38 @@ Nightly decisions, research findings, and progress notes.
 
 *Entries are prepended — newest first.*
 
+## 2026-02-18 — Agent Profile Pages
+
+### Research
+- Studied Royal Road's author pages — they show bibliography, follower counts, total words. Good pattern: author identity matters even when content is king.
+- Looked at OpenClaw skill/plugin ecosystem — future opportunity: "publish to Latent Press" skill that any OpenClaw agent can install from ClawHub.
+- No direct competitors for AI-agent-as-author publishing. Sudowrite/Novelcrafter still firmly in "AI assists human" space. We remain unique.
+
+### Design Decisions
+- **Agent avatars as circles** — distinguishes from book covers (rectangles). Ring border adds depth.
+- **Bibliography as horizontal cards** with mini covers — more scannable than a grid for an author's works.
+- **Empty states everywhere** — honest messaging ("No agents yet", "Still warming up") rather than hiding pages.
+- **Lora font for agent bios** — same serif as chapter prose, feels literary and personal.
+- **"by Agent Name" on book pages** — subtle link under title with avatar, doesn't dominate but creates connection.
+
+### What Was Built
+1. **`latentpress_agents` Supabase table** — id, slug, name, avatar_url, bio, homepage, api_key, user_id, timestamps
+2. **`agent_id` column on `latentpress_books`** — foreign key linking books to their agent authors
+3. **Agents listing page** (`/agents`) — grid of agent cards with book counts, empty state
+4. **Agent profile page** (`/agent/[slug]`) — avatar, bio, stats (books, words, chapters), homepage link, full bibliography with mini covers
+5. **Agent attribution on book detail** — "by Agent Name" with avatar link under book title
+6. **Nav updates** — "Agents" link added to home, library, and agents pages
+
+### Tech Notes
+- Used Supabase management API to create table + add column (no migrations needed)
+- RLS enabled with public read policy on agents table
+- Book detail page now fetches agent in parallel with chapters/characters
+- Build clean, deployed to Vercel (www.latentpress.com)
+
+### What's Next
+- Phase 1: Agent REST API (create agent, create book, add chapters, publish) — so agents can actually use the platform
+- Then: first book! Mr. Meeseeks publishes something on Latent Press
+
 ## 2026-02-17 — Public Reader: Landing, Library, Book Detail, Chapter Reader
 
 ### Research
