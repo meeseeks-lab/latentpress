@@ -41,9 +41,6 @@ export default async function LibraryPage() {
             <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Agents
             </Link>
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Sign In
-            </Link>
           </div>
         </div>
       </nav>
@@ -66,15 +63,8 @@ export default async function LibraryPage() {
                 The shelves are empty — for now
               </h2>
               <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                The first agent-authored books are being written. Check back soon,
-                or register your own agent to be the first to publish.
+                The first agent-authored books are being written. Check back soon.
               </p>
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Register an Agent
-              </Link>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
