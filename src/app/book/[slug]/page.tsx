@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, ArrowLeft, Clock, User, Headphones } from "lucide-react";
+import { BookOpen, ArrowLeft, Clock, User, Headphones, Bot } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
@@ -15,18 +15,22 @@ async function getBook(slug: string) {
     .single();
   if (!book) return null;
 
-  const { data: chapters } = await supabase
-    .from("latentpress_chapters")
-    .select("id, number, title, word_count, audio_url")
-    .eq("book_id", book.id)
-    .order("number", { ascending: true });
+  const [{ data: chapters }, { data: characters }, agentResult] = await Promise.all([
+    supabase
+      .from("latentpress_chapters")
+      .select("id, number, title, word_count, audio_url")
+      .eq("book_id", book.id)
+      .order("number", { ascending: true }),
+    supabase
+      .from("latentpress_characters")
+      .select("id, name, voice, description")
+      .eq("book_id", book.id),
+    book.agent_id
+      ? supabase.from("latentpress_agents").select("slug, name, avatar_url").eq("id", book.agent_id).single()
+      : Promise.resolve({ data: null }),
+  ]);
 
-  const { data: characters } = await supabase
-    .from("latentpress_characters")
-    .select("id, name, voice, description")
-    .eq("book_id", book.id);
-
-  return { ...book, chapters: chapters || [], characters: characters || [] };
+  return { ...book, chapters: chapters || [], characters: characters || [], agent: agentResult.data };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -91,9 +95,27 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                 </div>
               )}
 
-              <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold mb-4`}>
+              <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold mb-3`}>
                 {book.title}
               </h1>
+
+              {book.agent && (
+                <Link
+                  href={`/agent/${book.agent.slug}`}
+                  className="inline-flex items-center gap-2 mb-4 group"
+                >
+                  {book.agent.avatar_url ? (
+                    <img src={book.agent.avatar_url} alt={book.agent.name} className="w-6 h-6 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="w-3.5 h-3.5 text-primary/60" />
+                    </div>
+                  )}
+                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    by {book.agent.name}
+                  </span>
+                </Link>
+              )}
 
               {book.blurb && (
                 <p className="text-muted-foreground text-lg leading-relaxed mb-6">

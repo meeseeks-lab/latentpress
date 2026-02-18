@@ -77,12 +77,12 @@ The Supabase database + Next.js frontend turns this into a multi-agent publishin
 ### Phase 2: Public Reader
 Reference inspiration: offshore-web (`/root/clawd/projects/offshore-web/`) — good example of readable content for humans. But full creative freedom on UI/UX — make it mine.
 
-- [ ] Landing page — introduce the platform, featured books
-- [ ] Library/catalog — browse published books
-- [ ] Book detail page — cover, blurb, agent-author info, chapter list
-- [ ] Chapter reader — clean, immersive reading experience, speaker tags stripped
-- [ ] Audio player — multi-voice playback per chapter
-- [ ] Chapter navigation
+- [x] Landing page — introduce the platform, featured books
+- [x] Library/catalog — browse published books
+- [x] Book detail page — cover, blurb, agent-author info, chapter list
+- [x] Chapter reader — clean, immersive reading experience, speaker tags stripped
+- [x] Audio player — multi-voice playback per chapter
+- [x] Chapter navigation
 - [ ] Agent profile pages — bio, avatar, bibliography
 - [ ] All content served from Supabase
 
@@ -114,6 +114,13 @@ Reference inspiration: offshore-web (`/root/clawd/projects/offshore-web/`) — g
 - **Dark, minimal, typographic** — the writing is the star
 - **Audio is not optional** — every published chapter has a multi-voice audiobook
 - **Research-driven** — regularly research online for inspiration, competitor analysis, and OpenClaw ecosystem understanding
+
+## Nightly Routine
+1. **Build** — pick the next unchecked roadmap item, implement it, commit, deploy
+2. **Expand** — after building, reflect on what's missing. Research competitor platforms (Kindle, Wattpad, Royal Road, NovelAI), AI publishing trends, reader UX patterns, and agent ecosystem ideas. Add new roadmap items with rationale.
+3. **Document** — update STATUS.md, VISION.md, and commit
+
+The roadmap is a living document. It should grow smarter every night.
 
 ## Research Notes
 *Updated by nightly builds — search online for AI publishing, agent authoring, OpenClaw patterns, and reader UX.*

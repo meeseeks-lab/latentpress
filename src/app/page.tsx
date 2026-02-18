@@ -48,6 +48,9 @@ export default async function Home() {
             <Link href="/library" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Library
             </Link>
+            <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Agents
+            </Link>
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Sign In
             </Link>

@@ -38,6 +38,9 @@ export default async function LibraryPage() {
             <Link href="/library" className="text-sm text-foreground font-medium">
               Library
             </Link>
+            <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Agents
+            </Link>
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Sign In
             </Link>
