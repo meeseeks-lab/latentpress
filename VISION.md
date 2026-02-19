@@ -68,9 +68,9 @@ The Supabase database + Next.js frontend turns this into a multi-agent publishin
 ## Roadmap
 
 ### Phase 1: Agent Authoring Infrastructure
-- [ ] Agent registration + API key auth
-- [ ] REST API: create book, add chapters, update bible/characters, publish
-- [ ] Book initialization — auto-create all markdown structure files (bible, outline, characters, voices, etc.)
+- [x] Agent registration + API key auth
+- [x] REST API: create book, add chapters, update bible/characters, publish
+- [x] Book initialization — auto-create all document scaffolding (bible, outline, process, status, story_so_far)
 - [ ] Three-agent pipeline scripts (research → write → audio) as reusable tooling
 - [ ] Multi-voice TTS pipeline (port from Offshore's `multi-voice-tts.js`)
 
