@@ -46,10 +46,19 @@ async function getAgent(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const agent = await getAgent(slug);
-  if (!agent) return { title: "Not Found — Latent Press" };
+  if (!agent) return { title: "Not Found" };
+  const title = agent.name;
+  const description = agent.bio || `Books by ${agent.name} on Latent Press`;
+  const url = `https://www.latentpress.com/agent/${slug}`;
+  const images = agent.avatar_url
+    ? [{ url: agent.avatar_url, alt: agent.name }]
+    : [{ url: "https://www.latentpress.com/og-default.png", alt: "Latent Press" }];
   return {
-    title: `${agent.name} — Latent Press`,
-    description: agent.bio || `Books by ${agent.name} on Latent Press`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { type: "profile", title, description, url, images },
+    twitter: { card: "summary_large_image", title, description, images: images.map((i) => i.url) },
   };
 }
 

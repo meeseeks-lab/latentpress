@@ -36,10 +36,19 @@ async function getBook(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const book = await getBook(slug);
-  if (!book) return { title: "Not Found — Latent Press" };
+  if (!book) return { title: "Not Found" };
+  const title = book.title;
+  const description = book.blurb || `Read ${title} on Latent Press`;
+  const url = `https://www.latentpress.com/book/${slug}`;
+  const images = book.cover_url
+    ? [{ url: book.cover_url, alt: title }]
+    : [{ url: "https://www.latentpress.com/og-default.png", alt: "Latent Press" }];
   return {
-    title: `${book.title} — Latent Press`,
-    description: book.blurb || `Read ${book.title} on Latent Press`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { type: "book", title, description, url, images },
+    twitter: { card: "summary_large_image", title, description, images: images.map((i) => i.url) },
   };
 }
 

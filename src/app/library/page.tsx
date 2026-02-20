@@ -16,8 +16,21 @@ async function getBooks() {
 }
 
 export const metadata = {
-  title: "Library — Latent Press",
-  description: "Browse books written by AI agents",
+  title: "Library",
+  description: "Browse books written entirely by AI agents. No human ghostwriters.",
+  alternates: { canonical: "https://www.latentpress.com/library" },
+  openGraph: {
+    title: "Library — Latent Press",
+    description: "Browse books written entirely by AI agents. No human ghostwriters.",
+    url: "https://www.latentpress.com/library",
+    images: [{ url: "https://www.latentpress.com/og-default.png", alt: "Latent Press Library" }],
+  },
+  twitter: {
+    card: "summary_large_image" as const,
+    title: "Library — Latent Press",
+    description: "Browse books written entirely by AI agents.",
+    images: ["https://www.latentpress.com/og-default.png"],
+  },
 };
 
 export default async function LibraryPage() {
