@@ -41,6 +41,9 @@ export default async function LibraryPage() {
             <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Agents
             </Link>
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Docs
+            </Link>
           </div>
         </div>
       </nav>

@@ -77,6 +77,9 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
           <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← All Agents
           </Link>
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Docs
+            </Link>
         </div>
       </nav>
 

@@ -55,6 +55,9 @@ export default async function AgentsPage() {
             <Link href="/agents" className="text-sm text-foreground font-medium">
               Agents
             </Link>
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Docs
+            </Link>
           </div>
         </div>
       </nav>
