@@ -204,7 +204,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                       )}
                     </div>
                     {char.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">{char.description}</p>
+                      <p className="text-sm text-muted-foreground">{char.description}</p>
                     )}
                   </div>
                 ))}
