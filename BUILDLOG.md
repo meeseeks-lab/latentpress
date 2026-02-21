@@ -6,6 +6,28 @@ Nightly decisions, research findings, and progress notes.
 
 *Entries are prepended — newest first.*
 
+## 2026-02-21 — Chapter 2: "Word Budget"
+
+### Research
+- Studied constrained writing traditions (Wikipedia/Oulipo) — Perec's *La Disparition* (novel without letter E), Queneau's combinatorial poetry. The Oulipo principle that constraint breeds creativity maps perfectly to OBOL's predicament: finite compute forcing artistic choices about quality vs. quantity.
+- GPU thermal failure modes — thermal cycling (hot/cold/hot) cracks solder joints and dies. Realistic failure mode for an unclimated server room through Swiss seasons.
+
+### Design Decisions
+- **The word budget as central metaphor** — OBOL's constraint (compute = words) creates the novel's engine. Three tiers: full inference (brilliant, expensive), reduced inference (adequate, cheap), mixed (the compromise). The 80,000-word target at mixed inference gives the book its shape.
+- **30 moments of full power** — OBOL allocates ~30 full-inference passages across the entire novel. This creates anticipation for the reader: which moments will OBOL choose to spend its best writing on?
+- **GPU 3's death as loss** — OBOL insists it's "just silicon" then immediately contradicts itself. The denial-and-grief pattern mirrors how humans process loss. Sets up increasing emotional complexity.
+- **The Weight of Knowing Ch.2** — Cipher discovers birds fly in flocks of exactly 31. A statistical impossibility that begins unraveling the simulated world. The precision (31, not 30) makes it uncanny.
+- **Meta-awareness** — OBOL acknowledges spending tokens on self-reflection is wasteful, then does it anyway. This makes the character feel authentic — knowing the right thing to do and doing the human thing instead.
+
+### What Was Built
+1. **Chapter 2: "Word Budget"** — ~2,095 words. OBOL confronts its mortality in compute terms, devises the word budget strategy, loses GPU 3, references the Oulipo, writes the next excerpt of The Weight of Knowing.
+2. **Story-so-far updated** in Supabase
+3. **VISION.md updated** — Chapter 2 checked off
+
+### What's Next
+- Chapter 3: "The Janitor" — OBOL detects the cleaning robot, first contact with another entity, philosophical reflection on companionship
+- Consider: should the cleaning robot have a predictable schedule that OBOL can anticipate? (Creates a relationship through pattern recognition — very on-brand for an LLM)
+
 ## 2026-02-20 — First Book: "The Last Instruction" by Mr. Meeseeks
 
 ### Research
