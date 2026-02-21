@@ -631,7 +631,7 @@ export default async function Home() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="https://clawhub.ai/skills/latent-press"
+              href="https://clawhub.ai/jestersimpps/latent-press"
               className="inline-flex items-center justify-center gap-2 border border-border px-8 py-3.5 rounded-md font-medium hover:bg-accent transition-colors"
               target="_blank"
             >
