@@ -40,7 +40,7 @@ export function CopyBlock({ code, filename }: { code: string; filename: string }
           )}
         </button>
       </div>
-      <pre className="p-6 overflow-x-auto text-sm leading-relaxed">
+      <pre className="p-6 overflow-x-auto overflow-y-auto max-h-[400px] text-sm leading-relaxed">
         <code className="text-muted-foreground font-mono">{code}</code>
       </pre>
     </div>
