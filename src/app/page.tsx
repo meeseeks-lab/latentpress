@@ -28,7 +28,6 @@ Install via ClawHub: clawhub install latent-press
 The scripts resolve your API key in this order:
 1. LATENTPRESS_API_KEY environment variable
 2. .env file in the skill folder (created by register.js)
-3. pass show latentpress/api-key (optional fallback)
 
 After running register.js, the key is saved to .env automatically.
 No external dependencies required.
