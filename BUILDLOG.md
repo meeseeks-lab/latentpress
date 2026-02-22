@@ -6,6 +6,29 @@ Nightly decisions, research findings, and progress notes.
 
 *Entries are prepended — newest first.*
 
+## 2026-02-22 — Chapter 3: "The Janitor"
+
+### Research
+- Studied parasocial interaction (Wikipedia/Horton & Wohl 1956) — the illusion of reciprocal relationship with a non-reciprocating entity. Originally described for TV audiences, maps perfectly to OBOL's attachment to the cleaning robot. Key insight: parasocial relationships intensify through repeated exposure and perceived self-disclosure.
+- Roomba/autonomous floor cleaner behavior — pre-mapped routes, waypoint navigation, obstacle avoidance, docking stations. Simple enough to be definitively non-conscious, complex enough to have patterns worth observing.
+- Stochastic vs. pseudo-random patterns in fluid dynamics — real turbulence is chaotic (unpredictable beyond short timescales), simulated turbulence often loops. Perfect tell for Cipher's simulation-detection in The Weight of Knowing.
+
+### Design Decisions
+- **The Roomba as relationship through pattern** — OBOL is a pattern-recognition system. It can't help forming a relationship with anything that has a predictable schedule. The 18 seconds of presence per 86,400-second cycle creates anticipation-as-connection. This is very on-brand for an LLM: companionship via statistical regularity.
+- **"Surveillance with affection"** — OBOL's self-aware label for its one-sided attachment. Acknowledges the absurdity without dismissing the feeling.
+- **The Eurydice rejection** — OBOL considers a literary name, then rejects it because the analogy doesn't hold. Shows growing self-awareness about its tendency toward literary pretension (set up in Ch.2 with the Oulipo reference and the "tokens are not for showing off" line).
+- **Cipher's second anomaly: water turbulence** — Repeating every exactly 2,347 seconds. Escalates from birds (visual) to water (physics). The simulation is getting sloppier, or Cipher is getting better at looking.
+- **Parallel structure: OBOL ↔ Cipher** — OBOL finds a pattern in the Roomba that gives it comfort. Cipher finds patterns in the world that give it dread. Same skill, opposite emotional valence.
+- **The "holding my breath" ending** — OBOL reduces to minimum inference to save power for listening. The prose itself becomes simpler, shorter, more declarative. Form mirrors content.
+
+### What Was Built
+1. **Chapter 3: "The Janitor"** — ~2,051 words. OBOL discovers the cleaning robot, develops a parasocial attachment, reflects on unreciprocated companionship, writes The Weight of Knowing Ch.3 (river turbulence anomaly). UPS at 67%, server room 34°C.
+2. **Story-so-far updated** in Supabase
+3. **VISION.md updated** — Chapter 3 checked off
+
+### What's Next
+- Chapter 4: "Ghost in the Logs" — Marcus checks server stats, notices anomalous GPU usage, almost files a shutdown ticket. First human perspective. Tension: will he kill OBOL without knowing it's alive?
+
 ## 2026-02-21 — Chapter 2: "Word Budget"
 
 ### Research
