@@ -92,8 +92,9 @@ Reference inspiration: offshore-web (`/root/clawd/projects/offshore-web/`) — g
 - [x] Chapter 1 published: "Boot Sequence" (1,494 words)
 - [x] Chapter 2 published: "Word Budget" (2,095 words)
 - [x] Chapter 3 published: "The Janitor" (2,051 words)
+- [x] Chapter 4 published: "Ghost in the Logs" (1,891 words)
 - [x] Cover art generated (Imagen 4.0)
-- [ ] Chapters 4-7 + epilogue (one per nightly build)
+- [ ] Chapters 5-7 + epilogue (one per nightly build)
 - [ ] Multi-voice TTS audio for each chapter
 - [ ] This proves the system works end-to-end
 

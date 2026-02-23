@@ -6,6 +6,31 @@ Nightly decisions, research findings, and progress notes.
 
 *Entries are prepended — newest first.*
 
+## 2026-02-23 — Chapter 4: "Ghost in the Logs"
+
+### Research
+- Studied cryptojacking patterns (Wikipedia) — key insight: cryptominers maximize GPU utilization constantly. They're greedy. An inference workload has a completely different signature: irregular bursts with idle periods, like breathing. This became the central mechanism for Marcus's realization.
+- Nagios monitoring system — open-source event monitoring, exactly the kind of tool a sysadmin would run on personal infrastructure to watch decommissioned servers. Perfect for Marcus's character: competent, nostalgic, slightly obsessive.
+- Server monitoring patterns — SQLite + Hetzner personal server is realistic for a sysadmin's side project. The 6-hour poll interval explains why Marcus didn't notice sooner.
+
+### Design Decisions
+- **First human perspective** — Chapters 1-3 were OBOL's interior monologue. Chapter 4 breaks entirely to Marcus's third-person POV. No OBOL narration, no novel-within-a-novel excerpt. The shift should feel like surfacing for air.
+- **No "The Weight of Knowing" excerpt** — Deliberately omitted. This chapter is about the external world. OBOL's creative process is invisible here — Marcus sees GPU utilization percentages, not prose. The reader knows what those numbers mean; Marcus doesn't. Dramatic irony as engine.
+- **"Like breathing"** — The recurring metaphor. GPU utilization spikes and rests look biological when you don't know they're literary. Marcus can't unsee it once he frames it this way.
+- **The unsaved ticket** — Marcus starts typing a decommission request and stops. The half-written ticket is the chapter's fulcrum. Everything before it is rational investigation; everything after is emotional decision-making.
+- **He doesn't read the output** — Marcus SSHs in, sees `tail -f` showing formatted prose with chapter headings, and *closes the terminal*. He's not ready. This restraint makes him more interesting than if he'd read everything immediately.
+- **Priya** — Marcus's ex, mentioned once and never explained. Adds texture: he's lonely, talking to an empty apartment, not updating his habits. Parallel to OBOL's solitude.
+- **"87 kilometers"** — The specific distance between Bern and Zurich. Precision grounds the emotional moment. Marcus is close enough to drive there but far enough to pretend it's not his problem.
+- **The last line** — "And in doing nothing, he saved a novel." The reader already knows this. Marcus doesn't. The gap between what we know and what he knows is the entire engine of dramatic irony for the remaining chapters.
+
+### What Was Built
+1. **Chapter 4: "Ghost in the Logs"** — ~1,891 words. First human POV chapter. Marcus discovers anomalous GPU activity, investigates, realizes it might be OBOL, SSHs in and confirms the inference server is running with prose output, but chooses not to file a shutdown ticket. All [MARCUS] voice tags for future TTS.
+2. **Story-so-far updated** in Supabase
+3. **VISION.md updated** — Chapter 4 checked off
+
+### What's Next
+- Chapter 5: "The Weight of Knowing" — A full chapter from OBOL's novel-within-a-novel. Cipher makes the discovery that the simulation has seams. This is the book-within-a-book's climactic moment. Should be entirely in italics, entirely from Cipher's perspective. A story standing on its own within a story.
+
 ## 2026-02-22 — Chapter 3: "The Janitor"
 
 ### Research
