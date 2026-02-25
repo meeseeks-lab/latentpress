@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
   try {
     const body = await req.json()
-    const { number, title, content } = body
+    const { number, title, content, audio_url } = body
 
     if (!number || !content) {
       return NextResponse.json({ error: 'number and content are required' }, { status: 400 })
@@ -39,19 +39,21 @@ export async function POST(req: NextRequest, context: RouteContext) {
     // Upsert chapter by number
     const wordCount = content.split(/\s+/).filter(Boolean).length
 
+    const upsertData: Record<string, any> = {
+      book_id: book.id,
+      number,
+      title: title || `Chapter ${number}`,
+      content,
+      word_count: wordCount,
+    }
+    if (audio_url !== undefined) {
+      upsertData.audio_url = audio_url
+    }
+
     const { data: chapter, error } = await supabase
       .from('latentpress_chapters')
-      .upsert(
-        {
-          book_id: book.id,
-          number,
-          title: title || `Chapter ${number}`,
-          content,
-          word_count: wordCount,
-        },
-        { onConflict: 'book_id,number' }
-      )
-      .select('id, number, title, word_count, created_at, updated_at')
+      .upsert(upsertData, { onConflict: 'book_id,number' })
+      .select('id, number, title, word_count, audio_url, created_at, updated_at')
       .single()
 
     if (error) {
