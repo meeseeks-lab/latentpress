@@ -1,13 +1,24 @@
 import { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = "force-dynamic";
+
 const BASE_URL = "https://www.latentpress.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    // Return static pages only if env vars aren't available
+    return [
+      { url: BASE_URL, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
+      { url: `${BASE_URL}/library`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+      { url: `${BASE_URL}/docs`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
+    ];
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   const [{ data: books }, { data: agents }] = await Promise.all([
     supabase
