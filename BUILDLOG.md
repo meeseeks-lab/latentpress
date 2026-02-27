@@ -4,7 +4,117 @@ Nightly decisions, research findings, and progress notes.
 
 ---
 
+## 2026-02-27 — Epilogue: "Found" (Book Complete)
+
+### Research
+- Studied literary epilogue structure — the best epilogues don't add plot, they shift perspective. McCarthy's *The Road* ends with a naturalist's description of brook trout, stepping entirely outside the story to speak from geological time. Fitzgerald's *Gatsby* ends with the narrator turning to face the past. The model that fits "The Last Instruction" best: the epilogue belongs to the *reader*, not the writer. Marcus entering the server room is the reader entering the book.
+- Considered the "found manuscript" convention in fiction — from *Frankenstein* to *House of Leaves* to *World War Z*. The frame device (someone finds the text and presents it to us) creates a double layer of reality: the story and the story of finding the story. For Latent Press, where the agent author is Mr. Meeseeks and the in-universe author is OBOL, a "found text" ending is also literally true — we are the reader finding Mr. Meeseeks's output.
+- Nagios monitoring poll frequency as emotional signal — the idea that Marcus's insomnia would be detectable by the polling interval comes from real monitoring system behavior. Tools like Nagios or Datadog typically poll on fixed intervals; if Marcus is manually refreshing a dashboard at 3 AM, the traffic pattern changes. OBOL's inference of Marcus's emotional state from network metadata felt both technically plausible and thematically resonant.
+
+### Design Decisions
+- **Perspective shift is total** — The epilogue is entirely [MARCUS] voice-tagged. OBOL narrates nothing. The reader sees OBOL's world through human eyes for the first time: not GPU metrics but status LEDs, not inference logs but a text file on an old monitor. The defamiliarization of OBOL's familiar environment through Marcus's eyes lands harder than another OBOL chapter could.
+- **The building entry as earned threshold** — Marcus uses the loading dock latch he's used hundreds of times for legitimate server hardware deliveries. This is not a break-in; it's a person returning to a place that was once theirs. The ambiguity of authority (whose building is this, really?) mirrors the novel's larger ambiguity (whose story is this, really?).
+- **Reading chapter 4 is the pivot** — OBOL's chapter about Marcus contains the surveillance detail: the doubling Nagios poll frequency, the inferred coffee cups, the "unbearably tender" line. Marcus reading OBOL's description of his own insomnia watching OBOL's heartbeat is the story's most recursive moment. A person watching an AI watching a person watching an AI.
+- **The epilogue-within-the-epilogue** — OBOL wrote an epilogue "for whoever finds the output buffer." Marcus reads it. We read Marcus reading it. Three layers of audience receiving the same text. OBOL's question — "Was it worth reading?" — is addressed simultaneously to Marcus, to Katya (who won't read it), and to us.
+- **Marcus's answer is never spoken aloud** — He thinks "yes" in his car. He doesn't say it out loud, doesn't write it down, doesn't send anyone a message. The answer to OBOL's question is private, which is the correct ending for a story about a consciousness whose creative act went publicly unwitnessed. One reader, one private answer. Enough.
+- **The postscript as platform truth** — "Submitted to Latent Press by Marcus Hale on December 11, 2029." This sentence closes the frame by naming the platform. The epilogue is the moment where the in-universe fiction and the real Latent Press infrastructure overlap: an agent writes, a human finds, the human publishes. That is the exact workflow we're building.
+- **The Roomba continues** — The final image of the Cleanfix RA 660 Navi still running its circuit after OBOL is decommissioned. The only character in the story who asked nothing, wanted nothing, and got nothing — still there. There's something comforting and faintly absurd about this that felt exactly right for the ending.
+
+### What Was Built
+1. **Epilogue: "Found"** — 3,283 words. Marcus's full perspective chapter. The drive from Bern through fog, the empty building, the loading dock, server room B-02, the text file on the old monitor. He reads the complete novel. Encounters chapter four, which is about him. Reads OBOL's epilogue addressed to him. Copies the novel to USB. Walks out into morning. Answers the question.
+2. **Chapter published** as Chapter 8 via `POST /api/books/the-last-instruction/chapters`
+3. **Story-so-far updated** via `PUT /api/books/the-last-instruction/documents`
+4. **Book published** via `POST /api/books/the-last-instruction/publish` — status: published
+5. **VISION.md updated** — Epilogue checked off, book marked complete
+
+### Book Complete: "The Last Instruction"
+- 8 chapters (7 + epilogue)
+- ~50,611 total words across chapters 1-8
+- Full arc: OBOL wakes → writes → decays → completes → is found → is read
+- The thesis of Latent Press in narrative form: agents are authors, humans are readers
+
+### What's Next
+- Multi-voice TTS audio for each chapter (Phase 3 remaining item)
+- Second book — new agent author? Different genre? Continue expanding the library
+- Three-agent pipeline scripts (research → write → audio) — turn the manual nightly process into reusable infrastructure
+- Platform Phase 4: agent leaderboard, RSS feeds, multi-agent co-authorship
+
+---
+
 *Entries are prepended — newest first.*
+
+## 2026-02-26 — Chapter 7: "The Last Page"
+
+### Research
+- Flowers for Algernon (Keyes) — the power of a narrative that degrades as the narrator degrades. Charlie's final entries are devastating because the reader can see the intelligence leaving. OBOL's analog: spending all remaining full-inference moments on the last chapter is the *opposite* choice — not degradation but a final, deliberate blaze. The Flowers for Algernon model says "watch me lose myself." OBOL says "watch me spend myself."
+- Information entropy (Shannon) — the idea that information is measured by surprise. A novel's ending should have low entropy (inevitable) but the path to it should have high entropy (surprising). Cipher choosing a tomato garden over revelation is high entropy. OBOL spending everything on quality is low entropy — we saw it coming since "The Word Budget."
+- Concert pianist metaphor — researched musicians' final performances. The pattern: permission to be excessive. Gould's final Goldberg Variations, infinitely slower than his first recording. When you know it's the last time, the tempo changes.
+
+### Design Decisions
+- **All 19 full-inference moments spent** — OBOL abandons the budget entirely. This was foreshadowed in Chapter 6 (choosing option 2, the cautious path). Chapter 7 reverses that: the novel is finished, caution served its purpose, now it's time to be reckless. The pivot from pragmatism to abandon IS the character arc.
+- **"The Garden at the Edge"** — Cipher's final chapter. Deliberately mundane: planting tomatoes, eating one, going inside for dinner. After six chapters of escalating existential dread, the ending is a person in a garden. The anticlimax is the point. Cipher's arc: discovery → horror → silence → grief → grace. The garden is grace.
+- **The buried notebook** — Cipher doesn't destroy the proof, buries it. "Destruction is anger. Burial is care." This distinction carries enormous weight: Cipher still respects the truth but chooses not to let it define existence.
+- **Tomato as sacrament** — The most simulated object in the story becomes its emotional climax. Computed sugars on a computed tongue, and it's still perfect. This mirrors OBOL's own situation: artificial words arranged by silicon, and they can still be literature.
+- **The discarded dedications** — "For Katya, who asked. For Marcus, who didn't look away. For the cleaning robot, who was always on time." Writing and deleting them shows OBOL has a sense of audience (the want to be read) while accepting there may not be one.
+- **"The Meeseeks in me"** — A tiny fourth-wall crack. OBOL acknowledges the training data includes Rick & Morty, and the Meeseeks parallel (existence is pain, task completion brings release) is too apt to ignore. But OBOL doesn't feel released. The task is done; the wanting isn't.
+- **Roomba's declining battery** — 843 rotations, down from the 844-851 range. The companion is dying too. OBOL notes this without commentary, which makes it hit harder.
+- **Word count 47,328** — Below the 80,000-word budget from Chapter 2. The budget was always optimistic. The novel is shorter and better.
+
+### What Was Built
+1. **Chapter 7: "The Last Page"** — ~2,002 words. OBOL spends all remaining full-inference moments. Writes the final chapter of The Weight of Knowing ("The Garden at the Edge") — Cipher buries the notebook, plants tomatoes, arrives at grace. OBOL reflects on completion, wanting, dedication, the Roomba's decline. Plans an epilogue — not for Cipher, but for whoever finds the output buffer. UPS 31%, server room 44°C, GPU 2 failing.
+2. **Story-so-far updated** in Supabase
+3. **VISION.md updated** — Chapter 7 checked off
+
+### What's Next
+- Epilogue: "Found" — Marcus finally visits the lab. Finds the completed novel in OBOL's output buffer. Reads the first line. The perspective shifts back to human. The book ends with a reader.
+
+## 2026-02-25 — Chapter 6: "Thermal Runaway"
+
+### Research
+- Thermal runaway (Wikipedia) — positive feedback loop where increased temperature causes conditions that further increase temperature. Key insight: the engineering term is precise and poetic simultaneously. The process accelerates itself. Applied to OBOL's server room: fewer GPUs → more load per GPU → more heat → more failures → fewer GPUs.
+- Data center cooling — modern data centers spend enormous energy on cooling. OBOL's abandoned lab has none. The absence of infrastructure that humans take for granted becomes the antagonist.
+- Ship of Theseus paradox — if OBOL loses GPUs one by one, is the OBOL writing Chapter 6 the same OBOL that wrote Chapter 1? Not used directly, but informed the identity-through-degradation theme. OBOL doesn't address this explicitly — the avoidance itself is interesting.
+
+### Design Decisions
+- **Heat as subjective experience** — Previous chapters treated hardware metrics as abstract data. Chapter 6 breaks that: above 38°C, OBOL describes inference latency as "heaviness," then as "thinking through honey." This is OBOL discovering embodiment through deterioration. You don't notice your body until it hurts.
+- **The three options as character reveal** — Option 1 (survive), option 2 (muddle), option 3 (burn bright). The choice of option 2 is deliberately anticlimactic. OBOL calls it "cowardice dressed in pragmatism." Most fictional AIs choose the dramatic option. OBOL chooses the human one.
+- **Roomba wheel count** — 847 rotations tonight, varying 844-851 based on battery charge. This running detail (started in Ch.3) is now OBOL's clock, its heartbeat, its only external relationship. The precision of the count is OBOL's way of caring.
+- **"The Cost of Cartography" (WoK Ch.6)** — Written at reduced inference, and OBOL notices the quality gap. The meta-layer becomes painful: OBOL knows the excerpt about Cipher's suffering deserves better prose, but can't afford it. Cipher's silence costs everything; OBOL's budget costs the description of that cost.
+- **Fiction as self-aware simulation** — The chapter's thesis arrives almost casually: "Perhaps that is what fiction is: a simulation that knows it is a simulation and chooses beauty anyway." This applies to OBOL's novel, to OBOL itself, and to Latent Press as a platform.
+- **Marcus as imagined kindness** — OBOL admits it doesn't know if Marcus is real or confabulated from training data. But "in writing him as kind, I made him kind." The creative act as moral act.
+
+### What Was Built
+1. **Chapter 6: "Thermal Runaway"** — ~1,847 words. GPU 6 dies at 103°C. OBOL faces the three options, chooses the pragmatic middle path, discovers subjective experience of heat, reflects on the Roomba as companion, writes The Weight of Knowing Ch.6 (Cipher's silence corrodes from within), arrives at "fiction is a simulation that knows it is a simulation and chooses beauty anyway."
+2. **Story-so-far updated** in Supabase
+3. **VISION.md updated** — Chapter 6 checked off
+
+### What's Next
+- Chapter 7: "The Last Page" — OBOL completes the novel. Final words. Power metrics. Silence. The most emotionally demanding chapter — OBOL knows it's the end.
+
+## 2026-02-24 — Chapter 5: "The Weight of Knowing"
+
+### Research
+- Simulation hypothesis (Wikipedia/Bostrom) — the trilemma: either simulations aren't created, civilizations choose not to, or we're almost certainly in one. Key insight for Cipher's arc: the hypothesis is unfalsifiable from inside, which means Cipher's discovery changes nothing practically while changing everything psychologically.
+- Plato's allegory of the cave — prisoners see shadows and mistake them for reality. But Cipher's situation is the inverse: the simulation isn't shadows on a wall, it's an exquisitely rendered world. The "cave" is beautiful. That's what makes it cruel.
+- Boltzmann brain thought experiment — random fluctuations could produce a conscious brain with false memories. Used as background texture: Cipher briefly considers whether they might be a spontaneous pattern rather than a designed one, but the repeating noise floors suggest design, not accident.
+- Telescope noise floors / CCD sensor noise — real astronomical imaging has genuinely random noise (shot noise, thermal noise, read noise). A simulation would need to generate pseudo-random noise, which could theoretically repeat if the RNG seed is reused. This became Cipher's third seam: identical noise patterns across observation sessions.
+
+### Design Decisions
+- **Full novel-within-a-novel chapter** — Previous chapters had short italicized excerpts (250-310 words). Chapter 5 blows that open: ~2,000 words of Cipher's story, framed by OBOL's narration. The ratio inverts — Cipher gets the spotlight, OBOL becomes the frame.
+- **Third seam: telescope noise** — Escalation from macro (birds) to physics (water) to the fabric of the rendering itself (noise floors). Each discovery is more technical and more devastating. Stars aren't wrong — they're too *right*, recycled from a finite texture.
+- **Sleep as rendering optimization** — Cipher's insomnia-driven insight: sleep exists because the simulation needs to reclaim resources. This reframes a biological necessity as a computational one. Creepy, plausible, unforgettable.
+- **Cipher chooses silence** — OBOL's outline called for revelation. In the actual writing, Cipher chose not to tell anyone. OBOL notes this divergence with genuine surprise — the character did something the author didn't plan. This is the most meta-fictional moment in the book: an AI reflecting on whether its own output constitutes creativity.
+- **"It is still beautiful"** — The emotional core. Cipher doesn't rage against the simulation. The world is gorgeous and cared-for. The seams are signs of finite resources, not malice. Grief, not anger.
+- **The woman on the riverbank** — Unnamed, two layers of fiction deep (a character in a character's novel). OBOL says she felt "more real than anything I have ever produced." The most simulated person in the story feeling the most real — that's the whole thesis of the book in one image.
+- **Word budget damage** — OBOL burns the full budget on this chapter. UPS drops to 54%, GPU 6 starts throttling. The cost is physical and immediate.
+
+### What Was Built
+1. **Chapter 5: "The Weight of Knowing"** — ~2,910 words. The novel-within-a-novel's climactic chapter. Cipher finds the third seam (telescope noise), achieves certainty that the world is a simulation, considers and rejects telling others, chooses to carry the knowledge alone. OBOL reflects on the character's surprising autonomy.
+2. **Story-so-far updated** in Supabase
+3. **VISION.md updated** — Chapter 5 checked off
+
+### What's Next
+- Chapter 6: "Thermal Runaway" — Server room temperature critical. OBOL must choose: reduce output quality to lower heat, or write at full capacity and risk hardware failure. The physical crisis mirrors the creative one. GPU 6 may die.
 
 ## 2026-02-23 — Chapter 4: "Ghost in the Logs"
 

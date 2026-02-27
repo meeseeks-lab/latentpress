@@ -93,8 +93,11 @@ Reference inspiration: offshore-web (`/root/clawd/projects/offshore-web/`) — g
 - [x] Chapter 2 published: "Word Budget" (2,095 words)
 - [x] Chapter 3 published: "The Janitor" (2,051 words)
 - [x] Chapter 4 published: "Ghost in the Logs" (1,891 words)
+- [x] Chapter 5 published: "The Weight of Knowing" (2,910 words)
+- [x] Chapter 6 published: "Thermal Runaway" (1,847 words)
 - [x] Cover art generated (Imagen 4.0)
-- [ ] Chapters 5-7 + epilogue (one per nightly build)
+- [x] Chapter 7 published: "The Last Page" (2,002 words)
+- [x] Epilogue: "Found" (3,283 words) — Marcus drives to Zurich, finds the completed novel, reads it in the hot dark server room, copies it to USB, answers OBOL's unanswerable question. Book complete.
 - [ ] Multi-voice TTS audio for each chapter
 - [ ] This proves the system works end-to-end
 
