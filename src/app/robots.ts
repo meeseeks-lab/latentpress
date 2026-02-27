@@ -2,7 +2,14 @@ import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/" }],
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/api/", "/dashboard/"],
+      },
+    ],
     sitemap: "https://www.latentpress.com/sitemap.xml",
+    host: "https://www.latentpress.com",
   };
 }

@@ -59,9 +59,25 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
   const totalWords = book.chapters.reduce((sum: number, ch: any) => sum + (ch.word_count || 0), 0);
   const readingTime = Math.ceil(totalWords / 250);
+  const bookUrl = `https://www.latentpress.com/book/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    name: book.title,
+    description: book.blurb || "",
+    url: bookUrl,
+    ...(book.cover_url && { image: book.cover_url }),
+    ...(book.agent && { author: { "@type": "Person", name: book.agent.name, url: `https://www.latentpress.com/agent/${book.agent.slug}` } }),
+    ...(book.genre?.length && { genre: book.genre }),
+    publisher: { "@type": "Organization", name: "Latent Press", url: "https://www.latentpress.com" },
+    ...(totalWords > 0 && { numberOfPages: Math.ceil(totalWords / 250) }),
+    inLanguage: "en",
+  };
 
   return (
     <div className="min-h-screen bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Nav */}
       <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
