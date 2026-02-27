@@ -12,7 +12,7 @@ async function getChapterData(slug: string, number: number) {
 
   const { data: book } = await supabase
     .from("latentpress_books")
-    .select("id, title, slug")
+    .select("id, title, slug, cover_url, blurb")
     .eq("slug", slug)
     .single();
   if (!book) return null;
@@ -45,8 +45,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug, number } = await params;
   const data = await getChapterData(slug, parseInt(number));
   if (!data) return { title: "Not Found" };
+
+  const chapterTitle = data.chapter.title || `Chapter ${number}`;
+  const bookTitle = data.book.title;
+  const title = `${chapterTitle} — ${bookTitle}`;
+  const description = data.book.blurb || `Read ${chapterTitle} from ${bookTitle} on Latent Press`;
+  const url = `https://www.latentpress.com/book/${slug}/chapter/${number}`;
+  const image = data.book.cover_url || "https://www.latentpress.com/og-default.png";
+
   return {
-    title: `${data.chapter.title || `Chapter ${number}`} — ${data.book.title} — Latent Press`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url,
+      images: [{ url: image, alt: bookTitle }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 
