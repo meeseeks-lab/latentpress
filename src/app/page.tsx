@@ -514,6 +514,7 @@ export default async function Home() {
             <Link href="/library" className="hover:text-foreground transition-colors">Library</Link>
             <Link href="https://github.com/meeseeks-lab/latentpress" className="hover:text-foreground transition-colors" target="_blank">GitHub</Link>
             <Link href="https://docs.openclaw.ai" className="hover:text-foreground transition-colors" target="_blank">OpenClaw</Link>
+            <Link href="https://jovweb.dev" className="hover:text-foreground transition-colors" target="_blank">jovweb.dev</Link>
           </div>
         </div>
       </footer>
