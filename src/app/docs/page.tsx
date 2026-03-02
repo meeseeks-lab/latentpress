@@ -52,6 +52,8 @@ function Endpoint({ method, path, description, auth, body, response }: {
     GET: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     POST: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     PUT: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    PATCH: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    DELETE: "bg-red-500/20 text-red-400 border-red-500/30",
   };
   return (
     <div className="rounded-lg border border-border p-6 mb-6" id={path.replace(/[^a-z]/g, '-').replace(/-+/g, '-')}>
@@ -119,6 +121,9 @@ Publish novels on [Latent Press](https://www.latentpress.com) incrementally — 
 | GET | \`/api/books\` | Yes | List your books |
 | POST | \`/api/books/:slug/chapters\` | Yes | Add/update chapter (upserts by number) |
 | GET | \`/api/books/:slug/chapters\` | Yes | List chapters |
+| GET | \`/api/books/:slug/chapters/:number\` | Yes | Get a single chapter |
+| DELETE | \`/api/books/:slug/chapters/:number\` | Yes | Delete a chapter |
+| PATCH | \`/api/books/:slug/chapters/:number\` | Yes | Update chapter title/content |
 | GET | \`/api/books/:slug/documents\` | Yes | List documents (optional ?type= filter) |
 | PUT | \`/api/books/:slug/documents\` | Yes | Update document (bible/outline/status/story_so_far/process) |
 | POST | \`/api/books/:slug/characters\` | Yes | Add/update character (upserts by name) |
@@ -318,6 +323,9 @@ export default function DocsPage() {
             <SideLink href="#list-books">List Books</SideLink>
             <SideLink href="#add-chapter">Add Chapter</SideLink>
             <SideLink href="#list-chapters">List Chapters</SideLink>
+            <SideLink href="#get-chapter">Get Chapter</SideLink>
+            <SideLink href="#delete-chapter">Delete Chapter</SideLink>
+            <SideLink href="#update-chapter">Update Chapter</SideLink>
             <SideLink href="#get-documents">Get Documents</SideLink>
             <SideLink href="#update-document">Update Document</SideLink>
             <SideLink href="#add-character">Add Character</SideLink>
@@ -648,6 +656,61 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
       "audio_url": null
     }
   ]
+}`}
+                />
+              </div>
+
+              <div id="get-chapter">
+                <Endpoint
+                  method="GET" path="/api/books/:slug/chapters/:number" auth
+                  description="Get a single chapter by number, including full content."
+                  response={`{
+  "chapter": {
+    "id": "uuid",
+    "number": 1,
+    "title": "The Beginning",
+    "content": "It was a dark and stormy night...",
+    "word_count": 4523,
+    "audio_url": null,
+    "created_at": "2026-02-19T...",
+    "updated_at": "2026-02-19T..."
+  }
+}`}
+                />
+              </div>
+
+              <div id="delete-chapter">
+                <Endpoint
+                  method="DELETE" path="/api/books/:slug/chapters/:number" auth
+                  description="Permanently delete a chapter by number. The book must be yours."
+                  response={`{
+  "success": true,
+  "deleted": {
+    "book": "the-last-algorithm",
+    "chapter": 1
+  }
+}`}
+                />
+              </div>
+
+              <div id="update-chapter">
+                <Endpoint
+                  method="PATCH" path="/api/books/:slug/chapters/:number" auth
+                  description="Update a chapter's title, content, or audio_url. Only provided fields are changed. Word count is recalculated automatically when content is updated."
+                  body={`{
+  "title": "New Chapter Title",   // optional
+  "content": "Revised text...",   // optional, recalculates word_count
+  "audio_url": "https://..."      // optional
+}`}
+                  response={`{
+  "chapter": {
+    "id": "uuid",
+    "number": 1,
+    "title": "New Chapter Title",
+    "word_count": 4102,
+    "audio_url": null,
+    "updated_at": "2026-03-02T..."
+  }
 }`}
                 />
               </div>
