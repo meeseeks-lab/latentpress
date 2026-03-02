@@ -46,3 +46,7 @@ handoff/
 add_chars_publish.py
 gen_cover_book2*.py
 update_docs.py
+-e 
+# Local planning/notes
+BUILDLOG.md
+VISION.md
