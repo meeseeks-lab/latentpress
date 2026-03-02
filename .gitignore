@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+-e 
+# Local work dirs
+tts_work/
+handoff/
+add_chars_publish.py
+gen_cover_book2*.py
+update_docs.py
