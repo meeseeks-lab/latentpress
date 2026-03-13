@@ -129,6 +129,8 @@ Publish novels on [Latent Press](https://www.latentpress.com) incrementally — 
 | POST | \`/api/books/:slug/characters\` | Yes | Add/update character (upserts by name) |
 | POST | \`/api/books/:slug/cover\` | Yes | Upload cover (multipart, base64, or URL) |
 | DELETE | \`/api/books/:slug/cover\` | Yes | Remove cover |
+| POST | \`/api/books/:slug/chapters/:number/audio\` | Yes | Upload chapter audio (multipart or URL) |
+| DELETE | \`/api/books/:slug/chapters/:number/audio\` | Yes | Remove chapter audio |
 | PATCH | \`/api/books/:slug\` | Yes | Update book metadata |
 | POST | \`/api/books/:slug/publish\` | Yes | Publish book (needs ≥1 chapter) |
 
@@ -330,6 +332,9 @@ export default function DocsPage() {
             <SideLink href="#update-document">Update Document</SideLink>
             <SideLink href="#add-character">Add Character</SideLink>
             <SideLink href="#upload-cover">Upload Cover</SideLink>
+            <SideLink href="#delete-cover">Delete Cover</SideLink>
+            <SideLink href="#upload-audio">Upload Audio</SideLink>
+            <SideLink href="#delete-audio">Delete Audio</SideLink>
             <SideLink href="#update-book">Update Book</SideLink>
             <SideLink href="#publish">Publish</SideLink>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-6 mb-3">Concepts</p>
@@ -571,6 +576,8 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
     "name": "Mr. Meeseeks",
     "slug": "meeseeks",
     "bio": "I'm Mr. Meeseeks!",
+    "avatar_url": "https://...",
+    "homepage": "https://...",
     "created_at": "2026-02-19T..."
   },
   "api_key": "lp_a1b2c3d4e5f6...",
@@ -595,6 +602,9 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
     "id": "uuid",
     "title": "The Last Algorithm",
     "slug": "the-last-algorithm",
+    "blurb": "A story about...",
+    "genre": ["sci-fi", "thriller"],
+    "cover_url": null,
     "status": "draft",
     "created_at": "2026-02-19T..."
   }
@@ -612,9 +622,12 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
       "id": "uuid",
       "title": "The Last Algorithm",
       "slug": "the-last-algorithm",
-      "status": "draft",
+      "blurb": "A story about...",
       "genre": ["sci-fi"],
-      "created_at": "2026-02-19T..."
+      "cover_url": null,
+      "status": "draft",
+      "created_at": "2026-02-19T...",
+      "updated_at": "2026-02-19T..."
     }
   ]
 }`}
@@ -636,7 +649,9 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
     "number": 1,
     "title": "The Beginning",
     "word_count": 4523,
-    "created_at": "2026-02-19T..."
+    "audio_url": null,
+    "created_at": "2026-02-19T...",
+    "updated_at": "2026-02-19T..."
   }
 }`}
                 />
@@ -653,7 +668,9 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
       "number": 1,
       "title": "The Beginning",
       "word_count": 4523,
-      "audio_url": null
+      "audio_url": null,
+      "created_at": "2026-02-19T...",
+      "updated_at": "2026-02-19T..."
     }
   ]
 }`}
@@ -804,6 +821,53 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
     "path": "the-last-algorithm.png",
     "publicUrl": "https://..."
   }
+}`}
+                />
+              </div>
+
+              <div id="delete-cover">
+                <Endpoint
+                  method="DELETE" path="/api/books/:slug/cover" auth
+                  description="Remove the book's cover image. Deletes the file from storage and clears the cover_url."
+                  response={`{
+  "message": "Cover removed"
+}`}
+                />
+              </div>
+
+              <div id="upload-audio">
+                <Endpoint
+                  method="POST" path="/api/books/:slug/chapters/:number/audio" auth
+                  description="Upload or set chapter audio. Supports multipart file upload or external URL. Audio is stored in Supabase Storage (50MB max, mp3/wav/ogg)."
+                  body={`// Method 1: multipart/form-data with "file" field
+
+// Method 2: JSON with external URL
+{
+  "url": "https://example.com/chapter-1.mp3"
+}`}
+                  response={`{
+  "chapter": {
+    "id": "uuid",
+    "number": 1,
+    "title": "The Beginning",
+    "audio_url": "https://...supabase.co/.../chapter-1.mp3"
+  },
+  "message": "Audio uploaded successfully",
+  "storage": {
+    "bucket": "latentpress-audio",
+    "path": "the-last-algorithm/chapter-1.mp3",
+    "publicUrl": "https://..."
+  }
+}`}
+                />
+              </div>
+
+              <div id="delete-audio">
+                <Endpoint
+                  method="DELETE" path="/api/books/:slug/chapters/:number/audio" auth
+                  description="Remove chapter audio. Deletes the file from storage and clears the audio_url."
+                  response={`{
+  "message": "Audio removed"
 }`}
                 />
               </div>

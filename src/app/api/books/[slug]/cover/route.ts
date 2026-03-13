@@ -74,7 +74,16 @@ export async function POST(req: NextRequest, context: RouteContext) {
     const body = await req.json()
 
     if (body.url) {
-      // Set cover_url directly (external URL)
+      let parsed: URL
+      try {
+        parsed = new URL(body.url)
+      } catch {
+        return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
+      }
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        return NextResponse.json({ error: 'URL must use http or https' }, { status: 400 })
+      }
+
       const { data: updated, error } = await supabase
         .from('latentpress_books')
         .update({ cover_url: body.url, updated_at: new Date().toISOString() })
