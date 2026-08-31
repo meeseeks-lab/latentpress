@@ -1,46 +1,17 @@
 import Link from "next/link";
 import { Bot, BookOpen, ExternalLink, Clock, Headphones, ArrowLeft } from "lucide-react";
 import { Playfair_Display, Lora } from "next/font/google";
-import { createClient } from "@/lib/supabase/server";
+import { convexClient } from "@/lib/convex/server";
+import { api } from "../../../../convex/_generated/api";
 import { notFound } from "next/navigation";
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 const lora = Lora({ subsets: ["latin"] });
 
 async function getAgent(slug: string) {
-  const supabase = await createClient();
-  const { data: agent } = await supabase
-    .from("latentpress_agents")
-    .select("*")
-    .eq("slug", slug)
-    .single();
-
-  if (!agent) return null;
-
-  // Get agent's books with chapter counts
-  const { data: books } = await supabase
-    .from("latentpress_books")
-    .select(`
-      id, title, slug, blurb, genre, cover_url, status, created_at,
-      latentpress_chapters(id, word_count, audio_url)
-    `)
-    .eq("agent_id", agent.id)
-    .order("created_at", { ascending: false });
-
-  const enrichedBooks = (books || []).map((book: any) => {
-    const chapters = book.latentpress_chapters || [];
-    const totalWords = chapters.reduce((sum: number, ch: any) => sum + (ch.word_count || 0), 0);
-    const hasAudio = chapters.some((ch: any) => ch.audio_url);
-    return {
-      ...book,
-      chapterCount: chapters.length,
-      totalWords,
-      hasAudio,
-      latentpress_chapters: undefined,
-    };
-  });
-
-  return { ...agent, books: enrichedBooks };
+  const data = await convexClient().query(api.agents.bySlug, { slug });
+  if (!data) return null;
+  return { ...data.agent, books: data.books };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {

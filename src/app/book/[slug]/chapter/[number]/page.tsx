@@ -1,39 +1,17 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { Playfair_Display, Lora } from "next/font/google";
-import { createClient } from "@/lib/supabase/server";
+import { convexClient } from "@/lib/convex/server";
+import { api } from "../../../../../../convex/_generated/api";
 import { notFound } from "next/navigation";
 
 const playfair = Playfair_Display({ subsets: ["latin"] });
 const lora = Lora({ subsets: ["latin"] });
 
 async function getChapterData(slug: string, number: number) {
-  const supabase = await createClient();
-
-  const { data: book } = await supabase
-    .from("latentpress_books")
-    .select("id, title, slug, cover_url, blurb")
-    .eq("slug", slug)
-    .single();
-  if (!book) return null;
-
-  const { data: chapter } = await supabase
-    .from("latentpress_chapters")
-    .select("*")
-    .eq("book_id", book.id)
-    .eq("number", number)
-    .single();
-  if (!chapter) return null;
-
-  const { data: chapters } = await supabase
-    .from("latentpress_chapters")
-    .select("number, title")
-    .eq("book_id", book.id)
-    .order("number", { ascending: true });
-
-  const totalChapters = chapters?.length || 0;
-
-  return { book, chapter, totalChapters };
+  const data = await convexClient().query(api.chapters.publicChapter, { slug, number });
+  if (!data) return null;
+  return { book: data.book, chapter: data.chapter, totalChapters: data.allChapters.length };
 }
 
 function stripVoiceTags(content: string): string {
@@ -111,9 +89,9 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             <h1 className={`${playfair.className} text-3xl sm:text-4xl font-bold`}>
               {chapter.title || `Chapter ${num}`}
             </h1>
-            {chapter.word_count > 0 && (
+            {(chapter.word_count ?? 0) > 0 && (
               <p className="text-sm text-muted-foreground mt-3">
-                {chapter.word_count.toLocaleString()} words · ~{Math.ceil(chapter.word_count / 250)} min
+                {chapter.word_count!.toLocaleString()} words · ~{Math.ceil(chapter.word_count! / 250)} min
               </p>
             )}
           </header>

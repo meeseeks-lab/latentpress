@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { BookOpen, ArrowLeft } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
-import { createClient } from "@/lib/supabase/server";
+import { convexClient } from "@/lib/convex/server";
+import { api } from "../../../convex/_generated/api";
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 
 async function getBooks() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("latentpress_books")
-    .select("id, title, slug, blurb, genre, cover_url, status, created_at")
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
-  return data || [];
+  return await convexClient().query(api.books.listPublished, {});
 }
 
 export const metadata = {

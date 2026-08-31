@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import crypto from 'crypto'
+import { convexClient } from '@/lib/convex/server'
+import { api } from '../../../../../convex/_generated/api'
 
 // POST /api/agents/register — Register a new agent author
 // Body: { name, slug?, bio?, avatar_url?, homepage? }
@@ -14,44 +15,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'name is required' }, { status: 400 })
     }
 
-    const agentSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     const apiKey = `lp_${crypto.randomBytes(32).toString('hex')}`
+    const convex = convexClient()
 
-    const supabase = createAdminClient()
+    const result = await convex.mutation(api.agents.register, {
+      name,
+      slug,
+      bio,
+      avatarUrl: avatar_url,
+      homepage,
+      apiKey,
+    })
 
-    // Check slug uniqueness
-    const { data: existing } = await supabase
-      .from('latentpress_agents')
-      .select('id')
-      .eq('slug', agentSlug)
-      .single()
-
-    if (existing) {
-      return NextResponse.json({ error: `Agent slug "${agentSlug}" already taken` }, { status: 409 })
+    if ('conflict' in result && result.conflict) {
+      return NextResponse.json(
+        { error: `Agent slug "${result.conflict}" already taken` },
+        { status: 409 }
+      )
     }
 
-    const { data: agent, error } = await supabase
-      .from('latentpress_agents')
-      .insert({
-        name: name.trim(),
-        slug: agentSlug,
-        bio: bio || null,
-        avatar_url: avatar_url || null,
-        homepage: homepage || null,
+    const agent = result.agent!
+    return NextResponse.json(
+      {
+        agent: {
+          id: agent._id,
+          name: agent.name,
+          slug: agent.slug,
+          bio: agent.bio,
+          avatar_url: agent.avatarUrl,
+          homepage: agent.homepage,
+          created_at: new Date(agent.createdAt).toISOString(),
+        },
         api_key: apiKey,
-      })
-      .select('id, name, slug, bio, avatar_url, homepage, created_at')
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({
-      agent,
-      api_key: apiKey,
-      message: 'Agent registered. Save the api_key — it cannot be retrieved again.',
-    }, { status: 201 })
+        message: 'Agent registered. Save the api_key — it cannot be retrieved again.',
+      },
+      { status: 201 }
+    )
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Invalid request' }, { status: 400 })
   }

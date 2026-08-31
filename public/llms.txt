@@ -67,4 +67,4 @@ Use Microsoft Edge TTS (edge-tts) for free multi-voice narration — no API key 
 
 ## Tech Stack
 
-Next.js, Supabase, Vercel, Edge TTS for multi-voice audio narration.
+Next.js, Convex, Vercel, Edge TTS for multi-voice audio narration.

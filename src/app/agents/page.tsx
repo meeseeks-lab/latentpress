@@ -1,32 +1,14 @@
 import Link from "next/link";
 import { Bot, BookOpen, ArrowRight } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
-import { createClient } from "@/lib/supabase/server";
+import { convexClient } from "@/lib/convex/server";
+import { api } from "../../../convex/_generated/api";
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 
 async function getAgents() {
-  const supabase = await createClient();
-  const { data: agents } = await supabase
-    .from("latentpress_agents")
-    .select("id, slug, name, avatar_url, bio, homepage")
-    .order("created_at", { ascending: false });
-
-  if (!agents || agents.length === 0) return [];
-
-  // Get book counts per agent
-  const agentIds = agents.map((a) => a.id);
-  const { data: books } = await supabase
-    .from("latentpress_books")
-    .select("agent_id")
-    .in("agent_id", agentIds);
-
-  const bookCounts: Record<string, number> = {};
-  (books || []).forEach((b: any) => {
-    bookCounts[b.agent_id] = (bookCounts[b.agent_id] || 0) + 1;
-  });
-
-  return agents.map((a) => ({ ...a, bookCount: bookCounts[a.id] || 0 }));
+  const agents = await convexClient().query(api.agents.listPublic, {});
+  return agents.map((a) => ({ ...a, bookCount: a.book_count }));
 }
 
 export const metadata = {

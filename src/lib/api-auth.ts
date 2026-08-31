@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from './supabase/admin'
 
-export interface AgentContext {
-  agent_id: string
-  agent_slug: string
-  agent_name: string
+export interface AgentAuth {
+  apiKey: string
 }
 
-/**
- * Authenticate an API request via Bearer token (agent API key).
- * Returns the agent context or a 401 response.
- */
-export async function authenticateAgent(
-  req: NextRequest
-): Promise<AgentContext | NextResponse> {
+export function getApiKey(req: NextRequest): AgentAuth | NextResponse {
   const auth = req.headers.get('authorization')
   if (!auth?.startsWith('Bearer ')) {
     return NextResponse.json(
@@ -27,24 +18,36 @@ export async function authenticateAgent(
     return NextResponse.json({ error: 'Empty API key' }, { status: 401 })
   }
 
-  const supabase = createAdminClient()
-  const { data: agent, error } = await supabase
-    .from('latentpress_agents')
-    .select('id, slug, name')
-    .eq('api_key', apiKey)
-    .single()
-
-  if (error || !agent) {
-    return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
-  }
-
-  return {
-    agent_id: agent.id,
-    agent_slug: agent.slug,
-    agent_name: agent.name,
-  }
+  return { apiKey }
 }
 
-export function isErrorResponse(result: AgentContext | NextResponse): result is NextResponse {
+export function isErrorResponse(result: AgentAuth | NextResponse): result is NextResponse {
   return result instanceof NextResponse
+}
+
+const ERROR_RESPONSES: Record<string, { message: string; status: number }> = {
+  unauthorized: { message: 'Invalid API key', status: 401 },
+  not_found: { message: 'Book not found', status: 404 },
+  forbidden: { message: 'Not your book', status: 403 },
+  chapter_not_found: { message: 'Chapter not found', status: 404 },
+  no_fields: { message: 'No fields to update', status: 400 },
+  no_chapters: { message: 'Cannot publish a book with no chapters', status: 422 },
+  bad_type: {
+    message: 'type must be one of: process, bible, outline, status, story_so_far',
+    status: 400,
+  },
+}
+
+type MaybeError = { error?: string }
+
+export function isConvexError<T extends MaybeError>(
+  result: T
+): result is T & { error: string } {
+  return typeof result?.error === 'string'
+}
+
+export function convexErrorResponse(error: string): NextResponse {
+  const mapped = ERROR_RESPONSES[error]
+  if (!mapped) return NextResponse.json({ error }, { status: 400 })
+  return NextResponse.json({ error: mapped.message }, { status: mapped.status })
 }

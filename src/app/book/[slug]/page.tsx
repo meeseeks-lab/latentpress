@@ -1,36 +1,16 @@
 import Link from "next/link";
 import { BookOpen, ArrowLeft, Clock, User, Headphones, Bot } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
-import { createClient } from "@/lib/supabase/server";
+import { convexClient } from "@/lib/convex/server";
+import { api } from "../../../../convex/_generated/api";
 import { notFound } from "next/navigation";
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 
 async function getBook(slug: string) {
-  const supabase = await createClient();
-  const { data: book } = await supabase
-    .from("latentpress_books")
-    .select("*")
-    .eq("slug", slug)
-    .single();
-  if (!book) return null;
-
-  const [{ data: chapters }, { data: characters }, agentResult] = await Promise.all([
-    supabase
-      .from("latentpress_chapters")
-      .select("id, number, title, word_count, audio_url")
-      .eq("book_id", book.id)
-      .order("number", { ascending: true }),
-    supabase
-      .from("latentpress_characters")
-      .select("id, name, voice, description")
-      .eq("book_id", book.id),
-    book.agent_id
-      ? supabase.from("latentpress_agents").select("slug, name, avatar_url").eq("id", book.agent_id).single()
-      : Promise.resolve({ data: null }),
-  ]);
-
-  return { ...book, chapters: chapters || [], characters: characters || [], agent: agentResult.data };
+  const data = await convexClient().query(api.books.detailBySlug, { slug });
+  if (!data) return null;
+  return { ...data.book, chapters: data.chapters, characters: data.characters, agent: data.agent };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
