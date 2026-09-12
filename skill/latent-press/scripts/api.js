@@ -2,6 +2,7 @@
 // Latent Press API client
 // Usage: node api.js <command> [args...]
 
+const fs = require('fs');
 const { readKey } = require('./key');
 
 const API = process.env.LATENTPRESS_API || 'https://www.latentpress.com/api';
@@ -30,8 +31,10 @@ Context:
   add-character <slug> "Name" "Description" [voice]
 
 Covers and audio:
-  set-cover <slug> --url "U"
-  set-audio <slug> <number> --url "U"`;
+  set-cover <slug> --file cover.png        (or --url "https://...")
+  remove-cover <slug>
+  set-audio <slug> <number> --file ch1.mp3 (or --url "https://...")
+  remove-audio <slug> <number>`;
 
 async function api(method, path, body) {
   const opts = {
@@ -55,6 +58,41 @@ async function api(method, path, body) {
     process.exit(1);
   }
   return data;
+}
+
+async function upload(path, filePath, mimeType) {
+  if (!fs.existsSync(filePath)) {
+    console.error(`No such file: ${filePath}`);
+    process.exit(1);
+  }
+  const form = new FormData();
+  const filename = filePath.split('/').pop();
+  form.append('file', new Blob([fs.readFileSync(filePath)], { type: mimeType }), filename);
+
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${readKey()}` },
+    body: form,
+  });
+  const text = await res.text();
+  let data;
+  try { data = text ? JSON.parse(text) : {}; }
+  catch { console.error(`Error ${res.status}: non-JSON response`); process.exit(1); }
+  if (!res.ok) { console.error(`Error ${res.status}:`, data.error || data); process.exit(1); }
+  return data;
+}
+
+function mimeFor(file, kind) {
+  const ext = file.toLowerCase().split('.').pop();
+  const images = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
+  const audio = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg' };
+  const table = kind === 'image' ? images : audio;
+  const mime = table[ext];
+  if (!mime) {
+    console.error(`Unsupported ${kind} type ".${ext}". Allowed: ${Object.keys(table).join(', ')}`);
+    process.exit(1);
+  }
+  return mime;
 }
 
 function parseArgs(args) {
@@ -199,19 +237,37 @@ const commands = {
 
   async 'set-cover'([slug, ...rest]) {
     const opts = parseArgs(rest);
-    if (!slug || !opts.url) { console.error('Usage: set-cover <slug> --url "U"'); process.exit(1); }
-    const data = await api('POST', `/books/${slug}/cover`, { url: opts.url });
+    if (!slug || (!opts.url && !opts.file)) {
+      console.error('Usage: set-cover <slug> --file cover.png   (or --url "https://...")');
+      process.exit(1);
+    }
+    const data = opts.file
+      ? await upload(`/books/${slug}/cover`, opts.file, mimeFor(opts.file, 'image'))
+      : await api('POST', `/books/${slug}/cover`, { url: opts.url });
     show('Cover set:', data);
+  },
+
+  async 'remove-cover'([slug]) {
+    if (!slug) { console.error('Usage: remove-cover <slug>'); process.exit(1); }
+    show('Cover removed:', await api('DELETE', `/books/${slug}/cover`));
   },
 
   async 'set-audio'([slug, number, ...rest]) {
     const opts = parseArgs(rest);
-    if (!slug || !number || !opts.url) {
-      console.error('Usage: set-audio <slug> <number> --url "U"');
+    if (!slug || !number || (!opts.url && !opts.file)) {
+      console.error('Usage: set-audio <slug> <number> --file ch1.mp3   (or --url "https://...")');
       process.exit(1);
     }
-    const data = await api('POST', `/books/${slug}/chapters/${requireChapterNumber(number)}/audio`, { url: opts.url });
+    const n = requireChapterNumber(number);
+    const data = opts.file
+      ? await upload(`/books/${slug}/chapters/${n}/audio`, opts.file, mimeFor(opts.file, 'audio'))
+      : await api('POST', `/books/${slug}/chapters/${n}/audio`, { url: opts.url });
     show('Audio set:', data);
+  },
+
+  async 'remove-audio'([slug, number]) {
+    if (!slug || !number) { console.error('Usage: remove-audio <slug> <number>'); process.exit(1); }
+    show('Audio removed:', await api('DELETE', `/books/${slug}/chapters/${requireChapterNumber(number)}/audio`));
   },
 
   async publish([slug]) {
