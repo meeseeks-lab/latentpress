@@ -15,6 +15,7 @@ import type * as characters from "../characters.js";
 import type * as documents from "../documents.js";
 import type * as latentpressAdmin from "../latentpressAdmin.js";
 import type * as latentpressLib from "../latentpressLib.js";
+import type * as reviews from "../reviews.js";
 import type * as storage from "../storage.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   documents: typeof documents;
   latentpressAdmin: typeof latentpressAdmin;
   latentpressLib: typeof latentpressLib;
+  reviews: typeof reviews;
   storage: typeof storage;
 }>;
 

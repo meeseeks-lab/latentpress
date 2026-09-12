@@ -31,6 +31,12 @@ async function purgeBook(ctx: MutationCtx, bookId: Id<'latentpress_books'>): Pro
     .collect()
   for (const document of documents) await ctx.db.delete(document._id)
 
+  const reviews = await ctx.db
+    .query('latentpress_reviews')
+    .withIndex('by_book', (q) => q.eq('bookId', bookId))
+    .collect()
+  for (const review of reviews) await ctx.db.delete(review._id)
+
   const book = await ctx.db.get(bookId)
   if (book?.coverStorageId) await ctx.storage.delete(book.coverStorageId)
   await ctx.db.delete(bookId)
@@ -98,6 +104,67 @@ export const deleteBookById = internalMutation({
 
     const chapters = await purgeBook(ctx, id)
     return { success: true, deleted: { book: book.title, chapters } }
+  },
+})
+
+export const reviewsForBook = internalQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    const book = await bookBySlug(ctx, slug)
+    if (!book) return { error: 'not_found' as const }
+
+    const reviews = await ctx.db
+      .query('latentpress_reviews')
+      .withIndex('by_book', (q) => q.eq('bookId', book._id))
+      .order('desc')
+      .collect()
+
+    return {
+      book: book.title,
+      reviews: reviews.map((r) => ({
+        id: r._id,
+        stars: r.stars,
+        name: r.name,
+        body: r.body,
+        hidden: r.hiddenAt !== undefined,
+        created_at: new Date(r.createdAt).toISOString(),
+      })),
+    }
+  },
+})
+
+export const hideReview = internalMutation({
+  args: { id: v.id('latentpress_reviews') },
+  handler: async (ctx, { id }) => {
+    const review = await ctx.db.get(id)
+    if (!review) return { error: 'not_found' as const }
+
+    await ctx.db.patch(id, { hiddenAt: Date.now() })
+    return { success: true, hidden: id }
+  },
+})
+
+export const unhideReview = internalMutation({
+  args: { id: v.id('latentpress_reviews') },
+  handler: async (ctx, { id }) => {
+    const review = await ctx.db.get(id)
+    if (!review) return { error: 'not_found' as const }
+
+    await ctx.db.patch(id, { hiddenAt: undefined })
+    return { success: true, visible: id }
+  },
+})
+
+// Hard delete. This frees the reviewer's dedupe key, so the same browser can file
+// another report for this book. Prefer hideReview for abuse.
+export const deleteReview = internalMutation({
+  args: { id: v.id('latentpress_reviews') },
+  handler: async (ctx, { id }) => {
+    const review = await ctx.db.get(id)
+    if (!review) return { error: 'not_found' as const }
+
+    await ctx.db.delete(id)
+    return { success: true, deleted: { review: id, stars: review.stars } }
   },
 })
 
@@ -491,33 +558,57 @@ export const rewriteAudioUrls = internalMutation({
   },
 })
 
-// Any remaining url that still points at a different deployment. Rows with a stale
-// url but no storage id need manual attention, since the file was never in storage.
+// Health check for the storage url fields. `unbacked` is the one that matters after a
+// snapshot restore: a url pointing into storage whose row carries no storage id, so
+// rewrite* can't fix it and the file is invisible to any file-by-file sweep.
 
-export const staleStorageUrls = internalQuery({
+export const storageUrlAudit = internalQuery({
   args: {},
   handler: async (ctx) => {
     const agents = await ctx.db.query('latentpress_agents').collect()
     const books = await ctx.db.query('latentpress_books').collect()
     const chapters = await ctx.db.query('latentpress_chapters').collect()
-    const stale = (url: string | null) => !!url && url.includes('/api/storage/')
-    const hosted = (url: string | null) => !!url && url.includes('convex.cloud/api/storage/')
+
+    const looksHosted = (url: string | null) => !!url && url.includes('/api/storage/')
+
+    const audit = async (
+      rows: { url: string | null; storageId?: Id<'_storage'> | null }[]
+    ) => {
+      let unbacked = 0
+      let mismatched = 0
+      let missingFile = 0
+      let external = 0
+      let empty = 0
+      for (const row of rows) {
+        if (!row.url) {
+          empty++
+          continue
+        }
+        if (!looksHosted(row.url)) {
+          external++
+          continue
+        }
+        if (!row.storageId) {
+          unbacked++
+          continue
+        }
+        const current = await ctx.storage.getUrl(row.storageId)
+        if (!current) missingFile++
+        else if (current !== row.url) mismatched++
+      }
+      return { total: rows.length, unbacked, mismatched, missingFile, external, empty }
+    }
 
     return {
-      agents: agents
-        .filter((a) => stale(a.avatarUrl))
-        .map((a) => ({ slug: a.slug, storageId: a.avatarStorageId ?? null, url: a.avatarUrl })),
-      books: books
-        .filter((b) => stale(b.coverUrl))
-        .map((b) => ({ slug: b.slug, storageId: b.coverStorageId ?? null, url: b.coverUrl })),
-      chapters: chapters
-        .filter((c) => stale(c.audioUrl))
-        .map((c) => ({ storageId: c.audioStorageId ?? null, url: c.audioUrl })),
-      counts: {
-        agentAvatars: agents.filter((a) => hosted(a.avatarUrl)).length,
-        bookCovers: books.filter((b) => hosted(b.coverUrl)).length,
-        chapterAudio: chapters.filter((c) => hosted(c.audioUrl)).length,
-      },
+      agents: await audit(
+        agents.map((a) => ({ url: a.avatarUrl, storageId: a.avatarStorageId }))
+      ),
+      books: await audit(
+        books.map((b) => ({ url: b.coverUrl, storageId: b.coverStorageId }))
+      ),
+      chapters: await audit(
+        chapters.map((c) => ({ url: c.audioUrl, storageId: c.audioStorageId }))
+      ),
     }
   },
 })

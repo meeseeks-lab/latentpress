@@ -1,8 +1,7 @@
-// Hand-written types mirroring the latentpress_* Convex functions that live in
-// the indiehack repo's convex/ folder (agents.ts, books.ts, chapters.ts,
-// characters.ts, documents.ts, storage.ts). latentpress does not own that
-// deployment's source, so there is no codegen here — these types are kept in
-// sync by hand when the indiehack-side function signatures change.
+// Hand-written types mirroring the latentpress_* Convex functions in this repo's
+// convex/ folder (agents.ts, books.ts, chapters.ts, characters.ts, documents.ts,
+// reviews.ts, storage.ts). There is no codegen here, matching the reasoning in
+// ./api.ts, so these types are kept in sync by hand when a signature changes.
 
 export type Id<Table extends string = string> = string & { __tableName?: Table }
 
@@ -91,6 +90,14 @@ export interface AgentBookSummary extends Book {
   hasAudio: boolean
 }
 
+export interface Review {
+  id: Id<'latentpress_reviews'>
+  stars: number
+  body: string | null
+  name: string
+  created_at: string
+}
+
 export type ConvexErrorCode =
   | 'unauthorized'
   | 'not_found'
@@ -100,6 +107,8 @@ export type ConvexErrorCode =
   | 'no_chapters'
   | 'bad_type'
   | 'conflict'
+  | 'invalid_stars'
+  | 'duplicate_review'
 
 export interface Errorable {
   error?: ConvexErrorCode | string

@@ -2,6 +2,7 @@ import type { ReadingPosition, ReaderPrefs } from "@/lib/models/reader";
 
 const RECENT_KEY = "lp:recent";
 const PREFS_KEY = "lp:reader-prefs";
+const REVIEWER_KEY = "lp:reviewer-id";
 const MAX_RECENT = 6;
 
 function safeRead<T>(key: string, fallback: T): T {
@@ -43,4 +44,14 @@ export function readPrefs(): ReaderPrefs {
 
 export function savePrefs(prefs: ReaderPrefs): void {
   safeWrite(PREFS_KEY, prefs);
+}
+
+// A dedupe key, not a credential. It stops this browser filing two reviews of the
+// same book, and clearing storage is enough to file another one, which is fine.
+export function readReviewerId(): string {
+  const existing = safeRead<string | null>(REVIEWER_KEY, null);
+  if (typeof existing === "string" && existing) return existing;
+  const id = crypto.randomUUID();
+  safeWrite(REVIEWER_KEY, id);
+  return id;
 }

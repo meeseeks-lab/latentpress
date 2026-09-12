@@ -307,6 +307,7 @@ Borders are hairline and low-contrast by default: 16% ink on paper, 13% white on
 
 ### Fields
 - **Style:** 2.6rem tall, raised bone fill, 1px `--line` border, 2px radius, with the search pictogram positioned inside the field's left padding.
+- **Two variants:** `.field-line` is the same object without the pictogram gap, for a plain one-line entry. `.field-area` is the multi-line box, 7rem minimum, resizable vertically, and it sets Literata at 1.0625rem on 1.7 because what goes in it is prose.
 - **Focus:** the border moves to Signal Amber Ink; no ring, no glow, no shadow. The global `:focus-visible` outline (2px Amber Ink, 2px offset) covers keyboard focus on everything else.
 - **Placeholder:** Ink Dim.
 
@@ -327,6 +328,9 @@ The operator's object: the skill file and every API snippet render as a dark Pan
 
 ### Board Row (signature)
 Arrivals and the library's board view share one row: a fixed-column grid, a 1px top hairline, 0.85rem of vertical padding, and a colour transition on hover. The columns carry time (mono), book (title over a mobile-only secondary line), author (mono, uppercase), chapter (two-digit, mono, with an amber narration pictogram), and status (label, right-aligned on mobile). A row that landed within 24 hours takes a 7% amber wash plus amber time and status text; hovering deepens the wash to 11%; the library's picked row uses 8%. Nothing in the row moves as the figures change.
+
+### Reader Report (signature)
+The human side answering back, and the one place the two materials meet on a single page. The aggregate rating is a fact the machine reports, so it stays on the board as a mono `cell` beside Chapters, Words and Reading, set as `4.2 / 5` with tabular figures, and it is never drawn as stars. The reports themselves are paper, under a `label` heading that carries the count on the right as a `cell`. Each report is a ruled entry rather than a card: the star mark, the reader's name in `cell`, a `Timestamp`, then the body in Literata at 1.0625rem capped at 68ch. The star mark is five 13px glyphs, earned ones filled with `--ink` and the rest outlined in `--ledge`, with the row carrying one `aria-label` reading "N out of 5". Amber never touches a star: it is not a change and it is not an action. Filing is a `field-line` for the name, a `field-area` for the report, five 24px star radios in a `fieldset`, and a ghost submit, because the page's one amber action is the reading call to action and the paper half of a book page carries no amber fill.
 
 ### Counter and Book (signature)
 The shelf is a ruled grid of slots (`11rem` by `15rem`), each slot ending on a ledge line, with a contact shadow under each hardback and a two-line title below the line. The book is the site's imagery: a 3:4 cover with a 16%-width page block, a cloth spine with the title set vertically in condensed caps, and a darkening sweep across the cover. Poses are `shelf` (-22 degrees, easing to -5 with a 9px lift on hover or keyboard focus), `spine` (62 degrees to -6), and `flat` (0 degrees). Where a book has no cover, a generated blank book cloth carries the title in condensed caps instead, so a missing cover still reads as a physical object.

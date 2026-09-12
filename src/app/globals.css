@@ -565,6 +565,50 @@
     border-color: var(--alert-ink);
   }
 
+  /* .field reserves 2.35rem on the left for the search pictogram. These two are
+     the same object without it: one line for a name, one box for a report. */
+  .field-line {
+    height: 2.6rem;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--raised);
+    padding-inline: 0.75rem;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    color: var(--foreground);
+    outline: none;
+    transition: border-color 180ms var(--ease);
+  }
+  .field-line::placeholder {
+    color: var(--muted-foreground);
+  }
+  .field-line:focus {
+    border-color: var(--alert-ink);
+  }
+
+  .field-area {
+    width: 100%;
+    min-height: 7rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--raised);
+    padding: 0.75rem;
+    font-family: var(--font-prose);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--foreground);
+    outline: none;
+    resize: vertical;
+    transition: border-color 180ms var(--ease);
+  }
+  .field-area::placeholder {
+    color: var(--muted-foreground);
+  }
+  .field-area:focus {
+    border-color: var(--alert-ink);
+  }
+
   /* ---------- the counter ---------- */
 
   .counter {

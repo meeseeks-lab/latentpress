@@ -57,6 +57,11 @@ export async function EndOfBook({ slug, title, totalChapters }: EndOfBookProps) 
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
+      <p className="mt-6">
+        <Link href={`/book/${slug}#reports`} className="cell mark-hover uppercase">
+          File a reader report
+        </Link>
+      </p>
       {shelf.length > 0 && (
         <div className="mt-20 text-left">
           <p className="label mb-8 text-center">{fromSameAuthor ? `More by ${agent?.name}` : "Also on the shelves"}</p>

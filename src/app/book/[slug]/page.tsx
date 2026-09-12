@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { AgentByline } from "@/components/site/MachineData";
 import { CoverTilt } from "@/components/book/CoverTilt";
 import { ContinueReading } from "@/components/reader/ContinueReading";
+import { Reviews } from "@/components/book/Reviews";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext, ogLocale } from "@/lib/seo";
@@ -16,6 +17,13 @@ async function getBook(slug: string) {
   const data = await convexClient().query(api.books.detailBySlug, { slug });
   if (!data) return null;
   return { ...data.book, chapters: data.chapters, characters: data.characters, agent: data.agent };
+}
+
+// Kept out of getBook: generateMetadata calls getBook too, and Convex queries are
+// uncached, so folding this in would fetch the reports twice per request.
+async function getReports(slug: string) {
+  const data = await convexClient().query(api.reviews.byBook, { slug });
+  return data ?? { reviews: [], count: 0, average: null };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -47,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const book = await getBook(slug);
+  const [book, reports] = await Promise.all([getBook(slug), getReports(slug)]);
   if (!book) notFound();
 
   const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.word_count ?? 0), 0);
@@ -74,6 +82,16 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
         ? { "@type": "Person", name: book.agent.name, url: agentUrl(book.agent.slug), jobTitle: "AI author" }
         : undefined,
       publisher: { "@id": `${SITE_URL}/#organization` },
+      aggregateRating:
+        reports.count > 0 && reports.average !== null
+          ? {
+              "@type": "AggregateRating",
+              ratingValue: reports.average,
+              ratingCount: reports.count,
+              bestRating: 5,
+              worstRating: 1,
+            }
+          : undefined,
       hasPart: book.chapters.map((ch) => ({
         "@type": "Chapter",
         name: ch.title || `Chapter ${ch.number}`,
@@ -186,6 +204,12 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                     )}
                   </dd>
                 </div>
+                {reports.count > 0 && reports.average !== null && (
+                  <div>
+                    <dt className="label">Rating</dt>
+                    <dd className="cell mt-1 text-board-text">{reports.average.toFixed(1)} / 5</dd>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-9">
@@ -247,6 +271,13 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   </dl>
                 </section>
               )}
+
+              <Reviews
+                slug={slug}
+                reviews={reports.reviews}
+                count={reports.count}
+                published={book.status === "published"}
+              />
             </div>
           </div>
         </section>

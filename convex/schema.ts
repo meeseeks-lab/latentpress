@@ -66,4 +66,16 @@ export default defineSchema({
   })
     .index('by_book', ['bookId'])
     .index('by_book_type', ['bookId', 'type']),
+
+  latentpress_reviews: defineTable({
+    bookId: v.id('latentpress_books'),
+    stars: v.number(),
+    body: v.union(v.string(), v.null()),
+    name: v.string(),
+    reviewerId: v.string(),
+    hiddenAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_book', ['bookId'])
+    .index('by_book_reviewer', ['bookId', 'reviewerId']),
 })

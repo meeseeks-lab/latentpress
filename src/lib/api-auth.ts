@@ -36,6 +36,8 @@ const ERROR_RESPONSES: Record<string, { message: string; status: number }> = {
     message: 'type must be one of: process, bible, outline, status, story_so_far',
     status: 400,
   },
+  invalid_stars: { message: 'stars must be a whole number from 1 to 5', status: 422 },
+  duplicate_review: { message: 'This browser has already reviewed this book', status: 409 },
 }
 
 type MaybeError = { error?: string }

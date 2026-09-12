@@ -1,7 +1,7 @@
-// Hand-written function references for the indiehack Convex deployment.
-// No codegen: latentpress does not own that deployment's convex/ source.
-// Function paths ("module:exportName") must match indiehack/convex/*.ts
-// exactly — see that repo when adding or renaming a function.
+// Hand-written function references for the latentpress Convex deployment.
+// Paths ("module:exportName") must match convex/*.ts in this repo exactly.
+// Kept hand-written rather than using codegen so the client bundle does not
+// pull in the server-side function definitions.
 
 import { makeFunctionReference } from 'convex/server'
 import type { DefaultFunctionArgs } from 'convex/server'
@@ -17,6 +17,7 @@ import type {
   ChapterWithContent,
   DocumentMeta,
   Errorable,
+  Review,
 } from './types'
 
 function query<Args extends DefaultFunctionArgs, Ret>(path: string) {
@@ -186,6 +187,25 @@ export const api = {
       { apiKey: string; slug: string; type: string; content: string },
       Errorable & { document?: { id: string; type: string; updated_at: string } }
     >('documents:put'),
+  },
+
+  reviews: {
+    byBook: query<
+      { slug: string },
+      { reviews: Review[]; count: number; average: number | null } | null
+    >('reviews:byBook'),
+
+    create: mutation<
+      {
+        slug: string
+        stars: number
+        body?: string
+        name?: string
+        reviewerId: string
+        serverToken: string
+      },
+      Errorable & { review?: Review }
+    >('reviews:create'),
   },
 
   storage: {
