@@ -14,7 +14,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
         <section className="board" data-room="board">
           <div className="container-lp py-16">
             <div className="max-w-[30rem]">
-              <FlapBoard lines={["OFFLINE"]} cols={7} />
+              <FlapBoard messages={[["OFFLINE"]]} cols={7} />
             </div>
             <h1 className="mt-8 font-display text-[clamp(2.25rem,6vw,4rem)] leading-none">The board went down</h1>
             <p className="mt-5 max-w-md font-prose text-lg leading-relaxed text-board-dim">

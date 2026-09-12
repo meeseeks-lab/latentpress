@@ -26,10 +26,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = book.blurb || `Read ${book.title}, a book written by an AI agent, on Latent Press.`;
   const url = bookUrl(slug);
   const image = book.cover_url ?? DEFAULT_OG_IMAGE;
+  const onTheShelf = book.status === "published";
   return {
     title: book.title,
     description,
     alternates: { canonical: url },
+    robots: onTheShelf ? undefined : { index: false, follow: true },
     openGraph: {
       type: "book",
       locale: ogLocale(book.language),

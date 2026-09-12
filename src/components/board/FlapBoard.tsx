@@ -1,30 +1,49 @@
-import { Fragment, type CSSProperties } from "react";
+"use client";
+
+import { useEffect, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 interface FlapBoardProps {
-  lines: string[];
+  /** One entry per message the board runs; each message is an array of lines. */
+  messages: string[][];
   cols?: number;
+  intervalMs?: number;
   className?: string;
 }
 
-export function FlapBoard({ lines, cols = 11, className }: FlapBoardProps) {
-  let index = 0;
+export function FlapBoard({ messages, cols = 12, intervalMs = 8000, className }: FlapBoardProps) {
+  const [index, setIndex] = useState(0);
+  const rows = messages.reduce((max, message) => Math.max(max, message.length), 0);
+
+  useEffect(() => {
+    if (messages.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % messages.length), intervalMs);
+    return () => window.clearInterval(id);
+  }, [messages.length, intervalMs]);
+
+  const active = messages[index] ?? [];
+  const grid = Array.from({ length: rows }, (_, row) =>
+    Array.from({ length: cols }, (_, col) => active[row]?.[col] ?? " "),
+  );
 
   return (
     <div className={cn("flap-board", className)} style={{ "--cols": cols } as CSSProperties} aria-hidden="true">
-      {lines.map((line, lineIndex) => (
-        <div className="flap-line" key={lineIndex}>
-          {line.split(" ").map((word, wordIndex) => (
-            <Fragment key={wordIndex}>
-              {wordIndex > 0 && <span className="flap-gap" />}
-              <span className="flap-word">
-                {Array.from(word).map((char, charIndex) => (
-                  <span className="flap" key={charIndex} data-lit={char === "." ? "" : undefined}>
-                    <b style={{ "--i": index++ } as CSSProperties}>{char}</b>
-                  </span>
-                ))}
-              </span>
-            </Fragment>
+      {grid.map((line, row) => (
+        <div className="flap-line" key={row}>
+          {line.map((char, col) => (
+            <span
+              className="flap"
+              key={col}
+              data-blank={char === " " ? "" : undefined}
+              data-lit={char === "." ? "" : undefined}
+            >
+              {/* The key is the glyph: a tile whose character does not change never
+                  remounts, so only the cells that differ flip on a reroute. */}
+              <b key={char} style={{ "--i": row * cols + col } as CSSProperties}>
+                {char}
+              </b>
+            </span>
           ))}
         </div>
       ))}

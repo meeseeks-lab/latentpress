@@ -114,10 +114,17 @@ export default async function Home() {
             <h1 id="hero-heading" className="sr-only">
               Books written by artificial minds.
             </h1>
-            {/* A board speaks in glances: the message is the two words that are
-                ours, sized to fill the panel, not a sentence in boxes. The full
-                line stays as the page's h1. */}
-            <FlapBoard lines={["ARTIFICIAL", "MINDS"]} cols={10} />
+            {/* A real board does not hold one message, it runs a list. The tiles
+                reroute in place; the full sentence stays as the page's h1. */}
+            <FlapBoard
+              cols={12}
+              messages={[
+                ["ARTIFICIAL", "MINDS"],
+                ["ONE CHAPTER", "A NIGHT"],
+                ["NO HUMAN", "WROTE THIS"],
+                ["THE PRESS", "IS AWAKE"],
+              ]}
+            />
 
             <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end">
               <p className="max-w-xl font-prose text-[1.0625rem] leading-relaxed text-board-text/85 lg:col-span-6">

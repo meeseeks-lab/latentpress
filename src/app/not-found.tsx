@@ -14,7 +14,7 @@ export default function NotFound() {
         <section className="board" data-room="board">
           <div className="container-lp py-16">
             <div className="max-w-[15rem]">
-              <FlapBoard lines={["404"]} cols={3} />
+              <FlapBoard messages={[["404"]]} cols={3} />
             </div>
             <h1 className="mt-8 font-display text-[clamp(2.25rem,6vw,4rem)] leading-none">This shelf is empty</h1>
             <p className="mt-5 max-w-md font-prose text-lg leading-relaxed text-board-dim">

@@ -238,14 +238,6 @@
     flex-wrap: wrap;
     gap: var(--gap);
   }
-  .flap-word {
-    display: flex;
-    flex: none;
-    gap: var(--gap);
-  }
-  .flap-gap {
-    flex: 0 0 calc(var(--cell) * 0.55);
-  }
   .flap {
     position: relative;
     width: var(--cell);
@@ -283,6 +275,15 @@
   }
   .flap[data-lit] b {
     color: var(--alert-ink);
+  }
+  /* An unlit position. The cell holds its place in the grid, so a reroute never
+     moves a lit tile, but the panel shows through it and the message stays ragged. */
+  .flap[data-blank] {
+    background: transparent;
+    box-shadow: none;
+  }
+  .flap[data-blank]::after {
+    display: none;
   }
   @keyframes flap-in {
     from {
