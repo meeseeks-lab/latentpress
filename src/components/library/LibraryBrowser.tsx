@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dices, LayoutList, Library as LibraryIcon, Search, X } from "lucide-react";
 import { Book3D } from "@/components/book/Book3D";
-import type { LibraryFilters, LibrarySort, LibraryView, ShelfBook } from "@/lib/models/library";
+import { RatingStars } from "@/components/book/RatingStars";
+import type { LibraryFilters, LibrarySort, LibraryView, ShelfBook, StarsFilter } from "@/lib/models/library";
 import { useBatchedList } from "@/lib/hooks/use-batched-list";
 import { cn } from "@/lib/utils";
 
@@ -17,11 +18,24 @@ const SORTS: { value: LibrarySort; label: string }[] = [
   { value: "newest", label: "Newest" },
   { value: "updated", label: "Recently written" },
   { value: "read", label: "Most read" },
+  { value: "rated", label: "Top rated" },
   { value: "oldest", label: "Oldest" },
   { value: "title", label: "A to Z" },
 ];
 
 const SORT_VALUES = SORTS.map((s) => s.value);
+
+const STARS: { value: StarsFilter; label: string }[] = [
+  { value: 0, label: "Any rating" },
+  { value: 3, label: "3 stars and up" },
+  { value: 4, label: "4 stars and up" },
+  { value: 5, label: "5 stars" },
+];
+
+function parseStars(value: string | null): StarsFilter {
+  const n = Number(value);
+  return n === 3 || n === 4 || n === 5 ? n : 0;
+}
 const VIEW_VALUES: LibraryView[] = ["shelf", "board"];
 
 function parseSort(value: string | null): LibrarySort {
@@ -52,6 +66,7 @@ function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] 
   const filtered = books.filter((b) => {
     if (filters.genre && !b.genre.includes(filters.genre)) return false;
     if (filters.language && b.language !== filters.language) return false;
+    if (filters.stars && (b.rating ?? 0) < filters.stars) return false;
     if (!q) return true;
     return (
       b.title.toLowerCase().includes(q) ||
@@ -63,6 +78,11 @@ function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] 
   if (filters.sort === "newest") return filtered.sort(byDate);
   if (filters.sort === "updated") return filtered.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
   if (filters.sort === "oldest") return filtered.sort((a, b) => byDate(b, a));
+  if (filters.sort === "rated") {
+    return filtered.sort(
+      (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || (b.ratings ?? 0) - (a.ratings ?? 0) || byDate(a, b),
+    );
+  }
   if (filters.sort === "read") {
     return filtered.sort(
       (a, b) => (b.readers ?? 0) - (a.readers ?? 0) || (b.opens ?? 0) - (a.opens ?? 0) || byDate(a, b),
@@ -79,6 +99,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
     query: params.get("q") ?? "",
     genre: params.get("genre"),
     language: params.get("lang"),
+    stars: parseStars(params.get("stars")),
     sort: parseSort(params.get("sort")),
     view: parseView(params.get("view")),
   });
@@ -90,11 +111,14 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
     if (filters.query) next.set("q", filters.query);
     if (filters.genre) next.set("genre", filters.genre);
     if (filters.language) next.set("lang", filters.language);
+    if (filters.stars) next.set("stars", String(filters.stars));
     if (filters.sort !== "newest") next.set("sort", filters.sort);
     if (filters.view !== "shelf") next.set("view", filters.view);
     const qs = next.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [filters.query, filters.genre, filters.language, filters.sort, filters.view, router, pathname]);
+  }, [filters.query, filters.genre, filters.language, filters.stars, filters.sort, filters.view, router, pathname]);
+
+  const anyRated = useMemo(() => books.some((b) => (b.ratings ?? 0) > 0), [books]);
 
   const genres = useMemo(() => {
     const counts = new Map<string, number>();
@@ -126,7 +150,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
     });
   };
 
-  const cleared = !filters.query && !filters.genre && !filters.language;
+  const cleared = !filters.query && !filters.genre && !filters.language && !filters.stars;
 
   return (
     <div>
@@ -209,6 +233,23 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
         </div>
       )}
 
+      {anyRated && (
+        <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label="Rating">
+          {STARS.map((s) => (
+            <button
+              key={s.value}
+              type="button"
+              className="tab"
+              data-active={filters.stars === s.value}
+              aria-pressed={filters.stars === s.value}
+              onClick={() => set({ stars: s.value })}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <p className="cell mt-7 flex flex-wrap items-center gap-3 uppercase" aria-live="polite">
         <span>
           {visible.length === books.length
@@ -216,7 +257,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
             : `${visible.length} of ${books.length} books`}
         </span>
         {!cleared && (
-          <button type="button" onClick={() => set({ query: "", genre: null, language: null })} className="text-ink underline decoration-alert-ink decoration-2 underline-offset-4">
+          <button type="button" onClick={() => set({ query: "", genre: null, language: null, stars: 0 })} className="text-ink underline decoration-alert-ink decoration-2 underline-offset-4">
             <span className="inline-flex items-center gap-1">
               <X className="h-3 w-3" /> Clear
             </span>
@@ -290,6 +331,7 @@ function ShelfView({ books, picked, listRef }: ViewProps) {
           >
             {book.title}
           </Link>
+          <RatingStars average={book.rating ?? null} count={book.ratings ?? 0} className="mt-1 text-ink-dim" />
         </li>
       ))}
     </ul>
@@ -314,8 +356,9 @@ function BoardView({ books, picked, listRef }: ViewProps) {
                 <span className="block truncate font-ui text-[1.05rem] font-semibold leading-tight text-foreground transition-colors group-hover:text-alert-ink">
                   {book.title}
                 </span>
-                <span className="mt-0.5 block truncate text-[0.75rem] text-muted-foreground sm:hidden">
-                  {book.genre.slice(0, 2).join(", ") || "—"}
+                <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.75rem] text-muted-foreground">
+                  <span className="truncate sm:hidden">{book.genre.slice(0, 2).join(", ") || "—"}</span>
+                  <RatingStars average={book.rating ?? null} count={book.ratings ?? 0} size={10} />
                 </span>
               </span>
               <span className="hidden truncate text-sm text-muted-foreground sm:block">

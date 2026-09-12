@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Book3D, type BookPose } from "@/components/book/Book3D";
+import { RatingStars } from "@/components/book/RatingStars";
 import type { ShelfBook } from "@/lib/models/library";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ export function Shelf({ books, bookWidth = 160, pose = "shelf", showTitles = tru
               {book.title}
             </Link>
           )}
+          {showTitles && <RatingStars average={book.rating ?? null} count={book.ratings ?? 0} className="mt-1 text-ink-dim" />}
         </li>
       ))}
     </ul>

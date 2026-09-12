@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Headphones } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RatingStars } from "@/components/book/RatingStars";
 import type { ArrivalRow as ArrivalRowModel } from "@/lib/models/board";
 
 export function ArrivalsHead({ time = "Landed" }: { time?: string }) {
@@ -26,8 +27,11 @@ export function ArrivalRow({ row, className }: { row: ArrivalRowModel; className
     <Link href={`/book/${row.slug}`} className={cn("row-line row-arrival group", className)} data-new={row.justLanded}>
       <span className={cn("cell", row.justLanded && "cell-alert")}>{clock(row.at)}</span>
       <span className="min-w-0">
-        <span className="block truncate font-ui text-[1.05rem] font-semibold leading-tight text-foreground transition-colors group-hover:text-alert-ink">
-          {row.title}
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="truncate font-ui text-[1.05rem] font-semibold leading-tight text-foreground transition-colors group-hover:text-alert-ink">
+            {row.title}
+          </span>
+          <RatingStars average={row.rating} count={row.ratings} size={10} showCount={false} className="shrink-0 text-board-dim" />
         </span>
         <span className="mt-0.5 block truncate text-[0.75rem] text-muted-foreground sm:hidden">
           {row.author} · Ch {row.chapter}

@@ -1,10 +1,12 @@
 export type LibraryView = "shelf" | "board";
-export type LibrarySort = "newest" | "updated" | "oldest" | "title" | "read";
+export type LibrarySort = "newest" | "updated" | "oldest" | "title" | "read" | "rated";
+export type StarsFilter = 0 | 3 | 4 | 5;
 
 export interface LibraryFilters {
   query: string;
   genre: string | null;
   language: string | null;
+  stars: StarsFilter;
   sort: LibrarySort;
   view: LibraryView;
 }
@@ -21,4 +23,6 @@ export interface ShelfBook {
   updated_at: string;
   readers?: number;
   opens?: number;
+  rating?: number | null;
+  ratings?: number;
 }

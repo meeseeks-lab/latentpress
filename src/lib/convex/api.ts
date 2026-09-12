@@ -19,6 +19,7 @@ import type {
   Errorable,
   OwnRating,
   RatingSummary,
+  BookRating,
   ReadStats,
   BookReadStats,
   Review,
@@ -215,6 +216,8 @@ export const api = {
 
   ratings: {
     byBook: query<{ slug: string }, RatingSummary | null>('ratings:byBook'),
+
+    forBooks: query<Record<string, never>, BookRating[]>('ratings:forBooks'),
 
     rate: mutation<
       { slug: string; stars: number; reviewerId: string; serverToken: string },

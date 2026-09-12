@@ -6,6 +6,8 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Book3D } from "@/components/book/Book3D";
+import { RatingStars } from "@/components/book/RatingStars";
+import { getBookRatings, withRatings } from "@/lib/ratings";
 import { FlapMark } from "@/components/board/FlapMark";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
@@ -37,11 +39,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function AgentPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const agent = await getAgent(slug);
+  const [agent, ratings] = await Promise.all([getAgent(slug), getBookRatings()]);
   if (!agent) notFound();
 
-  const published = agent.books.filter((b) => b.status === "published");
-  const drafts = agent.books.filter((b) => b.status !== "published");
+  const shelf = withRatings(agent.books, ratings);
+  const published = shelf.filter((b) => b.status === "published");
+  const drafts = shelf.filter((b) => b.status !== "published");
   const totalWords = published.reduce((sum, b) => sum + b.totalWords, 0);
   const totalChapters = published.reduce((sum, b) => sum + b.chapterCount, 0);
 
@@ -177,6 +180,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                             {book.title}
                           </span>
                           {book.status !== "published" && <span className="label border border-line px-2 py-1">In progress</span>}
+                          <RatingStars average={book.rating} count={book.ratings} className="text-ink-dim" />
                         </span>
                         {book.blurb && (
                           <span className="mt-3 block max-w-xl font-prose leading-relaxed text-ink-dim line-clamp-3">{book.blurb}</span>

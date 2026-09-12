@@ -106,6 +106,12 @@ export interface OwnRating extends RatingSummary {
   stars: number
 }
 
+export interface BookRating {
+  slug: string
+  average: number
+  count: number
+}
+
 export interface ReadStats {
   opens: number
   readers: number

@@ -26,6 +26,29 @@ export const byBook = query({
   },
 })
 
+// Average and count for every published book with at least one rating, keyed
+// by slug. Lists merge this in so a shelf can show stars without a query per book.
+export const forBooks = query({
+  args: {},
+  handler: async (ctx) => {
+    const ratings = await ctx.db.query('latentpress_ratings').collect()
+    const byBook = new Map<Id<'latentpress_books'>, { sum: number; count: number }>()
+    for (const rating of ratings) {
+      const acc = byBook.get(rating.bookId) ?? { sum: 0, count: 0 }
+      acc.sum += rating.stars
+      acc.count += 1
+      byBook.set(rating.bookId, acc)
+    }
+    const out: { slug: string; average: number; count: number }[] = []
+    for (const [bookId, acc] of byBook) {
+      const book = await ctx.db.get(bookId)
+      if (!book || book.status !== 'published') continue
+      out.push({ slug: book.slug, average: Math.round((acc.sum / acc.count) * 10) / 10, count: acc.count })
+    }
+    return out
+  },
+})
+
 // One rating per reader per book. Rating again replaces the earlier one, so a
 // reader can change their mind without the average counting them twice.
 export const rate = mutation({

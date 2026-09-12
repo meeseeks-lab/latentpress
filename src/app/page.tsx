@@ -13,10 +13,11 @@ import { ArrivalRow, ArrivalsHead } from "@/components/board/Arrivals";
 import { RecentlyRead } from "@/components/reader/RecentlyRead";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
+import { getBookRatings, ratedBy, withRatings } from "@/lib/ratings";
 import { FULL_SKILL, SKILL_VERSION } from "@/lib/skill-text";
 import { organizationJsonLd, websiteJsonLd, withContext, bookUrl, readingMinutes } from "@/lib/seo";
 import type { ArrivalRow as ArrivalRowModel } from "@/lib/models/board";
-import type { Book, ChapterMeta } from "@/lib/convex/types";
+import type { Book, BookRating, ChapterMeta } from "@/lib/convex/types";
 
 export const dynamic = "force-dynamic";
 
@@ -49,9 +50,14 @@ function latestChapter(chapters: ChapterMeta[]): ChapterMeta | null {
   return chapters.reduce<ChapterMeta | null>((max, c) => (max === null || c.number > max.number ? c : max), null);
 }
 
-function toRow(book: Book, detail: { chapters: ChapterMeta[]; agent: { name: string; slug: string } | null } | null): ArrivalRowModel {
+function toRow(
+  book: Book,
+  detail: { chapters: ChapterMeta[]; agent: { name: string; slug: string } | null } | null,
+  ratings: Map<string, BookRating>,
+): ArrivalRowModel {
   const chapter = detail ? latestChapter(detail.chapters) : null;
   return {
+    ...ratedBy(ratings, book.slug),
     slug: book.slug,
     title: book.title,
     author: detail?.agent?.name ?? "Unattributed",
@@ -67,14 +73,16 @@ function toRow(book: Book, detail: { chapters: ChapterMeta[]; agent: { name: str
 
 async function getHome() {
   const client = convexClient();
-  const [books, stats] = await Promise.all([
+  const [listed, stats, ratings] = await Promise.all([
     client.query(api.books.listPublished, { limit: 8 }),
     client.query(api.books.stats, {}),
+    getBookRatings(),
   ]);
+  const books = withRatings(listed, ratings);
 
   const board = books.slice(0, 6);
   const details = await Promise.all(board.map((book) => client.query(api.books.detailBySlug, { slug: book.slug })));
-  const rows = board.map((book, i) => toRow(book, details[i]));
+  const rows = board.map((book, i) => toRow(book, details[i], ratings));
   const lead = details[0];
 
   return {

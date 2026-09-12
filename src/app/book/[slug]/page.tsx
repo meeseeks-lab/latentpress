@@ -10,6 +10,7 @@ import { CoverTilt } from "@/components/book/CoverTilt";
 import { ContinueReading } from "@/components/reader/ContinueReading";
 import { Reviews } from "@/components/book/Reviews";
 import { RatingWidget } from "@/components/book/RatingWidget";
+import { RatingStars } from "@/components/book/RatingStars";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext, ogLocale } from "@/lib/seo";
@@ -251,7 +252,9 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                 {rating.count > 0 && rating.average !== null && (
                   <div>
                     <dt className="label">Rating</dt>
-                    <dd className="cell mt-1 text-board-text">{rating.average.toFixed(1)} / 5</dd>
+                    <dd className="mt-1 text-board-text">
+                      <RatingStars average={rating.average} count={rating.count} size={12} />
+                    </dd>
                   </div>
                 )}
               </dl>

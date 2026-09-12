@@ -9,4 +9,6 @@ export interface ArrivalRow {
   words: number | null;
   narrated: boolean;
   justLanded: boolean;
+  rating: number | null;
+  ratings: number;
 }
