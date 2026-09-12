@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { validateLanguage, isLanguageError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
@@ -18,7 +19,14 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
   try {
     const body = await req.json()
-    const { title, blurb, genre, cover_url } = body
+    const { title, blurb, genre, cover_url, language } = body
+
+    let lang: string | undefined
+    if (language !== undefined) {
+      const checked = validateLanguage(language)
+      if (isLanguageError(checked)) return checked
+      lang = checked
+    }
 
     const result = await convexClient().mutation(api.books.update, {
       apiKey: auth.apiKey,
@@ -26,6 +34,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       title,
       blurb,
       genre,
+      language: lang,
       coverUrl: cover_url,
     })
 

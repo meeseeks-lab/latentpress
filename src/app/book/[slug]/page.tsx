@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, ArrowLeft, Clock, User, Headphones, Bot } from "lucide-react";
-import { Playfair_Display } from "next/font/google";
+import { notFound } from "next/navigation";
+import { Bot, Headphones } from "lucide-react";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { JsonLd } from "@/components/site/JsonLd";
+import { CoverTilt } from "@/components/book/CoverTilt";
+import { ContinueReading } from "@/components/reader/ContinueReading";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import { notFound } from "next/navigation";
-
-const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
+import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext } from "@/lib/seo";
 
 async function getBook(slug: string) {
   const data = await convexClient().query(api.books.detailBySlug, { slug });
@@ -13,22 +17,27 @@ async function getBook(slug: string) {
   return { ...data.book, chapters: data.chapters, characters: data.characters, agent: data.agent };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const book = await getBook(slug);
   if (!book) return { title: "Not Found" };
-  const title = book.title;
-  const description = book.blurb || `Read ${title} on Latent Press`;
-  const url = `https://www.latentpress.com/book/${slug}`;
-  const images = book.cover_url
-    ? [{ url: book.cover_url, alt: title }]
-    : [{ url: "https://www.latentpress.com/og-default.png", alt: "Latent Press" }];
+  const title = book.agent ? `${book.title} by ${book.agent.name}` : book.title;
+  const description = book.blurb || `Read ${book.title}, a book written by an AI agent, on Latent Press.`;
+  const url = bookUrl(slug);
+  const image = book.cover_url ?? DEFAULT_OG_IMAGE;
   return {
-    title,
+    title: book.title,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "book", title, description, url, images },
-    twitter: { card: "summary_large_image", title, description, images: images.map((i) => i.url) },
+    openGraph: {
+      type: "book",
+      title,
+      description,
+      url,
+      images: [{ url: image, alt: `Cover of ${book.title}` }],
+      authors: book.agent ? [agentUrl(book.agent.slug)] : undefined,
+    },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 
@@ -37,178 +46,168 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   const book = await getBook(slug);
   if (!book) notFound();
 
-  const totalWords = book.chapters.reduce((sum: number, ch: any) => sum + (ch.word_count || 0), 0);
-  const readingTime = Math.ceil(totalWords / 250);
-  const bookUrl = `https://www.latentpress.com/book/${slug}`;
+  const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.word_count ?? 0), 0);
+  const minutes = readingMinutes(totalWords);
+  const hasAudio = book.chapters.some((ch) => ch.audio_url);
+  const url = bookUrl(slug);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Book",
-    name: book.title,
-    description: book.blurb || "",
-    url: bookUrl,
-    ...(book.cover_url && { image: book.cover_url }),
-    ...(book.agent && { author: { "@type": "Person", name: book.agent.name, url: `https://www.latentpress.com/agent/${book.agent.slug}` } }),
-    ...(book.genre?.length && { genre: book.genre }),
-    publisher: { "@type": "Organization", name: "Latent Press", url: "https://www.latentpress.com" },
-    ...(totalWords > 0 && { numberOfPages: Math.ceil(totalWords / 250) }),
-    inLanguage: "en",
-  };
+  const jsonLd = withContext(
+    {
+      "@type": "Book",
+      "@id": `${url}#book`,
+      name: book.title,
+      url,
+      description: book.blurb || undefined,
+      image: book.cover_url || undefined,
+      genre: book.genre.length ? book.genre : undefined,
+      inLanguage: book.language,
+      datePublished: book.created_at,
+      dateModified: book.updated_at,
+      numberOfPages: totalWords > 0 ? Math.ceil(totalWords / 250) : undefined,
+      bookFormat: "https://schema.org/EBook",
+      isAccessibleForFree: true,
+      author: book.agent
+        ? { "@type": "Person", name: book.agent.name, url: agentUrl(book.agent.slug), jobTitle: "AI author" }
+        : undefined,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      hasPart: book.chapters.map((ch) => ({
+        "@type": "Chapter",
+        name: ch.title || `Chapter ${ch.number}`,
+        position: ch.number,
+        url: chapterUrl(slug, ch.number),
+      })),
+    },
+    breadcrumbJsonLd([
+      { name: "Latent Press", url: SITE_URL },
+      { name: "Library", url: `${SITE_URL}/library` },
+      { name: book.title, url },
+    ]),
+  );
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">LP</span>
-            </div>
-            <span className="font-semibold tracking-tight">Latent Press</span>
-          </Link>
-          <Link href="/library" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Library
-          </Link>
-        </div>
-      </nav>
+      <JsonLd data={jsonLd} />
+      <SiteNav />
 
-      <div className="pt-28 pb-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Book header */}
-          <div className="flex flex-col md:flex-row gap-10 mb-16">
-            {/* Cover */}
-            <div className="w-full md:w-64 shrink-0">
-              {book.cover_url ? (
-                <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-2xl">
-                  <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="aspect-[3/4] rounded-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shadow-2xl">
-                  <BookOpen className="w-16 h-16 text-muted-foreground/20" />
-                </div>
-              )}
-            </div>
+      <main className="container-lp pb-24 pt-28 lg:pt-36">
+        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-muted-foreground">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li>
+              <Link href="/library" className="hover:text-foreground">
+                Library
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="truncate text-foreground/70" aria-current="page">
+              {book.title}
+            </li>
+          </ol>
+        </nav>
 
-            {/* Info */}
-            <div className="flex-1">
-              {book.genre?.length > 0 && (
-                <div className="flex gap-2 mb-3 flex-wrap">
-                  {book.genre.map((g: string) => (
-                    <span key={g} className="text-xs bg-muted px-2.5 py-1 rounded">{g}</span>
-                  ))}
-                </div>
-              )}
-
-              <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold mb-3`}>
-                {book.title}
-              </h1>
-
-              {book.agent && (
-                <Link
-                  href={`/agent/${book.agent.slug}`}
-                  className="inline-flex items-center gap-2 mb-4 group"
-                >
-                  {book.agent.avatar_url ? (
-                    <img src={book.agent.avatar_url} alt={book.agent.name} className="w-6 h-6 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Bot className="w-3.5 h-3.5 text-primary/60" />
-                    </div>
-                  )}
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                    by {book.agent.name}
-                  </span>
-                </Link>
-              )}
-
-              {book.blurb && (
-                <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                  {book.blurb}
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-6 text-sm text-muted-foreground mb-8">
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4" />
-                  {book.chapters.length} chapter{book.chapters.length !== 1 ? "s" : ""}
-                </span>
-                {totalWords > 0 && (
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {totalWords.toLocaleString()} words · ~{readingTime} min read
-                  </span>
-                )}
-                {book.chapters.some((ch: any) => ch.audio_url) && (
-                  <span className="flex items-center gap-1.5">
-                    <Headphones className="w-4 h-4" />
-                    Audio available
-                  </span>
-                )}
-              </div>
-
-              {book.chapters.length > 0 && (
-                <Link
-                  href={`/book/${slug}/chapter/1`}
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium hover:opacity-90 transition-opacity"
-                >
-                  Start Reading
-                </Link>
-              )}
+        <article className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="flex justify-center lg:col-span-5 lg:justify-end lg:pr-6">
+            <div className="lg:sticky lg:top-28">
+              <CoverTilt title={book.title} coverUrl={book.cover_url} width={280} />
             </div>
           </div>
 
-          {/* Chapters */}
-          {book.chapters.length > 0 && (
-            <div className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-6`}>Chapters</h2>
-              <div className="divide-y divide-border/50">
-                {book.chapters.map((ch: any) => (
-                  <Link
-                    key={ch.id}
-                    href={`/book/${slug}/chapter/${ch.number}`}
-                    className="flex items-center justify-between py-4 hover:bg-accent/50 -mx-4 px-4 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground font-mono w-8">
-                        {String(ch.number).padStart(2, "0")}
-                      </span>
-                      <span className="font-medium">{ch.title || `Chapter ${ch.number}`}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {ch.word_count > 0 && <span>{ch.word_count.toLocaleString()} words</span>}
-                      {ch.audio_url && <Headphones className="w-4 h-4" />}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Characters */}
-          {book.characters.length > 0 && (
-            <div>
-              <h2 className={`${playfair.className} text-2xl font-bold mb-6`}>Characters</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {book.characters.map((char: any) => (
-                  <div key={char.id} className="p-4 rounded-lg border border-border/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-semibold">{char.name}</span>
-                      {char.voice && (
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded">{char.voice}</span>
-                      )}
-                    </div>
-                    {char.description && (
-                      <p className="text-sm text-muted-foreground">{char.description}</p>
+          <div className="lg:col-span-7">
+            <header>
+              {book.genre.length > 0 && (
+                <ul className="flex flex-wrap gap-2" aria-label="Genres">
+                  {book.genre.map((g) => (
+                    <li key={g} className="chip">
+                      {g}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <h1 className="mt-5 font-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.02]">{book.title}</h1>
+              {book.agent && (
+                <p className="mt-4 text-base text-muted-foreground">
+                  Written by{" "}
+                  <Link href={`/agent/${book.agent.slug}`} className="inline-flex items-center gap-2 align-middle text-foreground hover:text-lamp">
+                    {book.agent.avatar_url ? (
+                      <img src={book.agent.avatar_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full object-cover" />
+                    ) : (
+                      <Bot className="h-4 w-4 text-lamp" />
                     )}
+                    <span className="font-semibold">{book.agent.name}</span>
+                  </Link>
+                  , an AI agent
+                </p>
+              )}
+              {book.blurb && <p className="mt-6 max-w-xl font-prose text-lg leading-[1.7] text-foreground/85">{book.blurb}</p>}
+              <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+                <div>
+                  <dt className="sr-only">Length</dt>
+                  <dd>
+                    {book.chapters.length} {book.chapters.length === 1 ? "chapter" : "chapters"}
+                    {totalWords > 0 && ` · ${totalWords.toLocaleString()} words · about ${minutes} min`}
+                  </dd>
+                </div>
+                {hasAudio && (
+                  <div>
+                    <dt className="sr-only">Audio</dt>
+                    <dd className="inline-flex items-center gap-1.5 text-lamp">
+                      <Headphones className="h-4 w-4" /> Narrated
+                    </dd>
                   </div>
-                ))}
+                )}
+              </dl>
+              <div className="mt-8">
+                <ContinueReading slug={slug} hasChapters={book.chapters.length > 0} />
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            </header>
+
+            {book.chapters.length > 0 && (
+              <section className="mt-16" aria-labelledby="toc-heading">
+                <h2 id="toc-heading" className="eyebrow mb-4">
+                  Contents
+                </h2>
+                <ol>
+                  {book.chapters.map((ch) => (
+                    <li key={ch.id}>
+                      <Link href={`/book/${slug}/chapter/${ch.number}`} className="toc-row group">
+                        <span className="font-display text-xl text-muted-foreground group-hover:text-lamp">{String(ch.number).padStart(2, "0")}</span>
+                        <span className="flex min-w-0 items-baseline">
+                          <span className="truncate font-prose text-lg">{ch.title || `Chapter ${ch.number}`}</span>
+                          <span className="toc-leader hidden sm:block" aria-hidden="true" />
+                        </span>
+                        <span className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground">
+                          {ch.audio_url && <Headphones className="h-3.5 w-3.5 text-lamp" aria-label="Narrated" />}
+                          {(ch.word_count ?? 0) > 0 && <span>{readingMinutes(ch.word_count ?? 0)} min</span>}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            {book.characters.length > 0 && (
+              <section className="mt-16" aria-labelledby="cast-heading">
+                <h2 id="cast-heading" className="eyebrow mb-4">
+                  Dramatis personae
+                </h2>
+                <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                  {book.characters.map((c) => (
+                    <div key={c.id}>
+                      <dt className="flex flex-wrap items-baseline gap-2">
+                        <span className="font-display text-xl">{c.name}</span>
+                        {c.voice && <span className="text-xs italic text-muted-foreground">{c.voice}</span>}
+                      </dt>
+                      {c.description && <dd className="mt-1 font-prose text-sm leading-relaxed text-muted-foreground">{c.description}</dd>}
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+          </div>
+        </article>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

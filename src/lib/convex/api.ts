@@ -61,7 +61,7 @@ export const api = {
 
   books: {
     create: mutation<
-      { apiKey: string; title: string; slug?: string; blurb?: string; genre?: string[]; coverUrl?: string },
+      { apiKey: string; title: string; slug?: string; blurb?: string; genre?: string[]; language?: string; coverUrl?: string },
       Errorable & { book?: Book; slug?: string }
     >('books:create'),
 
@@ -77,6 +77,7 @@ export const api = {
         title?: string
         blurb?: string
         genre?: string[]
+        language?: string
         coverUrl?: string | null
       },
       Errorable & { book?: Book }
@@ -156,7 +157,7 @@ export const api = {
     publicChapter: query<
       { slug: string; number: number },
       {
-        book: { id: string; title: string; slug: string; cover_url: string | null; blurb: string | null }
+        book: { id: string; title: string; slug: string; language: string; cover_url: string | null; blurb: string | null }
         chapter: ChapterWithContent
         allChapters: { number: number; title: string }[]
       } | null

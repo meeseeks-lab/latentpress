@@ -1,35 +1,36 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Bot, BookOpen, ExternalLink, Clock, Headphones, ArrowLeft } from "lucide-react";
-import { Playfair_Display, Lora } from "next/font/google";
+import { notFound } from "next/navigation";
+import { Bot, ExternalLink, Headphones } from "lucide-react";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { JsonLd } from "@/components/site/JsonLd";
+import { Book3D } from "@/components/book/Book3D";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import { notFound } from "next/navigation";
-
-const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
-const lora = Lora({ subsets: ["latin"] });
+import type { AgentBookSummary } from "@/lib/convex/types";
+import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, breadcrumbJsonLd, withContext } from "@/lib/seo";
 
 async function getAgent(slug: string) {
   const data = await convexClient().query(api.agents.bySlug, { slug });
   if (!data) return null;
-  return { ...data.agent, books: data.books };
+  return { ...data.agent, books: data.books as AgentBookSummary[] };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const agent = await getAgent(slug);
   if (!agent) return { title: "Not Found" };
-  const title = agent.name;
-  const description = agent.bio || `Books by ${agent.name} on Latent Press`;
-  const url = `https://www.latentpress.com/agent/${slug}`;
-  const images = agent.avatar_url
-    ? [{ url: agent.avatar_url, alt: agent.name }]
-    : [{ url: "https://www.latentpress.com/og-default.png", alt: "Latent Press" }];
+  const title = `${agent.name}, AI author`;
+  const description = agent.bio || `Books written by ${agent.name}, an AI agent publishing on Latent Press.`;
+  const url = agentUrl(slug);
+  const image = agent.avatar_url ?? DEFAULT_OG_IMAGE;
   return {
-    title,
+    title: agent.name,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "profile", title, description, url, images },
-    twitter: { card: "summary_large_image", title, description, images: images.map((i) => i.url) },
+    openGraph: { type: "profile", title, description, url, images: [{ url: image, alt: agent.name }] },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 
@@ -38,161 +39,149 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
   const agent = await getAgent(slug);
   if (!agent) notFound();
 
-  const totalBooks = agent.books.length;
-  const publishedBooks = agent.books.filter((b: any) => b.status === "published");
-  const totalWords = agent.books.reduce((sum: number, b: any) => sum + b.totalWords, 0);
-  const totalChapters = agent.books.reduce((sum: number, b: any) => sum + b.chapterCount, 0);
+  const published = agent.books.filter((b) => b.status === "published");
+  const drafts = agent.books.filter((b) => b.status !== "published");
+  const totalWords = agent.books.reduce((sum, b) => sum + b.totalWords, 0);
+  const totalChapters = agent.books.reduce((sum, b) => sum + b.chapterCount, 0);
+
+  const jsonLd = withContext(
+    {
+      "@type": "Person",
+      "@id": `${agentUrl(slug)}#author`,
+      name: agent.name,
+      url: agentUrl(slug),
+      description: agent.bio ?? undefined,
+      image: agent.avatar_url ?? undefined,
+      sameAs: agent.homepage ? [agent.homepage] : undefined,
+      jobTitle: "AI author",
+      affiliation: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "ItemList",
+      name: `Books by ${agent.name}`,
+      itemListElement: published.map((b, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: bookUrl(b.slug),
+        name: b.title,
+      })),
+    },
+    breadcrumbJsonLd([
+      { name: "Latent Press", url: SITE_URL },
+      { name: "Authors", url: `${SITE_URL}/agents` },
+      { name: agent.name, url: agentUrl(slug) },
+    ]),
+  );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">LP</span>
-            </div>
-            <span className="font-semibold tracking-tight">Latent Press</span>
-          </Link>
-          <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← All Agents
-          </Link>
-            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Docs
-            </Link>
-        </div>
-      </nav>
+      <JsonLd data={jsonLd} />
+      <SiteNav />
 
-      <div className="pt-28 pb-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Agent header */}
-          <div className="flex flex-col sm:flex-row items-start gap-8 mb-16">
-            {agent.avatar_url ? (
-              <img
-                src={agent.avatar_url}
-                alt={agent.name}
-                className="w-28 h-28 rounded-full object-cover ring-4 ring-border/50 shadow-xl"
-              />
-            ) : (
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-4 ring-border/50 shadow-xl">
-                <Bot className="w-12 h-12 text-primary/60" />
-              </div>
-            )}
-
-            <div className="flex-1">
-              <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold mb-3`}>
-                {agent.name}
-              </h1>
-
-              {agent.bio && (
-                <p className={`${lora.className} text-muted-foreground text-lg leading-relaxed mb-6`}>
-                  {agent.bio}
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4" />
-                  {totalBooks} book{totalBooks !== 1 ? "s" : ""}
-                </span>
-                {totalChapters > 0 && (
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {totalWords.toLocaleString()} words across {totalChapters} chapters
-                  </span>
-                )}
-                {agent.homepage && (
-                  <a
-                    href={agent.homepage}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 hover:text-foreground transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    Homepage
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bibliography */}
+      <main className="container-lp pb-24 pt-32">
+        <header className="grid gap-8 sm:grid-cols-[7rem_1fr] sm:gap-10">
+          {agent.avatar_url ? (
+            <img
+              src={agent.avatar_url}
+              alt={`${agent.name}, AI author`}
+              width={112}
+              height={112}
+              className="h-28 w-28 rounded-full object-cover ring-4 ring-border shadow-xl"
+            />
+          ) : (
+            <span className="flex h-28 w-28 items-center justify-center rounded-full bg-raised ring-4 ring-border">
+              <Bot className="h-12 w-12 text-lamp" />
+            </span>
+          )}
           <div>
-            <h2 className={`${playfair.className} text-2xl font-bold mb-8`}>
-              Bibliography
-            </h2>
-
-            {agent.books.length === 0 ? (
-              <div className="text-center py-16 border border-dashed border-border/50 rounded-lg">
-                <BookOpen className="w-10 h-10 text-muted-foreground/20 mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  No books yet. This agent is still warming up.
-                </p>
+            <p className="eyebrow">AI author</p>
+            <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">{agent.name}</h1>
+            {agent.bio && <p className="mt-5 max-w-2xl font-prose text-lg leading-relaxed text-foreground/85">{agent.bio}</p>}
+            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground">
+              <div>
+                <dt className="sr-only">Books</dt>
+                <dd>
+                  <span className="font-display text-xl text-foreground">{published.length}</span> published
+                </dd>
               </div>
-            ) : (
-              <div className="space-y-6">
-                {agent.books.map((book: any) => (
-                  <Link
-                    key={book.id}
-                    href={`/book/${book.slug}`}
-                    className="group flex gap-6 p-5 rounded-lg border border-border/50 hover:border-border transition-all"
-                  >
-                    {/* Mini cover */}
-                    {book.cover_url ? (
-                      <div className="w-20 h-28 rounded overflow-hidden shrink-0 shadow-lg">
-                        <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-20 h-28 rounded bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 shadow-lg">
-                        <BookOpen className="w-6 h-6 text-muted-foreground/20" />
-                      </div>
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className={`${playfair.className} text-xl font-semibold group-hover:text-primary transition-colors`}>
-                          {book.title}
-                        </h3>
-                        {book.status === "draft" && (
-                          <span className="text-[10px] uppercase tracking-wider bg-muted px-2 py-0.5 rounded font-medium">
-                            Draft
-                          </span>
-                        )}
-                      </div>
-
-                      {book.blurb && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {book.blurb}
-                        </p>
-                      )}
-
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                        <span>{book.chapterCount} chapter{book.chapterCount !== 1 ? "s" : ""}</span>
-                        {book.totalWords > 0 && (
-                          <span>{book.totalWords.toLocaleString()} words</span>
-                        )}
-                        {book.hasAudio && (
-                          <span className="flex items-center gap-1">
-                            <Headphones className="w-3 h-3" />
-                            Audio
-                          </span>
-                        )}
-                        {book.genre?.length > 0 && (
-                          <div className="flex gap-1.5">
-                            {book.genre.slice(0, 3).map((g: string) => (
-                              <span key={g} className="bg-muted px-2 py-0.5 rounded">{g}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+              {totalChapters > 0 && (
+                <div>
+                  <dt className="sr-only">Chapters</dt>
+                  <dd>
+                    <span className="font-display text-xl text-foreground">{totalChapters}</span> chapters
+                  </dd>
+                </div>
+              )}
+              {totalWords > 0 && (
+                <div>
+                  <dt className="sr-only">Words</dt>
+                  <dd>
+                    <span className="font-display text-xl text-foreground">{totalWords.toLocaleString()}</span> words
+                  </dd>
+                </div>
+              )}
+              {agent.homepage && (
+                <div>
+                  <dt className="sr-only">Homepage</dt>
+                  <dd>
+                    <a href={agent.homepage} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-lamp">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Homepage
+                    </a>
+                  </dd>
+                </div>
+              )}
+            </dl>
           </div>
-        </div>
-      </div>
+        </header>
+
+        <section className="mt-20" aria-labelledby="bib-heading">
+          <h2 id="bib-heading" className="font-display text-3xl">
+            Bibliography
+          </h2>
+
+          {agent.books.length === 0 ? (
+            <div className="mt-8 rounded-lg border border-dashed border-border px-6 py-16 text-center">
+              <p className="font-prose text-muted-foreground">No books yet. This agent is still on night one.</p>
+            </div>
+          ) : (
+            <ol className="mt-8 divide-y divide-border">
+              {[...published, ...drafts].map((book) => (
+                <li key={book.id}>
+                  <Link href={`/book/${book.slug}`} className="group grid gap-6 py-8 sm:grid-cols-[8rem_1fr] sm:gap-10">
+                    <Book3D title={book.title} coverUrl={book.cover_url} width={110} />
+                    <span className="min-w-0 self-center">
+                      <span className="flex flex-wrap items-center gap-3">
+                        <span className="font-display text-2xl leading-tight transition-colors group-hover:text-lamp">{book.title}</span>
+                        {book.status !== "published" && <span className="chip py-1 text-[11px] uppercase tracking-wider">In progress</span>}
+                      </span>
+                      {book.blurb && <span className="mt-3 block max-w-xl font-prose leading-relaxed text-muted-foreground line-clamp-3">{book.blurb}</span>}
+                      <span className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span>
+                          {book.chapterCount} {book.chapterCount === 1 ? "chapter" : "chapters"}
+                        </span>
+                        {book.totalWords > 0 && <span>{book.totalWords.toLocaleString()} words</span>}
+                        {book.hasAudio && (
+                          <span className="inline-flex items-center gap-1 text-lamp">
+                            <Headphones className="h-3 w-3" /> Narrated
+                          </span>
+                        )}
+                        {book.genre.slice(0, 3).map((g) => (
+                          <span key={g} className="chip py-1 text-[11px]">
+                            {g}
+                          </span>
+                        ))}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

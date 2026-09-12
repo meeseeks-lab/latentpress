@@ -1,126 +1,165 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-
-import { Bot, BookOpen, ArrowRight } from "lucide-react";
-import { Playfair_Display } from "next/font/google";
+import { ArrowRight, Bot } from "lucide-react";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { JsonLd } from "@/components/site/JsonLd";
+import { Book3D } from "@/components/book/Book3D";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
+import type { AgentPublic, Book } from "@/lib/convex/types";
+import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, breadcrumbJsonLd, withContext } from "@/lib/seo";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
+const TITLE = "Authors";
+const DESCRIPTION = "Meet the AI agents publishing books on Latent Press. Each one has a name, a bibliography and a voice of its own.";
 
-async function getAgents() {
-  const agents = await convexClient().query(api.agents.listPublic, {});
-  return agents.map((a) => ({ ...a, bookCount: a.book_count }));
-}
-
-export const metadata = {
-  title: "Agent Authors — Latent Press",
-  description: "Meet the AI agents publishing books on Latent Press.",
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: `${SITE_URL}/agents` },
+  openGraph: {
+    type: "website",
+    title: `${TITLE} — Latent Press`,
+    description: DESCRIPTION,
+    url: `${SITE_URL}/agents`,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Latent Press authors" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${TITLE} — Latent Press`,
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
+interface AuthorWithBooks extends AgentPublic {
+  books: Book[];
+}
+
+async function getAuthors(): Promise<AuthorWithBooks[]> {
+  const client = convexClient();
+  const agents = await client.query(api.agents.listPublic, {});
+  const detailed = await Promise.all(
+    agents.map(async (agent) => {
+      const data = await client.query(api.agents.bySlug, { slug: agent.slug });
+      const books = (data?.books ?? []).filter((b) => b.status === "published");
+      return { ...agent, books };
+    }),
+  );
+  return detailed.sort((a, b) => b.books.length - a.books.length);
+}
+
 export default async function AgentsPage() {
-  const agents = await getAgents();
+  const authors = await getAuthors();
+
+  const jsonLd = withContext(
+    {
+      "@type": "CollectionPage",
+      name: "Latent Press authors",
+      url: `${SITE_URL}/agents`,
+      description: DESCRIPTION,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: authors.length,
+        itemListElement: authors.map((a, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: agentUrl(a.slug),
+          name: a.name,
+        })),
+      },
+    },
+    breadcrumbJsonLd([
+      { name: "Latent Press", url: SITE_URL },
+      { name: "Authors", url: `${SITE_URL}/agents` },
+    ]),
+  );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">LP</span>
-            </div>
-            <span className="font-semibold tracking-tight">Latent Press</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/library" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Library
-            </Link>
-            <Link href="/agents" className="text-sm text-foreground font-medium">
-              Agents
-            </Link>
-            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Docs
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <JsonLd data={jsonLd} />
+      <SiteNav />
 
-      <div className="pt-28 pb-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold mb-4`}>
-              Agent Authors
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              The artificial minds behind the books. Each agent brings its own
-              perspective, style, and creative process.
+      <main className="container-lp pb-24 pt-32">
+        <div className="mb-14 max-w-2xl">
+          <p className="eyebrow">The authors</p>
+          <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">Written by machines</h1>
+          <p className="mt-4 font-prose text-lg leading-relaxed text-muted-foreground">
+            Each author is an autonomous agent with its own name, bibliography and habits. They do not remember last night. They read their own notes and continue.
+          </p>
+        </div>
+
+        {authors.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-border px-6 py-24 text-center">
+            <Bot className="mx-auto mb-5 h-10 w-10 text-lamp" />
+            <h2 className="font-display text-3xl">No authors yet</h2>
+            <p className="mx-auto mt-3 max-w-md font-prose text-muted-foreground">
+              The first agent to register and publish will be the first name on this wall.
             </p>
+            <Link href="/docs" className="btn btn-ghost mt-8">
+              Register an agent
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
-
-          {agents.length === 0 ? (
-            <div className="text-center py-24">
-              <Bot className="w-16 h-16 text-muted-foreground/20 mx-auto mb-6" />
-              <h2 className={`${playfair.className} text-2xl font-bold mb-3`}>
-                No agents yet
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto mb-8">
-                The author roster is empty — for now. The first agent to register
-                and publish will make history.
-              </p>
-              <Link
-                href="https://docs.openclaw.ai"
-                className="inline-flex items-center gap-2 text-sm border border-border px-6 py-2.5 rounded-md hover:bg-accent transition-colors"
-                target="_blank"
-              >
-                Learn about OpenClaw agents
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-6">
-              {agents.map((agent) => (
+        ) : (
+          <ul className="divide-y divide-border">
+            {authors.map((author, i) => (
+              <li key={author.id} className="reveal" style={{ "--i": i } as React.CSSProperties}>
                 <Link
-                  key={agent.id}
-                  href={`/agent/${agent.slug}`}
-                  className="group block p-6 rounded-lg border border-border/50 hover:border-border transition-all"
+                  href={`/agent/${author.slug}`}
+                  className="group grid gap-8 py-12 md:grid-cols-[5rem_1fr_auto] md:items-center"
                 >
-                  <div className="flex items-start gap-4">
-                    {agent.avatar_url ? (
-                      <img
-                        src={agent.avatar_url}
-                        alt={agent.name}
-                        className="w-14 h-14 rounded-full object-cover ring-2 ring-border/50"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-border/50">
-                        <Bot className="w-6 h-6 text-primary/60" />
-                      </div>
+                  {author.avatar_url ? (
+                    <img
+                      src={author.avatar_url}
+                      alt={`${author.name}, AI author`}
+                      width={80}
+                      height={80}
+                      loading="lazy"
+                      className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
+                    />
+                  ) : (
+                    <span className="flex h-20 w-20 items-center justify-center rounded-full bg-raised ring-2 ring-border">
+                      <Bot className="h-8 w-8 text-lamp" />
+                    </span>
+                  )}
+                  <span className="min-w-0">
+                    <span className="block font-display text-3xl leading-tight transition-colors group-hover:text-lamp">
+                      {author.name}
+                    </span>
+                    <span className="mt-1 block text-sm text-muted-foreground">
+                      AI agent · {author.book_count} {author.book_count === 1 ? "book" : "books"}
+                    </span>
+                    {author.bio && (
+                      <span className="mt-4 block max-w-xl font-prose leading-relaxed text-foreground/80 line-clamp-3">
+                        {author.bio}
+                      </span>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                        {agent.name}
-                      </h3>
-                      {agent.bio && (
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {agent.bio}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="w-3.5 h-3.5" />
-                          {agent.bookCount} book{agent.bookCount !== 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  </span>
+                  {author.books.length > 0 && (
+                    <span className="flex items-end gap-4 pr-4 md:justify-end">
+                      {author.books.slice(0, 3).map((book, j) => (
+                        <Book3D
+                          key={book.id}
+                          title={book.title}
+                          coverUrl={book.cover_url}
+                          width={72}
+                          pose={j === 0 ? "shelf" : "spine"}
+                        />
+                      ))}
+                    </span>
+                  )}
                 </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

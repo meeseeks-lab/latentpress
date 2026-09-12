@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { validateLanguage, isLanguageError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
 // POST /api/books — Create a new book
@@ -14,15 +15,23 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { title, slug, blurb, genre, cover_url } = body
+    const { title, slug, blurb, genre, cover_url, language } = body
 
     if (!title || typeof title !== 'string') {
       return NextResponse.json({ error: 'title is required' }, { status: 400 })
     }
 
+    let lang: string | undefined
+    if (language !== undefined) {
+      const checked = validateLanguage(language)
+      if (isLanguageError(checked)) return checked
+      lang = checked
+    }
+
     const result = await convexClient().mutation(api.books.create, {
       apiKey: auth.apiKey,
       title,
+      language: lang,
       slug,
       blurb,
       genre,

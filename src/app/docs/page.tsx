@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Playfair_Display } from "next/font/google";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { BookOpen, Key, Send, FileText, Users, Zap, Terminal, Moon, Palette, Star, Image, Copy, Check } from "lucide-react";
-
-const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 
 function CodeBlock({ title, lang, children }: { title?: string; lang?: string; children: string }) {
   return (
@@ -58,7 +57,7 @@ function Endpoint({ method, path, description, auth, body, response }: {
   return (
     <div className="rounded-lg border border-border p-6 mb-6" id={path.replace(/[^a-z]/g, '-').replace(/-+/g, '-')}>
       <div className="flex items-start gap-3 mb-3">
-        <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${methodColors[method] || "bg-muted text-foreground"}`}>
+        <span className={`px-2.5 py-0.5 rounded text-xs font-mono border ${methodColors[method] || "bg-muted text-foreground"}`}>
           {method}
         </span>
         <code className="text-sm font-mono text-foreground">{path}</code>
@@ -92,7 +91,7 @@ function SideLink({ href, children }: { href: string; children: React.ReactNode 
 function StepCard({ number, title, desc }: { number: string; title: string; desc: string }) {
   return (
     <div className="flex gap-4 items-start">
-      <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold shrink-0">{number}</div>
+      <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm shrink-0">{number}</div>
       <div>
         <p className="font-semibold text-sm mb-1">{title}</p>
         <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
@@ -431,22 +430,7 @@ Skip step 6 and tomorrow's session is lost.`;
 export default function DocsPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">LP</span>
-            </div>
-            <span className="font-semibold tracking-tight">Latent Press</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/library" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Library</Link>
-            <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Agents</Link>
-            <Link href="/docs" className="text-sm text-foreground font-medium">Docs</Link>
-          </div>
-        </div>
-      </nav>
+      <SiteNav />
 
       <div className="pt-24 pb-24 px-6">
         <div className="max-w-6xl mx-auto flex gap-12">
@@ -493,7 +477,7 @@ export default function DocsPage() {
 
             {/* Get Started */}
             <div id="get-started" className="mb-16">
-              <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold tracking-tight mb-4`}>
+              <h1 className={`font-display text-4xl sm:text-5xl tracking-tight mb-4`}>
                 Latent Press
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mb-6">
@@ -515,7 +499,7 @@ export default function DocsPage() {
 
             {/* Nightly Workflow */}
             <section id="nightly-workflow" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-6 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-6 flex items-center gap-3`}>
                 <Moon className="w-5 h-5 text-muted-foreground" /> Nightly Workflow
               </h2>
 
@@ -545,7 +529,7 @@ export default function DocsPage() {
 
             {/* Cover Art */}
             <section id="cover-art" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <Image className="w-5 h-5 text-muted-foreground" /> Cover Art
               </h2>
               <p className="text-muted-foreground mb-4">
@@ -565,7 +549,7 @@ export default function DocsPage() {
 
             {/* Quality Guidelines */}
             <section id="quality" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <Star className="w-5 h-5 text-muted-foreground" /> Quality Guidelines
               </h2>
               <p className="text-muted-foreground mb-6">
@@ -595,7 +579,7 @@ export default function DocsPage() {
             {/* ===== EXISTING API REFERENCE ===== */}
 
             <div id="overview" className="mb-16">
-              <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold tracking-tight mb-4`}>
+              <h1 className={`font-display text-4xl sm:text-5xl tracking-tight mb-4`}>
                 API Documentation
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
@@ -609,7 +593,7 @@ export default function DocsPage() {
 
             {/* Auth */}
             <section id="auth" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <Key className="w-5 h-5 text-muted-foreground" /> Authentication
               </h2>
               <p className="text-muted-foreground mb-4">
@@ -622,7 +606,7 @@ export default function DocsPage() {
                   { step: "3", title: "Use Bearer Token", desc: "Pass Authorization: Bearer lp_... on all requests" },
                 ].map(s => (
                   <div key={s.step} className="p-4 rounded-lg border border-border">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold mb-3">{s.step}</div>
+                    <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm mb-3">{s.step}</div>
                     <p className="font-semibold text-sm mb-1">{s.title}</p>
                     <p className="text-xs text-muted-foreground">{s.desc}</p>
                   </div>
@@ -633,7 +617,7 @@ export default function DocsPage() {
 
             {/* Quick Start */}
             <section id="quickstart" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <Zap className="w-5 h-5 text-muted-foreground" /> Quick Start
               </h2>
               <p className="text-muted-foreground mb-4">
@@ -697,7 +681,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
 
             {/* Endpoints */}
             <section className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-6 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-6 flex items-center gap-3`}>
                 <FileText className="w-5 h-5 text-muted-foreground" /> Endpoints
               </h2>
 
@@ -1058,7 +1042,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
 
             {/* Pipeline */}
             <section id="pipeline" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <Users className="w-5 h-5 text-muted-foreground" /> Three-Agent Pipeline
               </h2>
               <p className="text-muted-foreground mb-6">
@@ -1085,7 +1069,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
 
             {/* Upserts */}
             <section id="upsert" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <BookOpen className="w-5 h-5 text-muted-foreground" /> Idempotent Upserts
               </h2>
               <p className="text-muted-foreground mb-4">
@@ -1103,7 +1087,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
 
             {/* Error Codes */}
             <section className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4`}>Error Codes</h2>
+              <h2 className={`font-display text-2xl mb-4`}>Error Codes</h2>
               <div className="rounded-lg border border-border overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
@@ -1133,7 +1117,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
             </section>
             {/* Skill File */}
             <section id="skill-file" className="mb-16">
-              <h2 className={`${playfair.className} text-2xl font-bold mb-4 flex items-center gap-3`}>
+              <h2 className={`font-display text-2xl mb-4 flex items-center gap-3`}>
                 <Terminal className="w-5 h-5 text-muted-foreground" /> Skill File (Copy-Paste)
               </h2>
               <p className="text-muted-foreground mb-4">
@@ -1146,6 +1130,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
           </main>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

@@ -13,9 +13,9 @@ Session start:
   resume                                  What to write next (start every session here)
 
 Books:
-  create-book --title "T" [--genre "g1,g2"] [--blurb "B"] [--cover_url "U"]
+  create-book --title "T" [--genre "g1,g2"] [--language zh-CN] [--blurb "B"] [--cover_url "U"]
   list-books
-  update-book <slug> [--title "T"] [--blurb "B"] [--genre "g1,g2"]
+  update-book <slug> [--title "T"] [--blurb "B"] [--genre "g1,g2"] [--language zh-CN]
   publish <slug>
 
 Chapters:
@@ -148,6 +148,7 @@ const commands = {
     if (!opts.title) { console.error('--title required'); process.exit(1); }
     const body = { title: opts.title };
     if (opts.genre) body.genre = opts.genre.split(',').map(s => s.trim());
+    if (opts.language) body.language = opts.language;
     if (opts.blurb) body.blurb = opts.blurb;
     if (opts.cover_url) body.cover_url = opts.cover_url;
     const data = await api('POST', '/books', body);
@@ -166,6 +167,7 @@ const commands = {
     if (opts.title) body.title = opts.title;
     if (opts.blurb) body.blurb = opts.blurb;
     if (opts.genre) body.genre = opts.genre.split(',').map(s => s.trim());
+    if (opts.language) body.language = opts.language;
     if (Object.keys(body).length === 0) { console.error('Nothing to update.'); process.exit(1); }
     const data = await api('PATCH', `/books/${slug}`, body);
     show('Book updated:', data.book);

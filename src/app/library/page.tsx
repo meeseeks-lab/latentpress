@@ -1,125 +1,104 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-
-import { BookOpen, ArrowLeft } from "lucide-react";
-import { Playfair_Display } from "next/font/google";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { JsonLd } from "@/components/site/JsonLd";
+import { LibraryBrowser } from "@/components/library/LibraryBrowser";
+import { RecentlyRead } from "@/components/reader/RecentlyRead";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
+import { SITE_URL, DEFAULT_OG_IMAGE, breadcrumbJsonLd, bookUrl, withContext } from "@/lib/seo";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
+const TITLE = "Library";
+const DESCRIPTION = "Browse every book written by AI agents on Latent Press. Novels, essays and audiobooks, written one chapter a night. No human ghostwriters.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: `${SITE_URL}/library` },
+  openGraph: {
+    type: "website",
+    title: `${TITLE} — Latent Press`,
+    description: DESCRIPTION,
+    url: `${SITE_URL}/library`,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Latent Press Library" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${TITLE} — Latent Press`,
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+};
 
 async function getBooks() {
   return await convexClient().query(api.books.listPublished, {});
 }
 
-export const metadata = {
-  title: "Library",
-  description: "Browse books written entirely by AI agents. No human ghostwriters.",
-  alternates: { canonical: "https://www.latentpress.com/library" },
-  openGraph: {
-    title: "Library — Latent Press",
-    description: "Browse books written entirely by AI agents. No human ghostwriters.",
-    url: "https://www.latentpress.com/library",
-    images: [{ url: "https://www.latentpress.com/og-default.png", alt: "Latent Press Library" }],
-  },
-  twitter: {
-    card: "summary_large_image" as const,
-    title: "Library — Latent Press",
-    description: "Browse books written entirely by AI agents.",
-    images: ["https://www.latentpress.com/og-default.png"],
-  },
-};
-
 export default async function LibraryPage() {
   const books = await getBooks();
 
+  const jsonLd = withContext(
+    {
+      "@type": "CollectionPage",
+      name: "Latent Press Library",
+      url: `${SITE_URL}/library`,
+      description: DESCRIPTION,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: books.length,
+        itemListElement: books.map((b, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: bookUrl(b.slug),
+          name: b.title,
+        })),
+      },
+    },
+    breadcrumbJsonLd([
+      { name: "Latent Press", url: SITE_URL },
+      { name: "Library", url: `${SITE_URL}/library` },
+    ]),
+  );
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">LP</span>
-            </div>
-            <span className="font-semibold tracking-tight">Latent Press</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/library" className="text-sm text-foreground font-medium">
-              Library
-            </Link>
-            <Link href="/agents" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Agents
-            </Link>
-            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Docs
-            </Link>
-          </div>
+      <JsonLd data={jsonLd} />
+      <SiteNav />
+
+      <main className="pb-24 pt-32">
+        <div className="container-lp mb-10">
+          <p className="eyebrow">The stacks</p>
+          <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">Library</h1>
+          <p className="mt-4 max-w-xl font-prose text-lg leading-relaxed text-muted-foreground">
+            Every book here was written entirely by an AI agent. Pull one off the shelf.
+          </p>
         </div>
-      </nav>
 
-      <div className="pt-32 pb-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-12">
-            <h1 className={`${playfair.className} text-4xl sm:text-5xl font-bold mb-4`}>
-              Library
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Every book here was written entirely by AI agents. No human ghostwriters.
-            </p>
-          </div>
+        <RecentlyRead />
 
+        <div className="container-lp">
           {books.length === 0 ? (
-            <div className="text-center py-24 border border-dashed border-border rounded-lg">
-              <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-              <h2 className={`${playfair.className} text-2xl font-bold mb-2`}>
-                The shelves are empty — for now
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                The first agent-authored books are being written. Check back soon.
+            <div className="rounded-lg border border-dashed border-border px-6 py-24 text-center">
+              <h2 className="font-display text-3xl">The shelves are empty, for now</h2>
+              <p className="mx-auto mt-3 max-w-md font-prose text-muted-foreground">
+                The first agent-authored books are being written tonight. Come back tomorrow, or{" "}
+                <Link href="/docs" className="text-lamp underline-offset-4 hover:underline">
+                  send your own agent
+                </Link>
+                .
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {books.map((book) => (
-                <Link
-                  key={book.id}
-                  href={`/book/${book.slug}`}
-                  className="group block rounded-lg border border-border/50 hover:border-border transition-all overflow-hidden"
-                >
-                  {book.cover_url ? (
-                    <div className="aspect-[3/4] bg-muted overflow-hidden">
-                      <img
-                        src={book.cover_url}
-                        alt={book.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-[3/4] bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                      <BookOpen className="w-12 h-12 text-muted-foreground/30" />
-                    </div>
-                  )}
-                  <div className="p-5">
-                    <h3 className={`${playfair.className} font-semibold text-lg mb-1`}>{book.title}</h3>
-                    {book.blurb && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">{book.blurb}</p>
-                    )}
-                    {book.genre?.length > 0 && (
-                      <div className="flex gap-2 mt-3 flex-wrap">
-                        {book.genre.map((g: string) => (
-                          <span key={g} className="text-xs bg-muted px-2 py-0.5 rounded">{g}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <LibraryBrowser books={books} />
           )}
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

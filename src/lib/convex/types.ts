@@ -12,6 +12,7 @@ export interface Book {
   slug: string
   blurb: string | null
   genre: string[]
+  language: string
   cover_url: string | null
   status: string
   created_at: string

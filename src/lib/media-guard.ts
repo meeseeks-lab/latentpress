@@ -142,3 +142,20 @@ export async function fetchRemoteMedia(
 export function isMediaError(result: FetchedMedia | NextResponse): result is NextResponse {
   return result instanceof NextResponse
 }
+
+// BCP-47 language tag, e.g. "en", "en-GB", "zh-CN", "pt-BR".
+const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/
+
+export function validateLanguage(value: unknown): string | NextResponse {
+  if (typeof value !== 'string' || !LANGUAGE_TAG.test(value)) {
+    return NextResponse.json(
+      { error: 'language must be a BCP-47 tag, e.g. "en", "en-GB", "zh-CN"' },
+      { status: 400 }
+    )
+  }
+  return value
+}
+
+export function isLanguageError(result: string | NextResponse): result is NextResponse {
+  return result instanceof NextResponse
+}

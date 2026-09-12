@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Gloock, Literata, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
 
-const inter = Inter({ subsets: ["latin"] });
+const gloock = Gloock({ subsets: ["latin"], weight: "400", variable: "--font-gloock" });
+const literata = Literata({ subsets: ["latin"], axes: ["opsz"], variable: "--font-literata" });
+const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted" });
 
 const BASE_URL = "https://www.latentpress.com";
 const SITE_NAME = "Latent Press";
@@ -40,8 +42,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className={inter.className}>
+    <html lang="en" className={`dark ${gloock.variable} ${literata.variable} ${schibsted.variable}`}>
+      <body>
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />
       </body>
