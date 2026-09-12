@@ -7,7 +7,7 @@ import { ReaderShell } from "@/components/reader/ReaderShell";
 import { EndOfBook } from "@/components/reader/EndOfBook";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import { SITE_URL, DEFAULT_OG_IMAGE, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext , ogLocale} from "@/lib/seo";
+import { SITE_URL, DEFAULT_OG_IMAGE, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext, ogLocale } from "@/lib/seo";
 
 async function getChapterData(slug: string, number: number) {
   if (!Number.isInteger(number) || number < 1) return null;
@@ -104,15 +104,15 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
       {prev && <link rel="prev" href={chapterUrl(slug, prev.number)} />}
       {next && <link rel="next" href={chapterUrl(slug, next.number)} />}
 
-      <main className="container-lp pb-24 pt-16">
-        <article lang={book.language} className="mx-auto max-w-[70ch]">
-          <header className="mb-14 text-center">
-            <p className="eyebrow">
+      <main className="pb-24 pt-14">
+        <article lang={book.language} className="container-lp mx-auto max-w-[70ch]">
+          <header className="mb-12 text-center">
+            <p className="cell uppercase">
               Chapter {num} of {chapters.length}
             </p>
-            <h1 className="mt-4 font-display text-[clamp(2rem,5vw,3.5rem)] leading-tight">{chapterTitle}</h1>
-            <p className="mt-4 text-sm text-muted-foreground">
-              <Link href={`/book/${slug}`} className="hover:text-foreground">
+            <h1 className="mt-4 font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.02]">{chapterTitle}</h1>
+            <p className="cell mt-4">
+              <Link href={`/book/${slug}`} className="text-ink-dim transition-colors hover:text-ink">
                 {book.title}
               </Link>
               {words > 0 && ` · ${words.toLocaleString()} words · about ${readingMinutes(words)} min`}
@@ -120,9 +120,9 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           </header>
 
           {chapter.audio_url && (
-            <section aria-label="Narration" className="mb-12 rounded-lg border border-border bg-raised p-4">
-              <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-lamp">
-                <Headphones className="h-3.5 w-3.5" /> Listen to this chapter
+            <section aria-label="Narration" className="mb-12 border border-line bg-raised p-4">
+              <p className="label mb-3 flex items-center gap-2 text-ink">
+                <Headphones className="h-3.5 w-3.5 text-alert-ink" /> <span className="text-ink">Listen to this chapter</span>
               </p>
               <audio controls className="w-full" preload="none">
                 <source src={chapter.audio_url} type="audio/mpeg" />
@@ -146,29 +146,33 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             )}
           </div>
 
-          <nav aria-label="Chapter navigation" className="mt-20 grid gap-4 border-t border-border pt-8 sm:grid-cols-2">
+          <nav aria-label="Chapter navigation" className="mt-20 grid gap-4 border-t border-line pt-8 sm:grid-cols-2">
             {prev && prevHref ? (
-              <Link href={prevHref} className="group rounded-lg border border-border p-5 transition-colors hover:border-lamp">
-                <span className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+              <Link href={prevHref} className="group border border-line p-5 transition-colors hover:border-alert-ink">
+                <span className="label flex items-center gap-2">
                   <ArrowLeft className="h-3.5 w-3.5" /> Previous
                 </span>
-                <span className="mt-2 block font-display text-xl group-hover:text-lamp">{prev.title || `Chapter ${prev.number}`}</span>
+                <span className="mark-hover mt-2 block font-display text-xl uppercase leading-tight">
+                  {prev.title || `Chapter ${prev.number}`}
+                </span>
               </Link>
             ) : (
               <span />
             )}
             {next && nextHref ? (
-              <Link href={nextHref} className="group rounded-lg border border-border bg-raised p-5 text-right transition-colors hover:border-lamp">
-                <span className="flex items-center justify-end gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+              <Link href={nextHref} className="group border border-line bg-raised p-5 text-right transition-colors hover:border-alert-ink">
+                <span className="label flex items-center justify-end gap-2">
                   Next <ArrowRight className="h-3.5 w-3.5" />
                 </span>
-                <span className="mt-2 block font-display text-xl group-hover:text-lamp">{next.title || `Chapter ${next.number}`}</span>
+                <span className="mark-hover mt-2 block font-display text-xl uppercase leading-tight">
+                  {next.title || `Chapter ${next.number}`}
+                </span>
               </Link>
             ) : (
               <span />
             )}
           </nav>
-          {next && <p className="mt-6 hidden text-center text-xs text-muted-foreground sm:block">Use ← and → to turn chapters</p>}
+          {next && <p className="cell mt-6 hidden text-center sm:block">Use ← and → to turn chapters</p>}
           {!next && <EndOfBook slug={slug} title={book.title} totalChapters={chapters.length} />}
         </article>
       </main>

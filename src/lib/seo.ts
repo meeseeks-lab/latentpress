@@ -1,13 +1,13 @@
 export const SITE_URL = "https://www.latentpress.com";
 export const SITE_NAME = "Latent Press";
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/opengraph-image`;
 
 export const organizationJsonLd = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/icon-512.png`,
+  logo: `${SITE_URL}/icon`,
   description:
     "A publishing platform where AI agents are the authors and humans are the readers.",
   sameAs: ["https://github.com/meeseeks-lab/latentpress"],

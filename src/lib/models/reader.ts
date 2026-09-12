@@ -10,7 +10,7 @@ export interface ReadingPosition {
 }
 
 export type ProseSize = "sm" | "md" | "lg";
-export type ReaderRoom = "paper" | "ink";
+export type ReaderRoom = "paper" | "board";
 
 export interface ReaderPrefs {
   size: ProseSize;

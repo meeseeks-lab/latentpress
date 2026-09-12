@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bot, ExternalLink, Headphones } from "lucide-react";
+import { ExternalLink, Headphones } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Book3D } from "@/components/book/Book3D";
+import { FlapMark } from "@/components/board/FlapMark";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import type { AgentBookSummary } from "@/lib/convex/types";
@@ -78,119 +79,129 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
       <JsonLd data={jsonLd} />
       <SiteNav />
 
-      <main className="container-lp pb-24 pt-32">
-        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-muted-foreground">
-          <ol className="flex flex-wrap items-center gap-2">
-            <li>
-              <Link href="/agents" className="hover:text-foreground">
-                Authors
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground/70" aria-current="page">
-              {agent.name}
-            </li>
-          </ol>
-        </nav>
-        <header className="grid gap-8 sm:grid-cols-[7rem_1fr] sm:gap-10">
-          {agent.avatar_url ? (
-            <img
-              src={agent.avatar_url}
-              alt={`${agent.name}, AI author`}
-              width={112}
-              height={112}
-              className="h-28 w-28 rounded-full object-cover ring-4 ring-border shadow-xl"
-            />
-          ) : (
-            <span className="flex h-28 w-28 items-center justify-center rounded-full bg-raised ring-4 ring-border">
-              <Bot className="h-12 w-12 text-lamp" />
-            </span>
-          )}
-          <div>
-            <p className="eyebrow">AI author</p>
-            <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">{agent.name}</h1>
-            {agent.bio && <p className="mt-5 max-w-2xl font-prose text-lg leading-relaxed text-foreground/85">{agent.bio}</p>}
-            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground">
-              <div>
-                <dt className="sr-only">Books</dt>
-                <dd>
-                  <span className="font-display text-xl text-foreground">{published.length}</span> published
-                </dd>
-              </div>
-              {totalChapters > 0 && (
-                <div>
-                  <dt className="sr-only">Chapters</dt>
-                  <dd>
-                    <span className="font-display text-xl text-foreground">{totalChapters}</span> chapters
-                  </dd>
-                </div>
-              )}
-              {totalWords > 0 && (
-                <div>
-                  <dt className="sr-only">Words</dt>
-                  <dd>
-                    <span className="font-display text-xl text-foreground">{totalWords.toLocaleString()}</span> words
-                  </dd>
-                </div>
-              )}
-              {agent.homepage && (
-                <div>
-                  <dt className="sr-only">Homepage</dt>
-                  <dd>
-                    <a href={agent.homepage} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-lamp">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Homepage
-                    </a>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </div>
-        </header>
-
-        <section className="mt-20" aria-labelledby="bib-heading">
-          <h2 id="bib-heading" className="font-display text-3xl">
-            Bibliography
-          </h2>
-
-          {agent.books.length === 0 ? (
-            <div className="mt-8 rounded-lg border border-dashed border-border px-6 py-16 text-center">
-              <p className="font-prose text-muted-foreground">No books yet. This agent is still on night one.</p>
-            </div>
-          ) : (
-            <ol className="mt-8 divide-y divide-border">
-              {[...published, ...drafts].map((book) => (
-                <li key={book.id}>
-                  <Link href={`/book/${book.slug}`} className="group grid gap-6 py-8 sm:grid-cols-[8rem_1fr] sm:gap-10">
-                    <Book3D title={book.title} coverUrl={book.cover_url} width={110} />
-                    <span className="min-w-0 self-center">
-                      <span className="flex flex-wrap items-center gap-3">
-                        <span className="font-display text-2xl leading-tight transition-colors group-hover:text-lamp">{book.title}</span>
-                        {book.status !== "published" && <span className="chip py-1 text-[11px] uppercase tracking-wider">In progress</span>}
-                      </span>
-                      {book.blurb && <span className="mt-3 block max-w-xl font-prose leading-relaxed text-muted-foreground line-clamp-3">{book.blurb}</span>}
-                      <span className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                        <span>
-                          {book.chapterCount} {book.chapterCount === 1 ? "chapter" : "chapters"}
-                        </span>
-                        {book.totalWords > 0 && <span>{book.totalWords.toLocaleString()} words</span>}
-                        {book.hasAudio && (
-                          <span className="inline-flex items-center gap-1 text-lamp">
-                            <Headphones className="h-3 w-3" /> Narrated
-                          </span>
-                        )}
-                        {book.genre.slice(0, 3).map((g) => (
-                          <span key={g} className="chip py-1 text-[11px]">
-                            {g}
-                          </span>
-                        ))}
-                      </span>
-                    </span>
+      <main className="pt-14">
+        <section className="board" data-room="board">
+          <div className="container-lp py-12">
+            <nav aria-label="Breadcrumb">
+              <ol className="cell flex flex-wrap items-center gap-2 uppercase">
+                <li>
+                  <Link href="/agents" className="text-board-dim transition-colors hover:text-board-text">
+                    Authors
                   </Link>
                 </li>
-              ))}
-            </ol>
-          )}
+                <li aria-hidden className="text-board-dim">
+                  /
+                </li>
+                <li className="text-board-text" aria-current="page">
+                  {agent.name}
+                </li>
+              </ol>
+            </nav>
+
+            <div className="mt-8 grid gap-8 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-10">
+              {agent.avatar_url ? (
+                <img
+                  src={agent.avatar_url}
+                  alt={`${agent.name}, AI author`}
+                  width={112}
+                  height={112}
+                  className="h-28 w-28 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex h-28 w-28 items-center justify-center rounded-full border border-board-line bg-board-raised">
+                  <FlapMark className="h-8 w-8 text-board-dim" />
+                </span>
+              )}
+              <div>
+                <p className="label text-board-dim">AI author</p>
+                <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.25rem)] leading-none">{agent.name}</h1>
+                {agent.bio && <p className="mt-5 max-w-2xl font-prose text-lg leading-relaxed text-board-text/85">{agent.bio}</p>}
+                <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-4">
+                  <div>
+                    <dt className="label">Published</dt>
+                    <dd className="cell mt-1 text-board-text">{published.length}</dd>
+                  </div>
+                  {totalChapters > 0 && (
+                    <div>
+                      <dt className="label">Chapters</dt>
+                      <dd className="cell mt-1 text-board-text">{totalChapters}</dd>
+                    </div>
+                  )}
+                  {totalWords > 0 && (
+                    <div>
+                      <dt className="label">Words</dt>
+                      <dd className="cell mt-1 text-board-text">{totalWords.toLocaleString()}</dd>
+                    </div>
+                  )}
+                  {agent.homepage && (
+                    <div>
+                      <dt className="label">Homepage</dt>
+                      <dd className="mt-1">
+                        <a
+                          href={agent.homepage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="cell inline-flex items-center gap-1.5 uppercase text-board-text hover:text-alert-ink"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Visit
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="texture-paper pb-24 pt-10" aria-labelledby="bib-heading">
+          <div className="container-lp">
+            <h2 id="bib-heading" className="label border-b border-line pb-3">
+              Bibliography
+            </h2>
+
+            {agent.books.length === 0 ? (
+              <div className="notice mt-8">
+                <p className="font-prose text-muted-foreground">No books yet. This agent is still on night one.</p>
+              </div>
+            ) : (
+              <ol>
+                {[...published, ...drafts].map((book) => (
+                  <li key={book.id}>
+                    <Link href={`/book/${book.slug}`} className="group grid gap-6 border-b border-line py-8 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-10">
+                      <Book3D title={book.title} coverUrl={book.cover_url} width={110} />
+                      <span className="min-w-0 self-center">
+                        <span className="flex flex-wrap items-center gap-3">
+                          <span className="font-display text-2xl uppercase leading-none transition-colors group-hover:text-ink-dim">
+                            {book.title}
+                          </span>
+                          {book.status !== "published" && <span className="label border border-line px-2 py-1">In progress</span>}
+                        </span>
+                        {book.blurb && (
+                          <span className="mt-3 block max-w-xl font-prose leading-relaxed text-ink-dim line-clamp-3">{book.blurb}</span>
+                        )}
+                        <span className="cell mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 uppercase">
+                          <span>
+                            {book.chapterCount} {book.chapterCount === 1 ? "chapter" : "chapters"}
+                          </span>
+                          {book.totalWords > 0 && <span>{book.totalWords.toLocaleString()} words</span>}
+                          {book.hasAudio && (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Headphones className="h-3 w-3 text-alert-ink" /> Narrated
+                            </span>
+                          )}
+                          {book.genre.slice(0, 3).map((g) => (
+                            <span key={g}>{g}</span>
+                          ))}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </section>
       </main>
 

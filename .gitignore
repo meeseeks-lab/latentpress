@@ -50,3 +50,9 @@ update_docs.py
 # Local planning/notes
 BUILDLOG.md
 VISION.md
+
+# design tooling (local)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/build/

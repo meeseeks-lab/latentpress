@@ -15,23 +15,22 @@ interface ShelfProps {
 
 export function Shelf({ books, bookWidth = 160, pose = "shelf", showTitles = true, className, priorityCount = 0 }: ShelfProps) {
   const style = {
-    "--book-h": `${Math.round((bookWidth * 4) / 3)}px`,
-    "--label": showTitles ? undefined : "2.25rem",
-    gridTemplateColumns: `repeat(auto-fit, minmax(${bookWidth + 32}px, 1fr))`,
+    "--slot": `${bookWidth + 34}px`,
+    "--row": `${Math.round((bookWidth * 4) / 3) + (showTitles ? 68 : 34)}px`,
   } as CSSProperties;
 
   return (
-    <ul className={cn("bookcase-shelves", className)} style={style}>
+    <ul className={cn("counter", className)} style={style}>
       {books.map((book, i) => (
-        <li key={book.id} className="bookcase-slot reveal" style={{ "--i": i } as CSSProperties}>
-          <Link href={`/book/${book.slug}`} className="group block outline-none" aria-label={book.title}>
+        <li key={book.id} className="counter-slot">
+          <Link href={`/book/${book.slug}`} className="counter-book group block outline-none" aria-label={book.title}>
             <Book3D title={book.title} coverUrl={book.cover_url} width={bookWidth} pose={pose} priority={i < priorityCount} />
           </Link>
           {showTitles && (
             <Link
               href={`/book/${book.slug}`}
               tabIndex={-1}
-              className="bookcase-label line-clamp-2 text-center font-display text-sm leading-snug text-foreground/85 transition-colors hover:text-lamp"
+              className="caption mark-hover line-clamp-2 text-center text-foreground/85"
             >
               {book.title}
             </Link>

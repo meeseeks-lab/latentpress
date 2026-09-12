@@ -5,11 +5,12 @@ import { Bot, Headphones } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { JsonLd } from "@/components/site/JsonLd";
+import { AgentByline } from "@/components/site/MachineData";
 import { CoverTilt } from "@/components/book/CoverTilt";
 import { ContinueReading } from "@/components/reader/ContinueReading";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext , ogLocale} from "@/lib/seo";
+import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext, ogLocale } from "@/lib/seo";
 
 async function getBook(slug: string) {
   const data = await convexClient().query(api.books.detailBySlug, { slug });
@@ -90,124 +91,163 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       <JsonLd data={jsonLd} />
       <SiteNav />
 
-      <main className="container-lp pb-24 pt-32">
-        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-muted-foreground">
-          <ol className="flex flex-wrap items-center gap-2">
-            <li>
-              <Link href="/library" className="hover:text-foreground">
-                Library
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="truncate text-foreground/70" aria-current="page">
-              {book.title}
-            </li>
-          </ol>
-        </nav>
-
-        <article className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="flex justify-center lg:col-span-5 lg:justify-end lg:pr-6">
-            <div className="lg:sticky lg:top-28">
-              <CoverTilt title={book.title} coverUrl={book.cover_url} width={280} />
+      <main className="pt-14">
+        <section className="board" data-room="board">
+          <div className="container-lp grid gap-10 py-12 lg:grid-cols-12 lg:gap-14 lg:pb-24">
+            <div className="flex justify-center lg:order-2 lg:col-span-4 lg:items-end lg:justify-end lg:self-end">
+              <div className="lg:-mb-28">
+                <CoverTilt title={book.title} coverUrl={book.cover_url} width={260} />
+              </div>
             </div>
-          </div>
 
-          <div className="lg:col-span-7">
-            <header>
+            <div className="lg:order-1 lg:col-span-8">
+              <nav aria-label="Breadcrumb">
+                <ol className="cell flex flex-wrap items-center gap-2 uppercase">
+                  <li>
+                    <Link href="/library" className="text-board-dim transition-colors hover:text-board-text">
+                      Library
+                    </Link>
+                  </li>
+                  <li aria-hidden className="text-board-dim">
+                    /
+                  </li>
+                  <li className="truncate text-board-text" aria-current="page">
+                    {book.title}
+                  </li>
+                </ol>
+              </nav>
+
               {book.genre.length > 0 && (
-                <ul className="flex flex-wrap gap-2" aria-label="Genres">
+                <ul className="mt-6 flex flex-wrap gap-1.5" aria-label="Genres">
                   {book.genre.map((g) => (
                     <li key={g}>
-                      <Link href={`/library?genre=${encodeURIComponent(g)}`} className="chip">
+                      <Link
+                        href={`/library?genre=${encodeURIComponent(g)}`}
+                        className="label block border border-board-line px-2 py-1 text-board-dim transition-colors hover:border-alert-ink hover:text-alert-ink"
+                      >
                         {g}
                       </Link>
                     </li>
                   ))}
                 </ul>
               )}
-              <h1 lang={book.language} className="mt-5 font-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.02]">{book.title}</h1>
+
+              <h1 lang={book.language} className="mt-5 font-display text-[clamp(2.5rem,5.5vw,4.25rem)] leading-[0.96]">
+                {book.title}
+              </h1>
+
               {book.agent && (
-                <p className="mt-4 text-base text-muted-foreground">
-                  Written by{" "}
-                  <Link href={`/agent/${book.agent.slug}`} className="inline-flex items-center gap-2 align-middle text-foreground hover:text-lamp">
+                <p className="mt-5">
+                  <Link href={`/agent/${book.agent.slug}`} className="inline-flex items-center gap-3">
                     {book.agent.avatar_url ? (
-                      <img src={book.agent.avatar_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full object-cover" />
+                      <img src={book.agent.avatar_url} alt="" width={22} height={22} className="h-[22px] w-[22px] rounded-full object-cover" />
                     ) : (
-                      <Bot className="h-4 w-4 text-lamp" />
+                      <Bot className="h-4 w-4 text-alert-ink" />
                     )}
-                    <span className="font-semibold">{book.agent.name}</span>
+                    <AgentByline name={book.agent.name} className="text-board-dim transition-colors hover:text-board-text" />
                   </Link>
-                  , an AI author
                 </p>
               )}
-              {book.blurb && <p lang={book.language} className="mt-6 max-w-xl font-prose text-lg leading-[1.7] text-foreground/85">{book.blurb}</p>}
-              <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+
+              {book.blurb && (
+                <p lang={book.language} className="mt-6 max-w-xl font-prose text-lg leading-[1.7] text-board-text/85">
+                  {book.blurb}
+                </p>
+              )}
+
+              <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
                 <div>
-                  <dt className="sr-only">Length</dt>
-                  <dd>
-                    {book.chapters.length} {book.chapters.length === 1 ? "chapter" : "chapters"}
-                    {totalWords > 0 && ` · ${totalWords.toLocaleString()} words · about ${minutes} min`}
-                  </dd>
+                  <dt className="label">Chapters</dt>
+                  <dd className="cell mt-1 text-board-text">{book.chapters.length}</dd>
                 </div>
-                {hasAudio && (
+                {totalWords > 0 && (
                   <div>
-                    <dt className="sr-only">Audio</dt>
-                    <dd className="inline-flex items-center gap-1.5 text-lamp">
-                      <Headphones className="h-4 w-4" /> Narrated
-                    </dd>
+                    <dt className="label">Words</dt>
+                    <dd className="cell mt-1 text-board-text">{totalWords.toLocaleString()}</dd>
                   </div>
                 )}
+                {totalWords > 0 && (
+                  <div>
+                    <dt className="label">Reading</dt>
+                    <dd className="cell mt-1 text-board-text">~{minutes} min</dd>
+                  </div>
+                )}
+                <div>
+                  <dt className="label">Narration</dt>
+                  <dd className="cell mt-1">
+                    {hasAudio ? (
+                      <span className="inline-flex items-center gap-1.5 text-alert-ink">
+                        <Headphones className="h-3 w-3" /> Available
+                      </span>
+                    ) : (
+                      <span className="text-board-text">Text only</span>
+                    )}
+                  </dd>
+                </div>
               </dl>
-              <div className="mt-8">
+
+              <div className="mt-9">
                 <ContinueReading slug={slug} hasChapters={book.chapters.length > 0} />
               </div>
-            </header>
-
-            {book.chapters.length > 0 && (
-              <section className="mt-16" aria-labelledby="toc-heading">
-                <h2 id="toc-heading" className="eyebrow mb-4">
-                  Contents
-                </h2>
-                <ol>
-                  {book.chapters.map((ch) => (
-                    <li key={ch.id}>
-                      <Link href={`/book/${slug}/chapter/${ch.number}`} className="toc-row group">
-                        <span className="font-display text-xl text-muted-foreground group-hover:text-lamp">{String(ch.number).padStart(2, "0")}</span>
-                        <span className="flex min-w-0 items-baseline">
-                          <span className="truncate font-prose text-lg">{ch.title || `Chapter ${ch.number}`}</span>
-                          <span className="toc-leader hidden sm:block" aria-hidden="true" />
-                        </span>
-                        <span className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground">
-                          {ch.audio_url && <Headphones className="h-3.5 w-3.5 text-lamp" aria-label="Narrated" />}
-                          {(ch.word_count ?? 0) > 0 && <span>{readingMinutes(ch.word_count ?? 0)} min</span>}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            )}
-
-            {book.characters.length > 0 && (
-              <section className="mt-16" aria-labelledby="cast-heading">
-                <h2 id="cast-heading" className="eyebrow mb-4">
-                  Dramatis personae
-                </h2>
-                <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-                  {book.characters.map((c) => (
-                    <div key={c.id}>
-                      <dt className="flex flex-wrap items-baseline gap-2">
-                        <span className="font-display text-xl">{c.name}</span>
-                        {c.voice && <span className="text-xs text-muted-foreground">voice: {c.voice}</span>}
-                      </dt>
-                      {c.description && <dd className="mt-1 font-prose text-sm leading-relaxed text-muted-foreground">{c.description}</dd>}
-                    </div>
-                  ))}
-                </dl>
-              </section>
-            )}
+            </div>
           </div>
-        </article>
+        </section>
+
+        <section className="texture-paper pb-24 pt-28 lg:pt-48">
+          <div className="container-lp grid gap-12 lg:grid-cols-12">
+            <div className="hidden lg:col-span-4 lg:block" />
+
+            <div className="lg:col-span-8">
+              {book.chapters.length > 0 && (
+                <section aria-labelledby="toc-heading">
+                  <h2 id="toc-heading" className="label border-b border-line pb-3">
+                    Contents
+                  </h2>
+                  <ol className="mt-2">
+                    {book.chapters.map((ch) => (
+                      <li key={ch.id}>
+                        <Link href={`/book/${slug}/chapter/${ch.number}`} className="toc-row group">
+                          <span className="cell text-muted-foreground transition-colors group-hover:text-ink">
+                            {String(ch.number).padStart(2, "0")}
+                          </span>
+                          <span className="flex min-w-0 items-baseline">
+                            <span className="truncate font-prose text-lg">{ch.title || `Chapter ${ch.number}`}</span>
+                            <span className="toc-leader hidden sm:block" aria-hidden="true" />
+                          </span>
+                          <span className="cell flex items-center gap-3">
+                            {ch.audio_url && <Headphones className="h-3.5 w-3.5 text-alert-ink" aria-label="Narrated" />}
+                            {(ch.word_count ?? 0) > 0 && <span>{readingMinutes(ch.word_count ?? 0)} min</span>}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+
+              {book.characters.length > 0 && (
+                <section className="mt-16" aria-labelledby="cast-heading">
+                  <h2 id="cast-heading" className="label border-b border-line pb-3">
+                    Cast
+                  </h2>
+                  <dl className="mt-6 grid gap-x-10 gap-y-7 sm:grid-cols-2">
+                    {book.characters.map((c) => (
+                      <div key={c.id}>
+                        <dt className="flex flex-wrap items-baseline gap-2">
+                          <span className="font-display text-xl uppercase">{c.name}</span>
+                          {c.voice && <span className="cell">voice: {c.voice}</span>}
+                        </dt>
+                        {c.description && (
+                          <dd className="mt-1.5 font-prose text-sm leading-relaxed text-muted-foreground">{c.description}</dd>
+                        )}
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />

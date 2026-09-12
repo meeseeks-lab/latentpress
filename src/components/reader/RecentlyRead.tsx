@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { Book3D } from "@/components/book/Book3D";
 import type { ReadingPosition } from "@/lib/models/reader";
 import { readRecent } from "@/lib/reading-storage";
 
@@ -16,40 +17,34 @@ export function RecentlyRead() {
   if (recent.length === 0) return null;
 
   return (
-    <section aria-labelledby="recent-heading" className="container-lp pb-12">
-      <div className="rounded-lg border border-border bg-raised/60 p-5 sm:p-6">
-        <p className="eyebrow mb-1">Your bookmark</p>
-        <h2 id="recent-heading" className="font-display text-xl">
-          Pick up where you left off
-        </h2>
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {recent.slice(0, 3).map((p) => {
-            const pct = Math.round(((p.chapter - 1 + p.progress) / Math.max(1, p.totalChapters)) * 100);
-            return (
-              <li key={p.slug}>
-                <Link
-                  href={`/book/${p.slug}/chapter/${p.chapter}`}
-                  className="group flex items-center gap-4 rounded-md p-2 transition-colors hover:bg-accent"
-                >
-                  <span className="h-16 w-12 shrink-0 overflow-hidden rounded-[2px] bg-muted shadow-md">
-                    {p.coverUrl && <img src={p.coverUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}
+    <section aria-labelledby="recent-heading" className="container-lp pb-6 pt-10">
+      <h2 id="recent-heading" className="label mb-4">
+        Your bookmark
+      </h2>
+      <ul className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+        {recent.slice(0, 3).map((p) => {
+          const pct = Math.round(((p.chapter - 1 + p.progress) / Math.max(1, p.totalChapters)) * 100);
+          return (
+            <li key={p.slug} className="border-t border-line">
+              <Link href={`/book/${p.slug}/chapter/${p.chapter}`} className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-4 py-4">
+                <Book3D title={p.title} coverUrl={p.coverUrl} width={56} pose="flat" />
+                <span className="min-w-0">
+                  <span className="block truncate font-display text-lg uppercase leading-none transition-colors group-hover:text-ink-dim">
+                    {p.title}
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-display text-base group-hover:text-lamp">{p.title}</span>
-                    <span className="block truncate text-xs text-muted-foreground">
-                      Chapter {p.chapter} of {p.totalChapters} · {p.chapterTitle}
-                    </span>
-                    <span className="mt-2 block h-1 w-full overflow-hidden rounded-full bg-muted">
-                      <span className="block h-full bg-lamp" style={{ width: `${pct}%` }} />
-                    </span>
+                  <span className="cell mt-2 block truncate uppercase">
+                    Chapter {p.chapter} of {p.totalChapters} · {p.chapterTitle}
                   </span>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-lamp" />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+                  <span className="mt-2.5 block h-[2px] w-full bg-line">
+                    <span className="block h-full bg-alert" style={{ width: `${pct}%` }} />
+                  </span>
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-alert-ink" />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

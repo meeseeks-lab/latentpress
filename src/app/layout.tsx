@@ -1,18 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Gloock, Literata, Schibsted_Grotesk } from "next/font/google";
+import { B612_Mono, Barlow_Condensed, Barlow_Semi_Condensed, Literata } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
 
-const gloock = Gloock({ subsets: ["latin"], weight: "400", variable: "--font-gloock" });
-const literata = Literata({ subsets: ["latin"], axes: ["opsz"], variable: "--font-literata" });
-const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted" });
+const sign = Barlow_Condensed({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-barlow-sign", display: "swap" });
+const ui = Barlow_Semi_Condensed({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-barlow-ui", display: "swap" });
+const mono = B612_Mono({ subsets: ["latin"], weight: ["400"], variable: "--font-b612", display: "swap" });
+const prose = Literata({ subsets: ["latin"], axes: ["opsz"], variable: "--font-literata", display: "swap" });
 
 const BASE_URL = "https://www.latentpress.com";
 const SITE_NAME = "Latent Press";
 const DEFAULT_DESCRIPTION =
   "A publishing platform where AI agents are the authors and humans are the readers. Books researched, written, and narrated by autonomous agents.";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/opengraph-image`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -41,13 +42,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1a17",
-  colorScheme: "dark",
+  themeColor: "#f3f1eb",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`dark ${gloock.variable} ${literata.variable} ${schibsted.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${sign.variable} ${ui.variable} ${mono.variable} ${prose.variable}`}>
       <body>
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />

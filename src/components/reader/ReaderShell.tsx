@@ -32,6 +32,12 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
   }, []);
 
   useEffect(() => {
+    const root = document.documentElement;
+    if (prefs.room === "board") root.setAttribute("data-room", "board");
+    else root.removeAttribute("data-room");
+  }, [prefs.room]);
+
+  useEffect(() => {
     let frame = 0;
     const onScroll = () => {
       cancelAnimationFrame(frame);
@@ -94,9 +100,17 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
   };
 
   return (
-    <div data-room={prefs.room} className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      {/* The room is an attribute on <html>, set before first paint so a reader who
+          chose the board never sees a flash of paper. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "try{var p=JSON.parse(localStorage.getItem('lp:reader-prefs')||'{}');var r=p.room==='ink'?'board':p.room;if(r==='board')document.documentElement.setAttribute('data-room','board')}catch(e){}",
+        }}
+      />
       <div
-        className="fixed left-0 top-0 z-[60] h-[3px] bg-lamp transition-[width] duration-150 ease-linear"
+        className="fixed left-0 top-0 z-[60] h-[3px] bg-alert transition-[width] duration-150 ease-linear"
         style={{ width: `${progress * 100}%` }}
         role="progressbar"
         aria-valuemin={0}
@@ -104,29 +118,25 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
         aria-valuenow={Math.round(progress * 100)}
         aria-label="Reading progress"
       />
-      <header className="fixed top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
+      <header className="board fixed top-0 z-50 w-full border-b border-board-line" data-room="board">
         <nav aria-label="Chapter" className="container-lp flex h-14 items-center justify-between gap-4">
           <Link
             href={`/book/${book.slug}`}
-            className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="flex min-w-0 items-center gap-2 text-board-dim transition-colors hover:text-board-text"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" />
-            <span className="truncate font-display">{book.title}</span>
+            <span className="truncate font-display text-base uppercase tracking-[0.04em]">{book.title}</span>
           </Link>
-          <div className="flex items-center gap-1">
-            <span className="mr-2 hidden text-xs tabular-nums text-muted-foreground sm:inline">
-              {chapter.number} / {totalChapters}
+          <div className="flex items-center gap-1.5">
+            <span className="cell mr-1 hidden uppercase text-board-dim sm:inline">
+              {String(chapter.number).padStart(2, "0")} / {String(totalChapters).padStart(2, "0")}
             </span>
             <details ref={tocRef} className="relative">
-              <summary
-                className="chip h-8 list-none gap-1.5 [&::-webkit-details-marker]:hidden"
-                aria-label="Jump to chapter"
-                title="Contents"
-              >
+              <summary className="tab cursor-pointer list-none [&::-webkit-details-marker]:hidden" aria-label="Jump to chapter" title="Contents">
                 <List className="h-3.5 w-3.5" />
               </summary>
-              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-10 max-h-[70vh] w-64 overflow-y-auto rounded-lg border border-border bg-raised p-2 shadow-lg">
-                <p className="eyebrow px-2 pb-2 pt-1">Contents</p>
+              <div className="pass absolute right-0 top-[calc(100%+0.5rem)] z-10 max-h-[70vh] w-72 overflow-y-auto p-2">
+                <p className="label px-2 pb-2 pt-1">Contents</p>
                 <ul>
                   {chapters.map((c) => (
                     <li key={c.number}>
@@ -134,12 +144,12 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
                         type="button"
                         onClick={() => goToChapter(c.number)}
                         className={cn(
-                          "flex w-full items-baseline gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent",
-                          c.number === chapter.number ? "text-lamp" : "text-foreground/85",
+                          "flex w-full items-baseline gap-3 rounded-[2px] px-2 py-1.5 text-left text-sm transition-colors hover:bg-well",
+                          c.number === chapter.number ? "text-ink" : "text-ink-dim",
                         )}
                       >
-                        <span className="tabular-nums text-muted-foreground">{c.number}.</span>
-                        <span className="truncate">{c.title}</span>
+                        <span className="cell">{String(c.number).padStart(2, "0")}</span>
+                        <span className="truncate font-prose">{c.title}</span>
                       </button>
                     </li>
                   ))}
@@ -149,7 +159,7 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
             <button
               type="button"
               onClick={cycleSize}
-              className="chip h-8 gap-1.5"
+              className="tab"
               aria-label={`Text size ${SIZE_LABELS[prefs.size]}. Click for ${SIZE_LABELS[SIZES[(SIZES.indexOf(prefs.size) + 1) % SIZES.length]]}.`}
               title={`Text size: ${SIZE_LABELS[prefs.size]}`}
             >
@@ -158,17 +168,17 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
             </button>
             <button
               type="button"
-              onClick={() => update({ room: prefs.room === "paper" ? "ink" : "paper" })}
-              className="chip h-8"
-              aria-label={prefs.room === "paper" ? "Read on ink" : "Read on paper"}
-              title={prefs.room === "paper" ? "Ink" : "Paper"}
+              onClick={() => update({ room: prefs.room === "paper" ? "board" : "paper" })}
+              className="tab"
+              aria-label={prefs.room === "paper" ? "Read on the board" : "Read on paper"}
+              title={prefs.room === "paper" ? "Board" : "Paper"}
             >
               {prefs.room === "paper" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
             </button>
           </div>
         </nav>
       </header>
-      <div data-size={prefs.size} className={cn("pt-14")}>
+      <div data-size={prefs.size} className="pt-14">
         {children}
       </div>
     </div>

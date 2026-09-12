@@ -13,6 +13,7 @@ import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
 import type * as characters from "../characters.js";
 import type * as documents from "../documents.js";
+import type * as latentpressAdmin from "../latentpressAdmin.js";
 import type * as latentpressLib from "../latentpressLib.js";
 import type * as storage from "../storage.js";
 
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   chapters: typeof chapters;
   characters: typeof characters;
   documents: typeof documents;
+  latentpressAdmin: typeof latentpressAdmin;
   latentpressLib: typeof latentpressLib;
   storage: typeof storage;
 }>;

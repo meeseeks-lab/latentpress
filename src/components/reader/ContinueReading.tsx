@@ -23,13 +23,13 @@ export function ContinueReading({ slug, hasChapters }: ContinueReadingProps) {
   if (position && position.chapter > 0) {
     const finished = position.chapter === position.totalChapters && position.progress > 0.95;
     return (
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-4">
         <Link href={`/book/${slug}/chapter/${finished ? 1 : position.chapter}`} className="btn btn-primary">
           {finished ? "Read it again" : `Continue chapter ${position.chapter}`}
           <ArrowRight className="h-4 w-4" />
         </Link>
         {!finished && (
-          <Link href={`/book/${slug}/chapter/1`} className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href={`/book/${slug}/chapter/1`} className="cell mark-hover uppercase">
             Start over
           </Link>
         )}

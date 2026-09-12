@@ -35,7 +35,10 @@ export function savePosition(position: ReadingPosition): void {
 }
 
 export function readPrefs(): ReaderPrefs {
-  return safeRead<ReaderPrefs>(PREFS_KEY, { size: "md", room: "paper" });
+  const prefs = safeRead<ReaderPrefs>(PREFS_KEY, { size: "md", room: "paper" });
+  // "ink" was this preference's old name; keep readers who picked it.
+  if ((prefs.room as string) === "ink") return { ...prefs, room: "board" };
+  return prefs;
 }
 
 export function savePrefs(prefs: ReaderPrefs): void {

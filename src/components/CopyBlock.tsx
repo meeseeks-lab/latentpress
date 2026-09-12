@@ -31,32 +31,21 @@ function CopyButton({ text, preRef }: CopyButtonProps) {
       type="button"
       onClick={handleCopy}
       aria-live="polite"
-      className="flex h-8 items-center gap-1.5 rounded px-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-    >
-      {state === "idle" ? (
-        <>
-          <Copy className="h-3.5 w-3.5" />
-          <span>Copy</span>
-        </>
-      ) : (
-        <>
-          <Check className="h-3.5 w-3.5 text-lamp" />
-          <span className="text-lamp">{state === "copied" ? "Copied" : "Selected, press ⌘C"}</span>
-        </>
+      className={cn(
+        "label inline-flex shrink-0 items-center gap-1.5 rounded-[2px] border border-board-line px-2 py-1 transition-colors",
+        state === "idle" ? "text-board-dim hover:border-alert-ink hover:text-alert-ink" : "border-alert-ink text-alert-ink",
       )}
+    >
+      {state === "idle" ? <Copy className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+      <span>{state === "idle" ? "Copy" : state === "copied" ? "Copied" : "Selected"}</span>
     </button>
   );
 }
 
-interface CodePaneProps {
-  code: string;
-  maxHeight?: string;
-}
-
-function CodePane({ code, preRef, maxHeight = "24rem" }: CodePaneProps & { preRef: RefObject<HTMLPreElement | null> }) {
+function CodePane({ code, preRef, maxHeight = "24rem" }: { code: string; preRef: RefObject<HTMLPreElement | null>; maxHeight?: string }) {
   return (
-    <pre ref={preRef} className="overflow-auto p-5 text-[13px] leading-relaxed sm:p-6 sm:text-sm" style={{ maxHeight }}>
-      <code className="font-mono text-foreground/80">{code}</code>
+    <pre ref={preRef} className="scan-body" style={{ maxHeight }}>
+      <code>{code}</code>
     </pre>
   );
 }
@@ -64,9 +53,9 @@ function CodePane({ code, preRef, maxHeight = "24rem" }: CodePaneProps & { preRe
 export function CopyBlock({ code, filename, maxHeight }: { code: string; filename: string; maxHeight?: string }) {
   const preRef = useRef<HTMLPreElement>(null);
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-well">
-      <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="font-mono text-xs text-muted-foreground">{filename}</span>
+    <div className="scan">
+      <div className="scan-head">
+        <span className="cell uppercase text-board-dim">{filename}</span>
         <CopyButton text={code} preRef={preRef} />
       </div>
       <CodePane code={code} preRef={preRef} maxHeight={maxHeight} />
@@ -79,8 +68,8 @@ export function TabbedCopyBlock({ tabs }: { tabs: { label: string; filename: str
   const preRef = useRef<HTMLPreElement>(null);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-well">
-      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+    <div className="scan">
+      <div className="scan-head">
         <div className="flex gap-1" role="tablist">
           {tabs.map((tab, i) => (
             <button
@@ -90,8 +79,8 @@ export function TabbedCopyBlock({ tabs }: { tabs: { label: string; filename: str
               aria-selected={i === activeTab}
               onClick={() => setActiveTab(i)}
               className={cn(
-                "rounded px-3 py-1 font-mono text-xs transition-colors",
-                i === activeTab ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                "label rounded-[2px] px-2 py-1 transition-colors",
+                i === activeTab ? "bg-alert text-on-alert" : "text-board-dim hover:text-board-text",
               )}
             >
               {tab.label}
@@ -100,7 +89,7 @@ export function TabbedCopyBlock({ tabs }: { tabs: { label: string; filename: str
         </div>
         <CopyButton key={activeTab} text={tabs[activeTab].code} preRef={preRef} />
       </div>
-      <CodePane code={tabs[activeTab].code} preRef={preRef} maxHeight="30rem" />
+      <CodePane key={activeTab} code={tabs[activeTab].code} preRef={preRef} maxHeight="30rem" />
     </div>
   );
 }

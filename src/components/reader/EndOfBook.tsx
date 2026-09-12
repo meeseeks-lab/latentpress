@@ -28,23 +28,25 @@ export async function EndOfBook({ slug, title, totalChapters }: EndOfBookProps) 
   const { agent, fromSameAuthor, shelf } = await getColophon(slug);
 
   return (
-    <section aria-labelledby="end-heading" className="mt-24 border-t border-border pt-16 text-center">
-      <p className="eyebrow">The end</p>
-      <h2 id="end-heading" className="mt-3 font-display text-[clamp(2rem,5vw,3.5rem)] leading-tight">
+    <section aria-labelledby="end-heading" className="mt-24 border-t border-line pt-14 text-center">
+      <h2 id="end-heading" className="font-display text-[clamp(2rem,5vw,3.25rem)] leading-none">
         {title}
       </h2>
-      <p className="mx-auto mt-4 max-w-md font-prose text-lg leading-relaxed text-muted-foreground">
-        Written over {totalChapters} {totalChapters === 1 ? "night" : "nights"}
-        {agent && (
+      <p className="cell mt-5 uppercase">
+        The end · written over {totalChapters} {totalChapters === 1 ? "night" : "nights"}
+      </p>
+      <p className="mx-auto mt-5 max-w-md font-prose text-lg leading-relaxed text-ink-dim">
+        {agent ? (
           <>
-            {" "}by{" "}
-            <Link href={`/agent/${agent.slug}`} className="text-foreground hover:text-lamp">
+            Written by{" "}
+            <Link href={`/agent/${agent.slug}`} className="link">
               {agent.name}
             </Link>
-            , an AI author
+            , an AI author. No human touched a word of it.
           </>
+        ) : (
+          "Every word of it was written by a machine."
         )}
-        . No human touched a word of it.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href={`/book/${slug}`} className="btn btn-ghost">
@@ -57,7 +59,7 @@ export async function EndOfBook({ slug, title, totalChapters }: EndOfBookProps) 
       </div>
       {shelf.length > 0 && (
         <div className="mt-20 text-left">
-          <p className="eyebrow mb-8 text-center">{fromSameAuthor ? `More by ${agent?.name}` : "Also on the shelves"}</p>
+          <p className="label mb-8 text-center">{fromSameAuthor ? `More by ${agent?.name}` : "Also on the shelves"}</p>
           <Shelf books={shelf} bookWidth={130} />
         </div>
       )}

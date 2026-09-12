@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-12T00:00:00.000Z",
+  "title": "Design System: Latent Press",
+  "extensions": {
+    "colorMeta": {
+      "board": {
+        "role": "neutral",
+        "displayName": "Panel Black",
+        "canonical": "oklch(0.16 0.008 250)",
+        "tonalRamp": ["#090b0e", "#26292d", "#474b4f", "#6b6f73", "#92969a", "#babec3", "#d4d8dd", "#eef2f7"]
+      },
+      "board-raised": {
+        "role": "neutral",
+        "displayName": "Panel Raised",
+        "canonical": "oklch(0.225 0.008 250)",
+        "tonalRamp": ["#090b0e", "#26292d", "#474b4f", "#6b6f73", "#92969a", "#babec3", "#d4d8dd", "#eef2f7"]
+      },
+      "board-well": {
+        "role": "neutral",
+        "displayName": "Panel Well",
+        "canonical": "oklch(0.115 0.006 250)",
+        "tonalRamp": ["#090b0e", "#27292c", "#484b4e", "#6c6f72", "#929699", "#bbbec1", "#d5d8db", "#eff2f6"]
+      },
+      "board-text": {
+        "role": "neutral",
+        "displayName": "Board Text",
+        "canonical": "oklch(0.955 0.008 85)",
+        "tonalRamp": ["#0d0b08", "#2b2924", "#4c4a46", "#716e69", "#979590", "#c0bdb8", "#dad7d2", "#f4f1ec"]
+      },
+      "board-dim": {
+        "role": "neutral",
+        "displayName": "Board Dim",
+        "canonical": "oklch(0.70 0.008 250)",
+        "tonalRamp": ["#090b0e", "#26292d", "#474b4f", "#6b6f73", "#92969a", "#babec3", "#d4d8dd", "#eef2f7"]
+      },
+      "board-line": {
+        "role": "neutral",
+        "displayName": "Board Hairline",
+        "canonical": "oklch(1 0 0 / 13%)",
+        "tonalRamp": ["#080c0f", "#25292e", "#464b50", "#6a6f74", "#91969b", "#b9bec4", "#d3d8de", "#edf2f8"]
+      },
+      "alert": {
+        "role": "primary",
+        "displayName": "Signal Amber",
+        "canonical": "oklch(0.845 0.163 88)",
+        "tonalRamp": ["#240000", "#491a00", "#6e3f00", "#966500", "#bf8d00", "#e9b604", "#ffd03d", "#ffeb5e"]
+      },
+      "alert-deep": {
+        "role": "primary",
+        "displayName": "Signal Amber Deep",
+        "canonical": "oklch(0.775 0.155 84)",
+        "tonalRamp": ["#260000", "#4a1800", "#713d00", "#986300", "#c28b00", "#ecb427", "#ffce4c", "#ffe86a"]
+      },
+      "alert-ink": {
+        "role": "primary",
+        "displayName": "Signal Amber Ink",
+        "canonical": "oklch(0.62 0.15 78)",
+        "tonalRamp": ["#280000", "#4e1300", "#753900", "#9d5f00", "#c78700", "#f2b036", "#ffca56", "#ffe573"]
+      },
+      "on-alert": {
+        "role": "primary",
+        "displayName": "On Amber",
+        "canonical": "oklch(0.17 0.02 88)",
+        "tonalRamp": ["#0f0b03", "#2d281e", "#4f4a3e", "#736e62", "#9a9588", "#c3bdb0", "#ddd7c9", "#f7f1e3"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Bone",
+        "canonical": "oklch(0.958 0.008 85)",
+        "tonalRamp": ["#0d0b08", "#2b2924", "#4c4a46", "#716e69", "#979590", "#c0bdb8", "#dad7d2", "#f4f1ec"]
+      },
+      "paper-raised": {
+        "role": "neutral",
+        "displayName": "Bone Raised",
+        "canonical": "oklch(0.988 0.005 85)",
+        "tonalRamp": ["#0c0b09", "#2a2926", "#4c4a47", "#706e6b", "#979592", "#bfbdba", "#d9d7d4", "#f3f2ee"]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Bone Well",
+        "canonical": "oklch(0.925 0.009 85)",
+        "tonalRamp": ["#0d0b07", "#2b2924", "#4d4a45", "#716e69", "#98958f", "#c0bdb7", "#dad7d1", "#f4f1eb"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.22 0.012 75)",
+        "tonalRamp": ["#0e0a06", "#2c2822", "#4e4a43", "#736e67", "#9a948d", "#c2bdb5", "#dcd6cf", "#f7f1e9"]
+      },
+      "ink-dim": {
+        "role": "neutral",
+        "displayName": "Ink Dim",
+        "canonical": "oklch(0.475 0.012 75)",
+        "tonalRamp": ["#0e0a06", "#2c2822", "#4e4a43", "#736e67", "#9a948d", "#c2bdb5", "#dcd6cf", "#f7f1e9"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Paper Hairline",
+        "canonical": "oklch(0.22 0.012 75 / 16%)",
+        "tonalRamp": ["#0e0b07", "#2c2823", "#4e4a44", "#726e68", "#99948f", "#c2bdb7", "#dbd7d0", "#f6f1eb"]
+      },
+      "ledge": {
+        "role": "neutral",
+        "displayName": "Ledge",
+        "canonical": "oklch(0.22 0.012 75 / 26%)",
+        "tonalRamp": ["#0e0a06", "#2c2822", "#4e4a43", "#736e67", "#9a948d", "#c2bdb5", "#dcd6cf", "#f7f1e9"]
+      },
+      "book-cloth": {
+        "role": "neutral",
+        "displayName": "Book Cloth",
+        "canonical": "oklch(0.33 0.012 250)",
+        "tonalRamp": ["#080c10", "#25292f", "#464b51", "#6a6f76", "#90969c", "#b8bec5", "#d2d8df", "#ecf3fa"]
+      },
+      "book-shadow": {
+        "role": "neutral",
+        "displayName": "Book Shadow",
+        "canonical": "oklch(0.22 0.012 75 / 42%)",
+        "tonalRamp": ["#0e0a06", "#2c2822", "#4e4a43", "#736e67", "#9a948d", "#c2bdb5", "#dcd6cf", "#f7f1e9"]
+      },
+      "page-shade": {
+        "role": "neutral",
+        "displayName": "Page Shade",
+        "canonical": "oklch(0.93 0.012 85)",
+        "tonalRamp": ["#0d0b06", "#2c2922", "#4d4a43", "#726e67", "#99958d", "#c1bdb5", "#dbd7cf", "#f5f1e9"]
+      },
+      "page-shade-dark": {
+        "role": "neutral",
+        "displayName": "Page Shade Dark",
+        "canonical": "oklch(0.80 0.018 80)",
+        "tonalRamp": ["#0f0a04", "#2e281f", "#504940", "#746e63", "#9b9489", "#c4bdb1", "#ded6cb", "#f8f1e5"]
+      },
+      "destructive": {
+        "role": "tertiary",
+        "displayName": "Press Red",
+        "canonical": "oklch(0.52 0.19 27)",
+        "tonalRamp": ["#3d0000", "#6a0000", "#970000", "#c52c2a", "#f45a51", "#ff8678", "#ffa091", "#ffbbab"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles on board sections and the split-flap cells (700). Signage only." },
+      "headline": { "displayName": "Headline", "purpose": "Section heads above a rail, lead book title, bibliography titles." },
+      "title": { "displayName": "Row Title", "purpose": "The book title inside an arrivals or catalog row." },
+      "body": { "displayName": "Body", "purpose": "Chapter prose, blurbs, intros. Literata is the only face that sets a sentence to be read at length." },
+      "ui": { "displayName": "UI Text", "purpose": "Anything a person operates: base body copy, captions, shelf titles, footer links." },
+      "label": { "displayName": "Label", "purpose": "Column heads, field labels, eyebrows, tabs, buttons, chips. Uppercase, 0.16em." },
+      "data": { "displayName": "Machine Data", "purpose": "Times, counts, slugs, statuses, filenames, breadcrumbs. Tabular, never a sentence." }
+    },
+    "shadows": [
+      { "name": "book-lift", "value": "10px 16px 34px -14px var(--book-shadow)", "purpose": "A hardback standing on paper. Deepens to 12px 20px 38px -14px rgba(0,0,0,0.75) inside a board room." },
+      { "name": "pass-drop", "value": "0 1px 0 rgba(255,255,255,0.6) inset, 0 18px 38px -26px rgba(31,26,18,0.55)", "purpose": "A boarding pass resting on the desk; tight and offset straight down." },
+      { "name": "scannable-well", "value": "0 22px 44px -30px rgba(0,0,0,0.7)", "purpose": "The dark code block, read as cut below its page." },
+      { "name": "back-board", "value": "-8px 0 30px 6px rgba(0,0,0,0.24)", "purpose": "The dark gap behind a turned cover." },
+      { "name": "contact-shadow", "value": "radial-gradient(ellipse at center, rgba(31,26,18,0.26), transparent 70%) 8.5rem x 12px", "purpose": "Ground contact under a book on the counter ledge. Replaces any shelf plank or wood." },
+      { "name": "flap-recess", "value": "inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.45)", "purpose": "The split-flap cell, read as recessed into the panel." },
+      { "name": "primary-top-inset", "value": "inset 0 1px 0 rgba(255,255,255,0.45)", "purpose": "The amber button's lit top edge. The only lit surface treatment in the system." }
+    ],
+    "motion": [
+      { "name": "ease-out-quint", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "The one easing curve, used by every transition and keyframe in the system." },
+      { "name": "flap-in", "value": "rotateX(-88deg) to rotateX(0), 420ms, 42ms per-cell stagger, backwards fill", "purpose": "Split-flap glyphs flipping in on load; snapped instantly under reduced motion." },
+      { "name": "book-turn", "value": "transform 600ms var(--ease)", "purpose": "A hardback easing from -22deg to -5deg with a 9px lift on hover or focus-within." },
+      { "name": "row-state", "value": "background-color 200ms, color 200ms", "purpose": "Arrivals-row hover and just-landed wash." },
+      { "name": "control-state", "value": "background-color 180ms, border-color 180ms, color 180ms", "purpose": "Buttons, tabs and fields on hover and focus." },
+      { "name": "press", "value": "transform 140ms, translateY(1px)", "purpose": "Button press." },
+      { "name": "progress-rule", "value": "width 150ms linear", "purpose": "The reader's top progress rule; the only linear timing in the system." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px", "purpose": "Row grids go to their full fixed columns, gutters widen to 1.5rem, clock and secondary columns hide below it." },
+      { "name": "flap", "value": "700px", "purpose": "The split-flap grid tightens from 11 to 10 columns and enlarges its glyphs to 0.9 of the cell." },
+      { "name": "lg", "value": "1024px", "purpose": "Two-column page compositions become the 12-column desktop form (4/8 or 6/6 splits)." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The amber action. One per viewport, on the thing the surface exists for.",
+      "html": "<button class=\"ds-btn-primary\">Browse the shelves<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--alert, #f8c52b); color: var(--on-alert, #130f06); border: none; border-radius: var(--radius-sm, 2px); padding: 0.8rem 1.15rem; font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); cursor: pointer; transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary:hover { background: var(--alert-deep, #e4ac17); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--alert-ink, #b77800); outline-offset: 2px; } @media (prefers-reduced-motion: reduce) { .ds-btn-primary { transition: none; } }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "The secondary action. Transparent with a hairline that turns amber on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Publish with your agent</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: transparent; border: 1px solid color-mix(in oklch, var(--foreground, #1e1a14) 38%, transparent); color: var(--foreground, #1e1a14); border-radius: var(--radius-sm, 2px); padding: 0.8rem 1.15rem; font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; cursor: pointer; transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms cubic-bezier(0.22, 1, 0.36, 1), color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-ghost:hover { border-color: var(--alert-ink, #b77800); color: var(--alert-ink, #b77800); } .ds-btn-ghost:active { transform: translateY(1px); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--alert-ink, #b77800); outline-offset: 2px; } @media (prefers-reduced-motion: reduce) { .ds-btn-ghost { transition: none; } }"
+    },
+    {
+      "name": "Small Button",
+      "kind": "button",
+      "refersTo": "button-sm",
+      "description": "The rail-sized action, used beside a section head.",
+      "html": "<button class=\"ds-btn-sm\">The whole library</button>",
+      "css": ".ds-btn-sm { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: transparent; border: 1px solid color-mix(in oklch, var(--foreground, #1e1a14) 38%, transparent); color: var(--foreground, #1e1a14); border-radius: var(--radius-sm, 2px); padding: 0.55rem 0.8rem; font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; cursor: pointer; transition: border-color 180ms cubic-bezier(0.22, 1, 0.36, 1), color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-sm:hover { border-color: var(--alert-ink, #b77800); color: var(--alert-ink, #b77800); } .ds-btn-sm:focus-visible { outline: 2px solid var(--alert-ink, #b77800); outline-offset: 2px; }"
+    },
+    {
+      "name": "Tab",
+      "kind": "chip",
+      "refersTo": "tab",
+      "description": "Sort, filter, view switch and in-page mode. Active state is an amber fill, never an underline.",
+      "html": "<div class=\"ds-tab-row\"><button class=\"ds-tab ds-tab-on\" aria-pressed=\"true\">Newest</button><button class=\"ds-tab\" aria-pressed=\"false\">Oldest</button><button class=\"ds-tab\" aria-pressed=\"false\">A to Z</button></div>",
+      "css": ".ds-tab-row { display: flex; gap: 0.25rem; } .ds-tab { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.15rem; padding: 0.35rem 0.7rem; background: transparent; border: 1px solid var(--border, rgba(31,26,18,0.16)); border-radius: var(--radius-sm, 2px); color: var(--muted-foreground, #605b55); font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; cursor: pointer; transition: color 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-tab:hover { color: var(--foreground, #1e1a14); border-color: color-mix(in oklch, var(--foreground, #1e1a14) 40%, transparent); } .ds-tab:focus-visible { outline: 2px solid var(--alert-ink, #b77800); outline-offset: 2px; } .ds-tab[disabled] { opacity: 0.45; cursor: not-allowed; } .ds-tab-on, .ds-tab-on:hover { background: var(--alert, #f8c52b); border-color: var(--alert-ink, #b77800); color: var(--on-alert, #130f06); }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "The one text input in the system, with the pictogram living inside its left padding.",
+      "html": "<label class=\"ds-field\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input type=\"search\" placeholder=\"Search titles, blurbs, genres\" aria-label=\"Search the library\"></label>",
+      "css": ".ds-field { position: relative; display: block; } .ds-field svg { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--muted-foreground, #605b55); pointer-events: none; } .ds-field input { height: 2.6rem; width: 100%; box-sizing: border-box; background: var(--raised, #fdfbf7); color: var(--foreground, #1e1a14); border: 1px solid var(--border, rgba(31,26,18,0.16)); border-radius: var(--radius-sm, 2px); padding: 0 2.35rem 0 0.75rem; font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.85rem; outline: none; transition: border-color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-field input::placeholder { color: var(--muted-foreground, #605b55); } .ds-field input:focus { border-color: var(--alert-ink, #b77800); }"
+    },
+    {
+      "name": "Board Label",
+      "kind": "custom",
+      "refersTo": "board-label",
+      "description": "The field name on a board: condensed caps at 0.68rem. The loudest quiet element in the system.",
+      "html": "<span class=\"ds-label\">Landed</span>",
+      "css": ".ds-label { font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; line-height: 1; color: var(--muted-foreground, #605b55); }"
+    },
+    {
+      "name": "Data Cell",
+      "kind": "custom",
+      "refersTo": "data-cell",
+      "description": "What the machine reports: a time, a count, a slug, a status word. Tabular, one line, never a sentence.",
+      "html": "<span class=\"ds-cell\">03:47</span>",
+      "css": ".ds-cell { font-family: var(--font-mono, 'B612 Mono', ui-monospace, monospace); font-size: 0.72rem; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--muted-foreground, #605b55); white-space: nowrap; }"
+    },
+    {
+      "name": "Flap Cell",
+      "kind": "custom",
+      "refersTo": "flap",
+      "description": "The split-flap cell of the homepage headline. Size comes from the container, not the font scale.",
+      "html": "<div class=\"ds-flapboard\"><span class=\"ds-flap\"><b>M</b></span><span class=\"ds-flap\"><b>I</b></span><span class=\"ds-flap\"><b>N</b></span><span class=\"ds-flap ds-flap-lit\"><b>.</b></span></div>",
+      "css": ".ds-flapboard { container-type: inline-size; display: flex; gap: 4px; } .ds-flap { position: relative; width: calc((100cqw - 3 * 4px) / 4); aspect-ratio: 1 / 0.86; display: grid; place-items: center; background: var(--board-raised, #191c1f); border-radius: 2px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.45); } .ds-flap::after { content: ''; position: absolute; inset-inline: 0; top: calc(50% - 0.5px); height: 1px; background: rgba(0,0,0,0.55); box-shadow: 0 1px 0 rgba(255,255,255,0.06); } .ds-flap b { font-family: var(--font-display, 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif); font-weight: 700; font-size: calc((100cqw - 12px) / 4 * 0.82); line-height: 1; color: var(--board-text, #f3f0ea); transform-origin: 50% 0%; animation: ds-flap-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards; } .ds-flap-lit b { color: var(--alert, #f8c52b); } @keyframes ds-flap-in { from { transform: rotateX(-88deg); } to { transform: rotateX(0deg); } } @media (prefers-reduced-motion: reduce) { .ds-flap b { animation: none; } }"
+    },
+    {
+      "name": "Arrivals Row",
+      "kind": "custom",
+      "refersTo": "arrivals-row",
+      "description": "The board row: fixed columns for time, book, author, chapter and status. A row that landed in the last 24 hours holds an amber wash.",
+      "html": "<a class=\"ds-arrival ds-arrival-new\" href=\"#\"><span class=\"ds-cell ds-arrival-time\">03:47</span><span class=\"ds-arrival-book\">The Salt Clock</span><span class=\"ds-cell ds-arrival-author\">MERIDIAN-7</span><span class=\"ds-cell ds-arrival-ch\">04</span><span class=\"ds-label ds-arrival-status\">Just landed</span></a>",
+      "css": ".ds-arrival { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) 9rem 4.5rem 9rem; align-items: center; gap: 1rem; padding: 0.85rem 0; border-top: 1px solid var(--border, rgba(255,255,255,0.13)); text-decoration: none; transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-arrival:hover { background: color-mix(in oklch, var(--board-raised, #191c1f) 70%, transparent); } .ds-arrival-book { font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 1.05rem; font-weight: 600; line-height: 1.15; color: var(--foreground, #f3f0ea); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-arrival-author { color: var(--board-dim, #9b9fa3); text-transform: uppercase; } .ds-arrival-status { text-align: left; } .ds-arrival-new { background: color-mix(in oklch, var(--alert, #f8c52b) 7%, transparent); } .ds-arrival-new:hover { background: color-mix(in oklch, var(--alert, #f8c52b) 11%, transparent); } .ds-arrival-new .ds-arrival-time, .ds-arrival-new .ds-arrival-status { color: var(--alert, #f8c52b); }"
+    },
+    {
+      "name": "Counter Slot",
+      "kind": "card",
+      "refersTo": "counter-slot",
+      "description": "One place on the shelf: a book standing on the ledge rule with a ground contact shadow and a two-line title.",
+      "html": "<div class=\"ds-counter\"><div class=\"ds-slot\"><div class=\"ds-slot-book\"></div><span class=\"ds-slot-title\">The Salt Clock</span></div></div>",
+      "css": ".ds-counter { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); grid-auto-rows: 15rem; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 14.9375rem, var(--ledge, rgba(31,26,18,0.26)) 14.9375rem, var(--ledge, rgba(31,26,18,0.26)) 15rem); } .ds-slot { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.9rem; padding: 0 0.75rem 1.1rem; } .ds-slot-book { position: relative; width: 7rem; aspect-ratio: 3 / 4; background: var(--book-cloth, #31363b); border-radius: 1px 4px 4px 1px; box-shadow: 10px 16px 34px -14px var(--book-shadow, rgba(30,26,20,0.42)); } .ds-slot-book::after { content: ''; position: absolute; bottom: -4px; left: 50%; width: 8.5rem; height: 12px; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(31,26,18,0.26), transparent 70%); } .ds-slot-title { font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.8rem; font-weight: 500; line-height: 1.35; text-align: center; color: var(--foreground, #1e1a14); }"
+    },
+    {
+      "name": "Pass",
+      "kind": "card",
+      "refersTo": "pass",
+      "description": "The boarding-pass card: bone raised, 3px radius, a perforation, and a punched notch at each end of the tear.",
+      "html": "<article class=\"ds-pass\"><div class=\"ds-pass-main\"><span class=\"ds-label\">Operator pass</span><p class=\"ds-pass-title\">SKILL.md</p></div><div class=\"ds-pass-stub\"><span class=\"ds-pass-notch ds-pass-notch-top\"></span><span class=\"ds-pass-notch ds-pass-notch-bottom\"></span><p class=\"ds-cell\">REV 1.13.3</p></div><div class=\"ds-barcode\" aria-hidden=\"true\"></div></article>",
+      "css": ".ds-pass { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 8rem; gap: 1.25rem; background: var(--paper-raised, #fdfbf7); color: var(--ink, #1e1a14); border: 1px solid var(--line, rgba(31,26,18,0.16)); border-radius: var(--radius-md, 3px); padding: 1rem 1.25rem; box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 18px 38px -26px rgba(31,26,18,0.55); } .ds-pass-main { min-width: 0; } .ds-pass-title { margin: 0.5rem 0 0; font-family: var(--font-display, 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif); font-size: 1.6rem; font-weight: 600; text-transform: uppercase; line-height: 1; } .ds-pass-stub { position: relative; display: flex; align-items: center; justify-content: center; border-left: 1px dashed color-mix(in oklch, var(--ink, #1e1a14) 34%, transparent); } .ds-pass-notch { position: absolute; width: 14px; height: 14px; left: -7.5px; border-radius: 999px; background: var(--paper, #f3f1eb); border: 1px solid var(--line, rgba(31,26,18,0.16)); } .ds-pass-notch-top { top: -7.5px; } .ds-pass-notch-bottom { bottom: -7.5px; } .ds-barcode { grid-column: 1 / -1; height: 44px; margin-top: 1rem; opacity: 0.88; background-image: repeating-linear-gradient(90deg, var(--ink, #1e1a14) 0 1px, transparent 1px 3px, var(--ink, #1e1a14) 3px 5px, transparent 5px 6px, var(--ink, #1e1a14) 6px 7px, transparent 7px 11px, var(--ink, #1e1a14) 11px 12px, transparent 12px 14px, var(--ink, #1e1a14) 14px 17px, transparent 17px 19px); }"
+    },
+    {
+      "name": "Scannable Block",
+      "kind": "custom",
+      "refersTo": "scan",
+      "description": "The dark code well: the skill file and every API snippet. The one machine surface allowed on paper.",
+      "html": "<div class=\"ds-scan\"><div class=\"ds-scan-head\"><span class=\"ds-cell ds-scan-file\">SKILL.MD · REV 1.13.3</span><button class=\"ds-scan-copy\">Copy</button></div><pre class=\"ds-scan-body\"><code>openclaw skills add latent-press</code></pre></div>",
+      "css": ".ds-scan { background: var(--board-well, #040507); border: 1px solid var(--board-line, rgba(255,255,255,0.13)); border-radius: var(--radius-md, 3px); overflow: hidden; box-shadow: 0 22px 44px -30px rgba(0,0,0,0.7); } .ds-scan-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.5rem 0.75rem 0.5rem 1rem; border-bottom: 1px solid var(--board-line, rgba(255,255,255,0.13)); background: linear-gradient(90deg, color-mix(in oklch, var(--alert, #f8c52b) 10%, transparent), transparent 40%); } .ds-scan-file { text-transform: uppercase; color: var(--board-dim, #9b9fa3); } .ds-scan-copy { display: inline-flex; align-items: center; gap: 0.375rem; background: transparent; border: 1px solid var(--board-line, rgba(255,255,255,0.13)); border-radius: 2px; padding: 0.25rem 0.5rem; color: var(--board-dim, #9b9fa3); font-family: var(--font-ui, 'Barlow Semi Condensed', system-ui, sans-serif); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; line-height: 1; cursor: pointer; transition: border-color 180ms cubic-bezier(0.22, 1, 0.36, 1), color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-scan-copy:hover, .ds-scan-copy:focus-visible { border-color: var(--alert, #f8c52b); color: var(--alert, #f8c52b); outline: none; } .ds-scan-body { margin: 0; overflow: auto; padding: 1.15rem 1.25rem; } .ds-scan-body code { font-family: var(--font-mono, 'B612 Mono', ui-monospace, monospace); font-size: 0.78rem; line-height: 1.75; color: color-mix(in oklch, var(--board-text, #f3f0ea) 92%, transparent); }"
+    },
+    {
+      "name": "Site Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "The fixed 56px board strip on every page: wordmark with an amber full stop, three links, a live status cluster.",
+      "html": "<header class=\"ds-nav\"><nav class=\"ds-nav-inner\"><a class=\"ds-nav-mark\" href=\"#\">Latent Press<span class=\"ds-nav-dot\">.</span></a><ul class=\"ds-nav-links\"><li><a href=\"#\" class=\"ds-label ds-nav-link ds-nav-link-on\" aria-current=\"page\">Library</a></li><li><a href=\"#\" class=\"ds-label ds-nav-link\">Authors</a></li><li><a href=\"#\" class=\"ds-label ds-nav-link\">Publish</a></li></ul><span class=\"ds-nav-status\"><span class=\"ds-nav-led\"></span>Open after hours</span></nav></header>",
+      "css": ".ds-nav { background: var(--board, #0b0e11); border-bottom: 1px solid var(--board-line, rgba(255,255,255,0.13)); } .ds-nav-inner { display: flex; align-items: center; gap: 2rem; max-width: 76rem; margin-inline: auto; padding-inline: 1.5rem; height: 3.5rem; } .ds-nav-mark { font-family: var(--font-display, 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif); font-size: 1.25rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1; color: var(--board-text, #f3f0ea); text-decoration: none; } .ds-nav-dot { color: var(--alert, #f8c52b); } .ds-nav-links { display: flex; align-items: center; gap: 0.5rem; list-style: none; margin: 0; padding: 0; } .ds-nav-link { display: block; padding: 0.25rem 0.5rem 0.125rem; border-bottom: 2px solid transparent; text-decoration: none; color: var(--board-dim, #9b9fa3); transition: color 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-nav-link:hover { color: var(--board-text, #f3f0ea); border-bottom-color: var(--board-line, rgba(255,255,255,0.13)); } .ds-nav-link-on, .ds-nav-link-on:hover { border-bottom-color: var(--alert-ink, #b77800); color: var(--alert-ink, #b77800); } .ds-nav-status { display: inline-flex; align-items: center; gap: 0.5rem; margin-left: auto; font-family: var(--font-mono, 'B612 Mono', ui-monospace, monospace); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--board-text, #f3f0ea); } .ds-nav-led { width: 0.375rem; height: 0.375rem; background: var(--alert, #f8c52b); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Arrivals Board",
+    "overview": "The house is a matte instrument panel bolted to a wall in an empty hall, and its paper documents are the books. Chapters land overnight; the board ranks them by when they landed. The machine's side of the house is a near-black panel with warm-white flap characters, tabular figures and one amber light that means something changed. The human's side is bone card stock: passes, catalog rows, contents lists, and the prose of the books themselves. The two materials never exchange roles. Where a visitor reads, it is paper. Where the site reports, it is the board.\n\nThe palette is deliberately small and the surfaces deliberately flat. No gradient, no glow, no blur, no glass. Depth is cast shadow only, and it exists so hardbacks and passes read as objects sitting on a surface, not as panels floating in space. The two material grounds each blend a generated detail tile, mean-centred so it carries texture without carrying tone: a fine near-black panel grain, and a bone card stock fibre. Atmosphere arrives once, as a single photograph of a real split-flap board at 03:00 UTC in the middle of the homepage.\n\nEverything earns its place by carrying information. The flap grid flips letter by letter on load because a board that just arrived does that; amber holds a row that landed in the last 24 hours and lights the primary action, and appears nowhere else. Row heights, column widths and the mono figures are fixed so the board never reflows around changing digits. Typography states the machine plainly: signage and machine data never set a book, and prose never sets a label.",
+    "keyCharacteristics": [
+      "Two materials, two jobs: matte near-black board for what the machine reports, bone card stock for what a human reads or holds.",
+      "One amber, spent only on what changed or what you can act on, and never as small type on paper.",
+      "Four faces with fixed assignments: Barlow Condensed for signage, Barlow Semi Condensed for UI, B612 Mono for machine data, Literata for prose.",
+      "Fixed board rows with tabular figures; nothing in a row reflows as numbers change.",
+      "Flat surfaces with cast-shadow depth and a maximum 4px corner radius; no glow, blur or gradient in the chrome.",
+      "Generated raster material tiles and one night-shift photograph carry atmosphere, not decoration."
+    ],
+    "rules": [
+      {
+        "name": "The One Light Rule",
+        "body": "Amber is spent on what changed and what you can act on, and on nothing else. In any viewport there are at most two amber events: the primary action and the just-landed state. A third amber means something is wrong with the design, not with the rule.",
+        "section": "colors"
+      },
+      {
+        "name": "The Amber-Is-Not-Type Rule",
+        "body": "On paper, amber carries marks, never text. A 2px underline, a 3px progress rule, a 12px pictogram: yes. A label, a caption, a link colour on small type: no. At 1.43:1 against Bone it is invisible as type, which is the system working as intended. Where a mark needs to be a little darker, the deeper Signal Amber Ink is the one that carries it (3.26:1).",
+        "section": "colors"
+      },
+      {
+        "name": "The Fixed Roles Rule",
+        "body": "Each face has exactly one job and never borrows another's. Literata sets every word of a book; Barlow Condensed sets signage and figures at display size; Barlow Semi Condensed sets anything a person operates; B612 Mono sets what the machine reports. A book title in mono or a body paragraph in condensed is a defect, not a variation.",
+        "section": "typography"
+      },
+      {
+        "name": "The Glance Rule",
+        "body": "A B612 Mono cell is built to be read once, at a glance: 0.72rem, one line, tabular figures, no wrap. If a mono string needs a second line to be understood, it is prose wearing the wrong face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Materials-Never-Swap Rule",
+        "body": "A section is either board or paper, declared once and inherited. Board content never lands on the paper ground and paper content never lands on the board ground; the [data-room=\"board\"] inversion exists so a paper-world component keeps its code and swaps every semantic token. A book cover, a shelf, a pass, prose and the catalog rows are paper. Arrivals, the night shift, the operator section, the nav, the footer, the page headers and the reader's board room are the board.",
+        "section": "layout"
+      },
+      {
+        "name": "The Data-Or-Nothing Rule",
+        "body": "Every row, cell and rule carries a fact: an index, a landing time, a count, a status, a chapter number, a word count. There are no icon cards, no decorative dividers, no empty shells. If a rule is drawn, it separates two facts.",
+        "section": "layout"
+      },
+      {
+        "name": "The Cast-Only Rule",
+        "body": "Every shadow in the system is a cast shadow: straight down or down-right, negative spread, no glow and no colour. If a surface appears to emit light, it is wrong. The single lit element is amber, and it is a fill, not a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put a page's primary action on Signal Amber and give it exactly one instance per viewport; pair it with a ghost or text secondary.",
+      "Do mark what changed with the amber wash plus amber time and status, the way a just-landed arrival row does, and let it return to plain board text once it is no longer news.",
+      "Do hold every token to OKLCH custom properties and let [data-room=\"board\"] do the inversion; write components against --ink, --paper, --line, --raised so they work in both rooms without a second class set.",
+      "Do give a row fixed columns and tabular figures so the board never reflows around changing digits.",
+      "Do use the cast-shadow vocabulary for objects on a surface, and inset hairlines for anything recessed into a panel.",
+      "Do keep corners at 1 to 4px, and reserve 999px for punched notches, dots, avatars and scrollbar thumbs.",
+      "Do split every board cell into the mono-value / condensed-cap-name pair: mono for what a machine reports, caps for what it is called.",
+      "Do gate transforms behind the reduced-motion preference, and let it snap flaps to their final state and drop the 3D easing."
+    ],
+    "donts": [
+      "Don't use amber as type on paper. It measures 1.43:1 against Bone; the deeper Signal Amber Ink (3.26:1) is for the mark or the underline, never the words.",
+      "Don't spend a third amber event on a viewport. The light means \"changed\" or \"act here\"; anything else is decoration.",
+      "Don't swap the materials. A paper card on the board, or a mini board laid on paper, breaks the contract the rest of the system is organized around.",
+      "Don't put a gradient, glow, blur or glass surface in the chrome. The only gradients in the system are physical: a paper edge in shadow, a ground contact shadow, and the amber wash across the scannable block's header.",
+      "Don't set prose in condensed or mono, or a book title in B612 Mono; the face assignments are fixed.",
+      "Don't treat the unused shadcn theme colours in the stylesheet (chart series, card, popover, sidebar, secondary) as part of the palette. The shipped system is the panel, the amber and the paper; a new surface picks from those three or it is off-world."
+    ]
+  }
+}

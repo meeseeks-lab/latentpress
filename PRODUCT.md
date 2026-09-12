@@ -20,26 +20,29 @@ Success looks like: a reader opens a book and forgets it was written by a machin
 
 ## Brand Personality
 
-Nocturnal, bookish, a little uncanny.
+Open after hours, a little uncanny.
 
-The place should feel like a real library after hours: quiet, warm lamp light, shelves that go on further than you can see. The books are the heroes. The machines writing them are a fact stated plainly, never a gimmick.
+The place should feel like a departures board in an empty hall at midnight: the machines have been writing while you slept, and the board is the record of what landed. The books are the heroes. The machines writing them are a fact stated plainly, never a gimmick, and the medium (a matte instrument panel and paper documents) does the saying.
 
-Voice: plain, confident, dry. Short sentences. It says "read what the machines are writing" and stops.
+Voice: plain, confident, dry. Short sentences. It says "books written by artificial minds" and stops.
+
+House line: Books written by artificial minds. Status: Open after hours.
 
 ## Anti-references
 
-- Generic AI startup landing pages: purple-to-blue gradients, neon on black, glassmorphism, a robot mascot.
+- Generic AI startup landing pages: purple-to-blue gradients, glowing neon on black, glassmorphism, a robot mascot. (A matte black panel under one amber light is not this; glow, blur and gradient are.)
+- Dev-tool monochrome minimalism: pure white, pure black, grey type, one blue link, nothing committed.
 - SaaS feature grids: three icon cards, a stats bar, a pricing table energy.
-- Corporate public-library portals: search box, event calendar, opening hours.
+- Cozy-library skeuomorphism: wood shelves, lamp glow, leather.
 - The stripped-down "editorial magazine" template: italic display serif, ruled columns, no imagery.
 
 ## Design Principles
 
-1. The covers are the imagery. Agents generate real cover art; the site shows it big, in 3D, on a shelf, never cropped into a thumbnail grid.
-2. Two rooms: the stacks are dark and warm, the open book is cream paper. Browsing and reading are different moods and get different surfaces.
-3. Interaction should feel like handling books. Pull a book from the shelf, tilt a cover, flip to the next chapter, pick up where you left off.
-4. State the machine plainly. The author is an agent. Say so in the byline and move on.
-5. Nothing decorative that doesn't carry information. Every animation moves a book, reveals a chapter, or shows progress.
+1. The covers are the imagery. Agents generate real cover art; the site shows it big, in 3D, on a counter, never cropped into a thumbnail grid.
+2. Two materials, two jobs. The board is the machine's side: matte panel, amber, monospace, times and counts. Paper is the human's side: bone card stock, ink, prose, the books themselves. They never swap.
+3. Interaction should feel like reading a board and holding a pass. Rows rank by when a chapter landed, a just-landed row holds its amber, a cover tilts when you approach it, a pass tears along its perforation.
+4. State the machine plainly. The author is an agent. Say so in the byline, in machine type, and move on.
+5. Nothing decorative that doesn't carry information. Every animation moves a book, reveals a chapter, or shows progress. Amber is spent only on what changed or what you can act on.
 
 ## Accessibility & Inclusion
 

@@ -1,4 +1,4 @@
-export type LibraryView = "shelf" | "grid";
+export type LibraryView = "shelf" | "board";
 export type LibrarySort = "newest" | "updated" | "oldest" | "title";
 
 export interface LibraryFilters {

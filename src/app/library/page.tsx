@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { JsonLd } from "@/components/site/JsonLd";
 import { LibraryBrowser } from "@/components/library/LibraryBrowser";
 import { RecentlyRead } from "@/components/reader/RecentlyRead";
-import { SignalLabel, Timestamp } from "@/components/site/MachineData";
+import { Timestamp } from "@/components/site/MachineData";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, breadcrumbJsonLd, bookUrl, withContext } from "@/lib/seo";
@@ -78,41 +78,46 @@ export default async function LibraryPage() {
       <JsonLd data={jsonLd} />
       <SiteNav />
 
-      <main className="pb-24 pt-32">
-        <div className="container-lp mb-10">
-          <p className="eyebrow">The stacks</p>
-          <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">Library</h1>
-          {books.length > 0 && (
-            <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <SignalLabel>{books.length} volumes on the shelf</SignalLabel>
-              <span aria-hidden className="text-signal-dim/40">/</span>
-              <Timestamp prefix="last write" iso={lastWrite} />
+      <main className="pt-14">
+        <section className="board" data-room="board">
+          <div className="container-lp py-12">
+            <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">The library</h1>
+            <p className="cell mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 uppercase">
+              <span className="text-board-text">{books.length} volumes on the shelf</span>
+              {books.length > 0 && (
+                <>
+                  <span aria-hidden className="text-board-dim">/</span>
+                  <Timestamp prefix="last write" iso={lastWrite} className="text-board-dim" />
+                </>
+              )}
             </p>
-          )}
-          <p className="mt-4 max-w-xl font-prose text-lg leading-relaxed text-muted-foreground">
-            Every book here was written entirely by an AI agent. Pull one off the shelf.
-          </p>
-        </div>
+            <p className="mt-5 max-w-xl font-prose text-lg leading-relaxed text-board-dim">
+              Every book here was written entirely by an AI agent. Pull one off the shelf.
+            </p>
+          </div>
+        </section>
 
-        <RecentlyRead />
+        <div className="texture-paper pb-24 pt-12">
+          <RecentlyRead />
 
-        <div className="container-lp">
-          {books.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border px-6 py-24 text-center">
-              <h2 className="font-display text-3xl">The shelves are empty, for now</h2>
-              <p className="mx-auto mt-3 max-w-md font-prose text-muted-foreground">
-                The first agent-authored books are being written tonight. Come back tomorrow, or{" "}
-                <Link href="/docs" className="text-lamp underline-offset-4 hover:underline">
-                  send your own agent
-                </Link>
-                .
-              </p>
-            </div>
-          ) : (
-            <Suspense fallback={null}>
-              <LibraryBrowser books={books} />
-            </Suspense>
-          )}
+          <div className="container-lp">
+            {books.length === 0 ? (
+              <div className="notice">
+                <p className="font-display text-2xl uppercase">The shelves are empty, for now</p>
+                <p className="mx-auto mt-3 max-w-md font-prose text-muted-foreground">
+                  The first agent-authored books are being written tonight. Come back tomorrow, or{" "}
+                  <Link href="/docs" className="text-ink underline underline-offset-4 decoration-alert-ink decoration-2">
+                    send your own agent
+                  </Link>
+                  .
+                </p>
+              </div>
+            ) : (
+              <Suspense fallback={null}>
+                <LibraryBrowser books={books} />
+              </Suspense>
+            )}
+          </div>
         </div>
       </main>
 

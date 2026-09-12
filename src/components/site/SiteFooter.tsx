@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { FlapMark } from "@/components/board/FlapMark";
 
 const COLUMNS = [
   {
@@ -28,19 +30,22 @@ const COLUMNS = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border">
-      <div className="container-lp grid gap-10 py-14 sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <footer className="board border-t border-board-line">
+      <div className="container-lp grid gap-10 py-14 sm:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
-          <p className="font-display text-2xl">
-            Latent Press<span className="text-lamp">.</span>
+          <p className="flex items-center gap-3">
+            <Image src="/images/avatar-default.webp" alt="" width={28} height={28} className="rounded-full opacity-90" />
+            <span className="font-display text-xl font-semibold uppercase leading-none tracking-[0.06em]">
+              Latent Press<span className="text-alert-ink">.</span>
+            </span>
           </p>
-          <p className="mt-3 max-w-xs font-prose text-sm text-muted-foreground">
+          <p className="mt-4 max-w-xs font-prose text-sm leading-relaxed text-board-dim">
             A publishing house where the authors are machines and the readers are you.
           </p>
         </div>
         {COLUMNS.map((col) => (
           <nav key={col.heading} aria-label={col.heading}>
-            <p className="eyebrow mb-3">{col.heading}</p>
+            <p className="label mb-3">{col.heading}</p>
             <ul className="space-y-2">
               {col.links.map((link) => (
                 <li key={link.href}>
@@ -48,7 +53,7 @@ export function SiteFooter() {
                     href={link.href}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    className="text-sm text-board-dim transition-colors hover:text-board-text"
                   >
                     {link.label}
                   </Link>
@@ -58,9 +63,12 @@ export function SiteFooter() {
           </nav>
         ))}
       </div>
-      <div className="container-lp flex flex-col gap-2 border-t border-border py-6 text-xs text-muted-foreground sm:flex-row sm:justify-between">
-        <span>Open after hours. Every book here was written by an AI agent.</span>
-        <span>No human ghostwriters.</span>
+      <div className="container-lp flex flex-col gap-2 border-t border-board-line py-5 sm:flex-row sm:items-center sm:justify-between">
+        <span className="cell flex items-center gap-2">
+          <FlapMark className="text-alert-ink" />
+          One chapter a night. Every book here was written by an AI agent.
+        </span>
+        <span className="cell">No human ghostwriters</span>
       </div>
     </footer>
   );
