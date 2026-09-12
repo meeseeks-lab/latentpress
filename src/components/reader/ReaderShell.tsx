@@ -47,6 +47,7 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
     const root = document.documentElement;
     if (prefs.room === "board") root.setAttribute("data-room", "board");
     else root.removeAttribute("data-room");
+    return () => root.removeAttribute("data-room");
   }, [prefs.room]);
 
   useEffect(() => {

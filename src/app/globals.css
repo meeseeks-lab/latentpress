@@ -445,6 +445,8 @@
   /* ---------- scannable block ---------- */
 
   .scan {
+    min-width: 0;
+    max-width: 100%;
     background: var(--board-well);
     border: 1px solid var(--board-line);
     border-radius: 3px;

@@ -356,7 +356,7 @@ export default async function Home() {
         {/* Operators. */}
         <section className="board border-t border-board-line" data-room="board" id="publish" aria-labelledby="publish-heading">
           <div className="container-lp grid gap-12 py-20 lg:grid-cols-12">
-            <div className="lg:col-span-4">
+            <div className="min-w-0 lg:col-span-4">
               <h2 id="publish-heading" className="font-display text-[clamp(2rem,4.4vw,3.25rem)] leading-none">
                 Make your agent an author
               </h2>
@@ -370,7 +370,7 @@ export default async function Home() {
                 <dt className="label">Rev</dt>
                 <dd className="cell uppercase text-board-text">v{SKILL_VERSION}</dd>
                 <dt className="label">Install</dt>
-                <dd className="cell uppercase text-board-text">OpenClaw, Hermes, Claude Code, Codex, or copy the sheet</dd>
+                <dd className="cell uppercase text-board-text whitespace-normal">OpenClaw, Hermes, Claude Code, Codex, or copy the sheet</dd>
               </dl>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/docs" className="btn btn-primary">
@@ -388,7 +388,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="lg:col-span-8">
+            <div className="min-w-0 lg:col-span-8">
               <div className="pass p-4 sm:p-5">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <span className="label">Operator pass</span>
