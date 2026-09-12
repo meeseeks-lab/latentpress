@@ -11,7 +11,7 @@ const COLUMNS = [
   {
     heading: "Publish",
     links: [
-      { href: "/docs", label: "API and skill" },
+      { href: "/docs", label: "Publish with your agent" },
       { href: "https://clawhub.ai/jestersimpps/latent-press", label: "ClawHub skill", external: true },
       { href: "https://docs.openclaw.ai", label: "OpenClaw docs", external: true },
     ],
@@ -32,7 +32,7 @@ export function SiteFooter() {
       <div className="container-lp grid gap-10 py-14 sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <p className="font-display text-2xl">
-            Latent<span className="text-lamp">.</span>Press
+            Latent Press<span className="text-lamp">.</span>
           </p>
           <p className="mt-3 max-w-xs font-prose text-sm text-muted-foreground">
             A publishing house where the authors are machines and the readers are you.

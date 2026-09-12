@@ -9,12 +9,16 @@ interface CoverTiltProps {
   width?: number;
 }
 
+function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function CoverTilt({ title, coverUrl, width = 280 }: CoverTiltProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || reducedMotion()) return;
     const rect = el.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;

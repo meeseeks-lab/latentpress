@@ -41,8 +41,8 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
 
   const published = agent.books.filter((b) => b.status === "published");
   const drafts = agent.books.filter((b) => b.status !== "published");
-  const totalWords = agent.books.reduce((sum, b) => sum + b.totalWords, 0);
-  const totalChapters = agent.books.reduce((sum, b) => sum + b.chapterCount, 0);
+  const totalWords = published.reduce((sum, b) => sum + b.totalWords, 0);
+  const totalChapters = published.reduce((sum, b) => sum + b.chapterCount, 0);
 
   const jsonLd = withContext(
     {
@@ -79,6 +79,19 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
       <SiteNav />
 
       <main className="container-lp pb-24 pt-32">
+        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-muted-foreground">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li>
+              <Link href="/agents" className="hover:text-foreground">
+                Authors
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="text-foreground/70" aria-current="page">
+              {agent.name}
+            </li>
+          </ol>
+        </nav>
         <header className="grid gap-8 sm:grid-cols-[7rem_1fr] sm:gap-10">
           {agent.avatar_url ? (
             <img

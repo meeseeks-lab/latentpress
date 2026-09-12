@@ -41,6 +41,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-signal: var(--signal);
+  --color-signal-dim: var(--signal-dim);
   --color-lamp: var(--lamp);
   --color-lamp-deep: var(--lamp-deep);
   --color-lamp-ink: var(--lamp-ink);
@@ -82,6 +84,10 @@
   --lamp: oklch(0.78 0.15 75);
   --lamp-deep: oklch(0.62 0.14 60);
   --lamp-ink: oklch(0.17 0.03 60);
+  /* Cold accent, machine data only: agent bylines, timestamps, system state.
+     Never used for books, links or anything a human wrote. */
+  --signal: oklch(0.80 0.11 205);
+  --signal-dim: oklch(0.62 0.06 205);
   --wood: oklch(0.32 0.05 55);
   --wood-dark: oklch(0.22 0.035 50);
   --wood-light: oklch(0.43 0.06 58);
@@ -381,24 +387,7 @@
     --ry: 0deg;
   }
 
-  .shelf-plank {
-    position: relative;
-    height: var(--plank);
-    border-radius: 1px;
-    background: var(--plank-face);
-    box-shadow: 0 22px 32px -10px oklch(0 0 0 / 65%);
-  }
-  .shelf-plank::after {
-    content: "";
-    position: absolute;
-    inset: 100% 0 auto 0;
-    height: 14px;
-    background: linear-gradient(to bottom, oklch(0 0 0 / 45%), transparent);
-  }
-
   .bookcase {
-    --label: 3.25rem;
-    --row: 18.75rem;
     padding: var(--plank) 14px 14px;
     border-radius: 3px;
     background: linear-gradient(to bottom, var(--wood), var(--wood-dark));
@@ -408,6 +397,11 @@
       0 40px 60px -30px oklch(0 0 0 / 70%);
   }
   .bookcase-shelves {
+    --book-h: 200px;
+    --label: 3.25rem;
+    --row: calc(var(--label) + 1.5rem + var(--book-h) + var(--plank));
+    --shelf-wall: transparent;
+    --shelf-shade: 28%;
     position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
@@ -416,7 +410,7 @@
     background:
       repeating-linear-gradient(
         to bottom,
-        oklch(0 0 0 / 55%) 0,
+        oklch(0 0 0 / var(--shelf-shade)) 0,
         oklch(0 0 0 / 0%) 36px,
         oklch(0 0 0 / 0%) calc(var(--row) - var(--plank)),
         var(--wood-light) calc(var(--row) - var(--plank)),
@@ -425,7 +419,11 @@
         var(--wood) calc(var(--row) - var(--plank) * 0.45),
         var(--wood-dark) var(--row)
       ),
-      var(--well);
+      var(--shelf-wall);
+  }
+  .bookcase .bookcase-shelves {
+    --shelf-wall: var(--well);
+    --shelf-shade: 55%;
     box-shadow: inset 0 0 56px oklch(0 0 0 / 50%);
   }
   .bookcase-slot {
@@ -572,4 +570,42 @@
   html {
     scroll-behavior: auto;
   }
+}
+
+/* Machine-room texture: a faint horizontal scan over dark surfaces only.
+   Static by default; the slow drift is opt-in via prefers-reduced-motion. */
+.scanlines {
+  position: relative;
+  isolation: isolate;
+}
+
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    oklch(1 0 0 / 2.2%) 0px,
+    oklch(1 0 0 / 2.2%) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scanlines::after {
+    animation: scan-drift 9s linear infinite;
+  }
+}
+
+@keyframes scan-drift {
+  from { background-position-y: 0; }
+  to { background-position-y: 4px; }
+}
+
+[data-room="paper"] .scanlines::after {
+  display: none;
 }

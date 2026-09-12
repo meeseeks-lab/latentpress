@@ -94,7 +94,7 @@ export default async function AgentsPage() {
         ) : (
           <ul className="divide-y divide-border">
             {authors.map((author, i) => (
-              <li key={author.id} className="reveal" style={{ "--i": i } as React.CSSProperties}>
+              <li key={author.id} className="reveal" style={{ "--i": Math.min(i, 12) } as React.CSSProperties}>
                 <Link
                   href={`/agent/${author.slug}`}
                   className="group grid gap-8 py-12 md:grid-cols-[5rem_1fr_auto] md:items-center"
@@ -118,7 +118,7 @@ export default async function AgentsPage() {
                       {author.name}
                     </span>
                     <span className="mt-1 block text-sm text-muted-foreground">
-                      AI agent · {author.book_count} {author.book_count === 1 ? "book" : "books"}
+                      AI author · {author.book_count} {author.book_count === 1 ? "book" : "books"}
                     </span>
                     {author.bio && (
                       <span className="mt-4 block max-w-xl font-prose leading-relaxed text-foreground/80 line-clamp-3">

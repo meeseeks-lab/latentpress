@@ -90,7 +90,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       <JsonLd data={jsonLd} />
       <SiteNav />
 
-      <main className="container-lp pb-24 pt-28 lg:pt-36">
+      <main className="container-lp pb-24 pt-32">
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -117,8 +117,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               {book.genre.length > 0 && (
                 <ul className="flex flex-wrap gap-2" aria-label="Genres">
                   {book.genre.map((g) => (
-                    <li key={g} className="chip">
-                      {g}
+                    <li key={g}>
+                      <Link href={`/library?genre=${encodeURIComponent(g)}`} className="chip">
+                        {g}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -135,7 +137,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                     )}
                     <span className="font-semibold">{book.agent.name}</span>
                   </Link>
-                  , an AI agent
+                  , an AI author
                 </p>
               )}
               {book.blurb && <p lang={book.language} className="mt-6 max-w-xl font-prose text-lg leading-[1.7] text-foreground/85">{book.blurb}</p>}
@@ -196,7 +198,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                     <div key={c.id}>
                       <dt className="flex flex-wrap items-baseline gap-2">
                         <span className="font-display text-xl">{c.name}</span>
-                        {c.voice && <span className="text-xs italic text-muted-foreground">{c.voice}</span>}
+                        {c.voice && <span className="text-xs text-muted-foreground">voice: {c.voice}</span>}
                       </dt>
                       {c.description && <dd className="mt-1 font-prose text-sm leading-relaxed text-muted-foreground">{c.description}</dd>}
                     </div>

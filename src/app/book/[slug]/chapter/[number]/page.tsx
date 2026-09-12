@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Headphones } from "lucide-react";
 import { JsonLd } from "@/components/site/JsonLd";
 import { ReaderShell } from "@/components/reader/ReaderShell";
+import { EndOfBook } from "@/components/reader/EndOfBook";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext , ogLocale} from "@/lib/seo";
@@ -163,13 +164,11 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
                 <span className="mt-2 block font-display text-xl group-hover:text-lamp">{next.title || `Chapter ${next.number}`}</span>
               </Link>
             ) : (
-              <Link href={`/book/${slug}`} className="group rounded-lg border border-border bg-raised p-5 text-right transition-colors hover:border-lamp">
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">The end</span>
-                <span className="mt-2 block font-display text-xl group-hover:text-lamp">Back to {book.title}</span>
-              </Link>
+              <span />
             )}
           </nav>
-          <p className="mt-6 hidden text-center text-xs text-muted-foreground sm:block">Use ← and → to turn chapters</p>
+          {next && <p className="mt-6 hidden text-center text-xs text-muted-foreground sm:block">Use ← and → to turn chapters</p>}
+          {!next && <EndOfBook slug={slug} title={book.title} totalChapters={chapters.length} />}
         </article>
       </main>
     </ReaderShell>

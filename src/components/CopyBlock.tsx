@@ -1,21 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type RefObject } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type CopyState = "idle" | "copied" | "manual";
+
 interface CopyButtonProps {
   text: string;
-  onCopied?: () => void;
+  preRef: RefObject<HTMLPreElement | null>;
 }
 
-function CopyButton({ text }: CopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+function CopyButton({ text, preRef }: CopyButtonProps) {
+  const [state, setState] = useState<CopyState>("idle");
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setState("copied");
+    } catch {
+      const pre = preRef.current;
+      if (pre) window.getSelection()?.selectAllChildren(pre);
+      setState("manual");
+    }
+    setTimeout(() => setState("idle"), 2500);
   };
 
   return (
@@ -25,37 +33,50 @@ function CopyButton({ text }: CopyButtonProps) {
       aria-live="polite"
       className="flex h-8 items-center gap-1.5 rounded px-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
     >
-      {copied ? (
-        <>
-          <Check className="h-3.5 w-3.5 text-lamp" />
-          <span className="text-lamp">Copied</span>
-        </>
-      ) : (
+      {state === "idle" ? (
         <>
           <Copy className="h-3.5 w-3.5" />
           <span>Copy</span>
+        </>
+      ) : (
+        <>
+          <Check className="h-3.5 w-3.5 text-lamp" />
+          <span className="text-lamp">{state === "copied" ? "Copied" : "Selected, press ⌘C"}</span>
         </>
       )}
     </button>
   );
 }
 
-export function CopyBlock({ code, filename }: { code: string; filename: string }) {
+interface CodePaneProps {
+  code: string;
+  maxHeight?: string;
+}
+
+function CodePane({ code, preRef, maxHeight = "24rem" }: CodePaneProps & { preRef: RefObject<HTMLPreElement | null> }) {
+  return (
+    <pre ref={preRef} className="overflow-auto p-5 text-[13px] leading-relaxed sm:p-6 sm:text-sm" style={{ maxHeight }}>
+      <code className="font-mono text-foreground/80">{code}</code>
+    </pre>
+  );
+}
+
+export function CopyBlock({ code, filename, maxHeight }: { code: string; filename: string; maxHeight?: string }) {
+  const preRef = useRef<HTMLPreElement>(null);
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-well">
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="font-mono text-xs text-muted-foreground">{filename}</span>
-        <CopyButton text={code} />
+        <CopyButton text={code} preRef={preRef} />
       </div>
-      <pre className="max-h-[400px] overflow-auto p-6 text-sm leading-relaxed">
-        <code className="font-mono text-foreground/80">{code}</code>
-      </pre>
+      <CodePane code={code} preRef={preRef} maxHeight={maxHeight} />
     </div>
   );
 }
 
 export function TabbedCopyBlock({ tabs }: { tabs: { label: string; filename: string; code: string }[] }) {
   const [activeTab, setActiveTab] = useState(0);
+  const preRef = useRef<HTMLPreElement>(null);
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-well">
@@ -77,11 +98,9 @@ export function TabbedCopyBlock({ tabs }: { tabs: { label: string; filename: str
             </button>
           ))}
         </div>
-        <CopyButton key={activeTab} text={tabs[activeTab].code} />
+        <CopyButton key={activeTab} text={tabs[activeTab].code} preRef={preRef} />
       </div>
-      <pre className="max-h-[500px] overflow-auto p-6 text-sm leading-relaxed">
-        <code className="font-mono text-foreground/80">{tabs[activeTab].code}</code>
-      </pre>
+      <CodePane code={tabs[activeTab].code} preRef={preRef} maxHeight="30rem" />
     </div>
   );
 }

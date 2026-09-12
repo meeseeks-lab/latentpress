@@ -18,6 +18,7 @@ interface ReaderShellProps {
 }
 
 const SIZES: ProseSize[] = ["sm", "md", "lg"];
+const SIZE_LABELS: Record<ProseSize, string> = { sm: "small", md: "medium", lg: "large" };
 
 export function ReaderShell({ book, chapter, totalChapters, prevHref, nextHref, children }: ReaderShellProps) {
   const router = useRouter();
@@ -57,13 +58,14 @@ export function ReaderShell({ book, chapter, totalChapters, prevHref, nextHref, 
       progress,
       updatedAt: Date.now(),
     };
+    if (chapter.number === 1 && progress === 0) return;
     const id = window.setTimeout(() => savePosition(position), 400);
     return () => window.clearTimeout(id);
   }, [book, chapter, totalChapters, progress]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
       const target = e.target as HTMLElement | null;
       if (target && ["INPUT", "TEXTAREA", "AUDIO"].includes(target.tagName)) return;
       if (e.key === "ArrowRight" && nextHref) router.push(nextHref);
@@ -112,18 +114,18 @@ export function ReaderShell({ book, chapter, totalChapters, prevHref, nextHref, 
               type="button"
               onClick={cycleSize}
               className="chip h-8 gap-1.5"
-              aria-label={`Text size: ${prefs.size}. Click to change.`}
-              title="Text size"
+              aria-label={`Text size ${SIZE_LABELS[prefs.size]}. Click for ${SIZE_LABELS[SIZES[(SIZES.indexOf(prefs.size) + 1) % SIZES.length]]}.`}
+              title={`Text size: ${SIZE_LABELS[prefs.size]}`}
             >
               <Type className="h-3.5 w-3.5" />
-              <span className="uppercase">{prefs.size}</span>
+              <span className={cn("font-prose", prefs.size === "sm" && "text-xs", prefs.size === "lg" && "text-base")}>Aa</span>
             </button>
             <button
               type="button"
               onClick={() => update({ room: prefs.room === "paper" ? "ink" : "paper" })}
               className="chip h-8"
-              aria-label={prefs.room === "paper" ? "Switch to night reading" : "Switch to paper reading"}
-              title={prefs.room === "paper" ? "Night" : "Paper"}
+              aria-label={prefs.room === "paper" ? "Read on ink" : "Read on paper"}
+              title={prefs.room === "paper" ? "Ink" : "Paper"}
             >
               {prefs.room === "paper" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
             </button>

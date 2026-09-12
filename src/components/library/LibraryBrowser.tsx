@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState, type CSSProperties } from "react";
+import { useSearchParams } from "next/navigation";
 import { Dices, LayoutGrid, Library as LibraryIcon, Search, X } from "lucide-react";
 import { Book3D } from "@/components/book/Book3D";
 import type { LibraryFilters, LibrarySort, LibraryView, ShelfBook } from "@/lib/models/library";
+import { useBatchedList } from "@/lib/hooks/use-batched-list";
 import { cn } from "@/lib/utils";
 
 interface LibraryBrowserProps {
@@ -50,7 +52,14 @@ function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] 
 }
 
 export function LibraryBrowser({ books }: LibraryBrowserProps) {
-  const [filters, setFilters] = useState<LibraryFilters>({ query: "", genre: null, language: null, sort: "newest", view: "shelf" });
+  const params = useSearchParams();
+  const [filters, setFilters] = useState<LibraryFilters>({
+    query: params.get("q") ?? "",
+    genre: params.get("genre"),
+    language: params.get("lang"),
+    sort: "newest",
+    view: "shelf",
+  });
   const [picked, setPicked] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -67,6 +76,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
   }, [books]);
 
   const visible = useMemo(() => applyFilters([...books], filters), [books, filters]);
+  const { visible: shown, hasMore, showMore, revealUpTo, sentinelRef } = useBatchedList(visible);
 
   const set = (patch: Partial<LibraryFilters>) => setFilters((f) => ({ ...f, ...patch }));
 
@@ -75,9 +85,13 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
     const pool = visible.length > 1 ? visible.filter((b) => b.id !== picked) : visible;
     const choice = pool[Math.floor(Math.random() * pool.length)];
     setPicked(choice.id);
-    const el = listRef.current?.querySelector<HTMLElement>(`[data-book-id="${choice.id}"]`);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    el?.querySelector<HTMLAnchorElement>("a")?.focus({ preventScroll: true });
+    // The pick can sit past the rendered batch, so reveal it before scrolling.
+    revealUpTo(visible.findIndex((b) => b.id === choice.id));
+    requestAnimationFrame(() => {
+      const el = listRef.current?.querySelector<HTMLElement>(`[data-book-id="${choice.id}"]`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      el?.querySelector<HTMLAnchorElement>("a")?.focus({ preventScroll: true });
+    });
   };
 
   const cleared = !filters.query && !filters.genre && !filters.language;
@@ -162,7 +176,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
         </div>
       )}
 
-      <p className="mt-8 text-sm text-muted-foreground" aria-live="polite">
+      <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-signal-dim" aria-live="polite">
         {visible.length === books.length
           ? `${books.length} ${books.length === 1 ? "book" : "books"} on the shelves`
           : `${visible.length} of ${books.length} books`}
@@ -183,9 +197,17 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
           <p className="mt-2 text-sm text-muted-foreground">Try another genre, or clear the search.</p>
         </div>
       ) : filters.view === "shelf" ? (
-        <ShelfView books={visible} picked={picked} listRef={listRef} />
+        <ShelfView books={shown} picked={picked} listRef={listRef} />
       ) : (
-        <GridView books={visible} picked={picked} listRef={listRef} />
+        <GridView books={shown} picked={picked} listRef={listRef} />
+      )}
+
+      {hasMore && (
+        <div ref={sentinelRef} className="mt-12 flex justify-center">
+          <button type="button" onClick={showMore} className="chip h-9">
+            Show more books
+          </button>
+        </div>
       )}
     </div>
   );
@@ -215,29 +237,25 @@ interface ViewProps {
 
 function ShelfView({ books, picked, listRef }: ViewProps) {
   return (
-    <ul ref={listRef} className="mt-10 grid grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-x-2">
-      {books.map((book, i) => (
-        <li
-          key={book.id}
-          data-book-id={book.id}
-          className="reveal relative flex flex-col items-center px-2 pb-8 pt-10"
-          style={{ "--i": Math.min(i, 12) } as CSSProperties}
-        >
-          <Link href={`/book/${book.slug}`} className="group block outline-none" aria-label={book.title}>
-            <Book3D title={book.title} coverUrl={book.cover_url} width={150} pose="shelf" className={cn(picked === book.id && "[&_.book3d]:[--lift:-14px] [&_.book3d]:[--ry:-6deg]")} />
-          </Link>
-          <span className="shelf-plank absolute inset-x-0 bottom-0" aria-hidden="true" />
-          <Link href={`/book/${book.slug}`} tabIndex={-1} className="relative z-10 mt-4 -mb-3 line-clamp-2 max-w-[11rem] text-center font-display text-sm leading-snug text-foreground/85 hover:text-lamp">
-            {book.title}
-          </Link>
-          {picked === book.id && (
-            <span className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-lamp px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-lamp-ink">
-              Try this one
-            </span>
-          )}
-        </li>
-      ))}
-    </ul>
+    <div className="bookcase scanlines mt-10">
+      <ul ref={listRef} className="bookcase-shelves">
+        {books.map((book, i) => (
+          <li key={book.id} data-book-id={book.id} className="bookcase-slot reveal" style={{ "--i": Math.min(i, 12) } as CSSProperties}>
+            {picked === book.id && (
+              <span className="mb-3 rounded-full bg-lamp px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-lamp-ink">
+                Try this one
+              </span>
+            )}
+            <Link href={`/book/${book.slug}`} className="group block outline-none" aria-label={book.title}>
+              <Book3D title={book.title} coverUrl={book.cover_url} width={150} pose="shelf" className={cn(picked === book.id && "[&_.book3d]:[--lift:-14px] [&_.book3d]:[--ry:-6deg]")} />
+            </Link>
+            <Link href={`/book/${book.slug}`} tabIndex={-1} className="bookcase-label line-clamp-2 text-center font-display text-sm leading-snug text-foreground/85 hover:text-lamp">
+              {book.title}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

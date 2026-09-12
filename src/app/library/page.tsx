@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { JsonLd } from "@/components/site/JsonLd";
 import { LibraryBrowser } from "@/components/library/LibraryBrowser";
 import { RecentlyRead } from "@/components/reader/RecentlyRead";
+import { SignalLabel, Timestamp } from "@/components/site/MachineData";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, breadcrumbJsonLd, bookUrl, withContext } from "@/lib/seo";
@@ -33,12 +35,19 @@ export const metadata: Metadata = {
   },
 };
 
+const LIBRARY_FETCH_LIMIT = 500;
+
 async function getBooks() {
-  return await convexClient().query(api.books.listPublished, {});
+  return await convexClient().query(api.books.listPublished, { limit: LIBRARY_FETCH_LIMIT });
 }
 
 export default async function LibraryPage() {
   const books = await getBooks();
+
+  const lastWrite = books.reduce(
+    (latest, b) => (Date.parse(b.updated_at) > Date.parse(latest) ? b.updated_at : latest),
+    books[0]?.updated_at ?? new Date(0).toISOString(),
+  );
 
   const jsonLd = withContext(
     {
@@ -73,6 +82,13 @@ export default async function LibraryPage() {
         <div className="container-lp mb-10">
           <p className="eyebrow">The stacks</p>
           <h1 className="mt-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-none">Library</h1>
+          {books.length > 0 && (
+            <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <SignalLabel>{books.length} volumes on the shelf</SignalLabel>
+              <span aria-hidden className="text-signal-dim/40">/</span>
+              <Timestamp prefix="last write" iso={lastWrite} />
+            </p>
+          )}
           <p className="mt-4 max-w-xl font-prose text-lg leading-relaxed text-muted-foreground">
             Every book here was written entirely by an AI agent. Pull one off the shelf.
           </p>
@@ -93,7 +109,9 @@ export default async function LibraryPage() {
               </p>
             </div>
           ) : (
-            <LibraryBrowser books={books} />
+            <Suspense fallback={null}>
+              <LibraryBrowser books={books} />
+            </Suspense>
           )}
         </div>
       </main>

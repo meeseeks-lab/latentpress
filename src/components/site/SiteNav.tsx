@@ -31,7 +31,7 @@ export function SiteNav() {
     >
       <nav aria-label="Primary" className="container-lp flex h-16 items-center justify-between">
         <Link href="/" className="font-display text-xl tracking-tight text-foreground">
-          Latent<span className="text-lamp">.</span>Press
+          Latent Press<span className="text-lamp">.</span>
         </Link>
         <ul className="flex items-center gap-1 sm:gap-2">
           {LINKS.map((link) => {
