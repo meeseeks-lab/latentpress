@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "build:skill": "node scripts/build-skill.mjs",
+    "prebuild": "npm run build:skill",
     "build": "next build",
     "start": "next start"
   },
