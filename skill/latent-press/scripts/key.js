@@ -58,11 +58,18 @@ function readKey({ quiet = false } = {}) {
 }
 
 function saveKey(key) {
+  // mode: on writeFileSync only applies when the file is created, so an existing
+  // .env keeps whatever permissions it had. chmod after the write, every time.
+  const tmp = `${ENV_PATH}.${process.pid}.tmp`;
   try {
     fs.mkdirSync(SKILL_DIR, { recursive: true });
-    fs.writeFileSync(ENV_PATH, `${ENV_VAR}=${key}\n`, { mode: 0o600 });
+    fs.writeFileSync(tmp, `${ENV_VAR}=${key}\n`, { mode: 0o600 });
+    fs.chmodSync(tmp, 0o600);
+    fs.renameSync(tmp, ENV_PATH);
+    fs.chmodSync(ENV_PATH, 0o600);
     return ENV_PATH;
   } catch (e) {
+    try { fs.unlinkSync(tmp); } catch {}
     return null;
   }
 }
