@@ -13,14 +13,27 @@ interface LibraryBrowserProps {
 
 const SORTS: { value: LibrarySort; label: string }[] = [
   { value: "newest", label: "Newest" },
+  { value: "updated", label: "Recently updated" },
   { value: "oldest", label: "Oldest" },
   { value: "title", label: "A to Z" },
 ];
+
+// "zh-CN" -> "Chinese (China)" using the browser's own locale data, so we don't
+// ship and maintain a language-name table.
+function languageLabel(tag: string): string {
+  try {
+    const display = new Intl.DisplayNames(["en"], { type: "language" });
+    return display.of(tag) ?? tag;
+  } catch {
+    return tag;
+  }
+}
 
 function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] {
   const q = filters.query.trim().toLowerCase();
   const filtered = books.filter((b) => {
     if (filters.genre && !b.genre.includes(filters.genre)) return false;
+    if (filters.language && b.language !== filters.language) return false;
     if (!q) return true;
     return (
       b.title.toLowerCase().includes(q) ||
@@ -30,12 +43,14 @@ function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] 
   });
   const byDate = (a: ShelfBook, b: ShelfBook) => Date.parse(b.created_at) - Date.parse(a.created_at);
   if (filters.sort === "newest") return filtered.sort(byDate);
+  if (filters.sort === "updated")
+    return filtered.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
   if (filters.sort === "oldest") return filtered.sort((a, b) => byDate(b, a));
   return filtered.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export function LibraryBrowser({ books }: LibraryBrowserProps) {
-  const [filters, setFilters] = useState<LibraryFilters>({ query: "", genre: null, sort: "newest", view: "shelf" });
+  const [filters, setFilters] = useState<LibraryFilters>({ query: "", genre: null, language: null, sort: "newest", view: "shelf" });
   const [picked, setPicked] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -43,6 +58,12 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
     const counts = new Map<string, number>();
     books.forEach((b) => b.genre.forEach((g) => counts.set(g, (counts.get(g) ?? 0) + 1)));
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([g]) => g);
+  }, [books]);
+
+  const languages = useMemo(() => {
+    const counts = new Map<string, number>();
+    books.forEach((b) => counts.set(b.language, (counts.get(b.language) ?? 0) + 1));
+    return counts.size > 1 ? [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([l]) => l) : [];
   }, [books]);
 
   const visible = useMemo(() => applyFilters([...books], filters), [books, filters]);
@@ -59,7 +80,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
     el?.querySelector<HTMLAnchorElement>("a")?.focus({ preventScroll: true });
   };
 
-  const cleared = !filters.query && !filters.genre;
+  const cleared = !filters.query && !filters.genre && !filters.language;
 
   return (
     <div>
@@ -103,7 +124,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
 
       {genres.length > 0 && (
         <div className="mt-5 flex flex-wrap items-center gap-2" role="group" aria-label="Genre">
-          <button type="button" className="chip" data-active={filters.genre === null} onClick={() => set({ genre: null })}>
+          <button type="button" className="chip" data-active={filters.genre === null} aria-pressed={filters.genre === null} onClick={() => set({ genre: null })}>
             All shelves
           </button>
           {genres.map((g) => (
@@ -121,6 +142,26 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
         </div>
       )}
 
+      {languages.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Language">
+          <button type="button" className="chip" data-active={filters.language === null} onClick={() => set({ language: null })}>
+            All languages
+          </button>
+          {languages.map((l) => (
+            <button
+              key={l}
+              type="button"
+              className="chip"
+              data-active={filters.language === l}
+              aria-pressed={filters.language === l}
+              onClick={() => set({ language: filters.language === l ? null : l })}
+            >
+              {languageLabel(l)}
+            </button>
+          ))}
+        </div>
+      )}
+
       <p className="mt-8 text-sm text-muted-foreground" aria-live="polite">
         {visible.length === books.length
           ? `${books.length} ${books.length === 1 ? "book" : "books"} on the shelves`
@@ -128,7 +169,7 @@ export function LibraryBrowser({ books }: LibraryBrowserProps) {
         {!cleared && (
           <button
             type="button"
-            onClick={() => set({ query: "", genre: null })}
+            onClick={() => set({ query: "", genre: null, language: null })}
             className="ml-3 inline-flex items-center gap-1 text-lamp hover:underline"
           >
             <X className="h-3 w-3" /> Clear
@@ -174,7 +215,7 @@ interface ViewProps {
 
 function ShelfView({ books, picked, listRef }: ViewProps) {
   return (
-    <ul ref={listRef} className="mt-10 grid grid-cols-2 gap-x-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <ul ref={listRef} className="mt-10 grid grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-x-2">
       {books.map((book, i) => (
         <li
           key={book.id}
@@ -190,7 +231,7 @@ function ShelfView({ books, picked, listRef }: ViewProps) {
             {book.title}
           </Link>
           {picked === book.id && (
-            <span className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-lamp px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-lamp-ink">
+            <span className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-lamp px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-lamp-ink">
               Try this one
             </span>
           )}

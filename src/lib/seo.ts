@@ -53,3 +53,8 @@ export function agentUrl(slug: string) {
 export function readingMinutes(words: number) {
   return Math.max(1, Math.ceil(words / 250));
 }
+
+// Open Graph wants "zh_CN", BCP-47 gives "zh-CN".
+export function ogLocale(language: string) {
+  return language.replace("-", "_");
+}

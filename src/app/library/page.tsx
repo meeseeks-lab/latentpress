@@ -20,14 +20,14 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/library` },
   openGraph: {
     type: "website",
-    title: `${TITLE} — Latent Press`,
+    title: `${TITLE} · Latent Press`,
     description: DESCRIPTION,
     url: `${SITE_URL}/library`,
     images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Latent Press Library" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${TITLE} — Latent Press`,
+    title: `${TITLE} · Latent Press`,
     description: DESCRIPTION,
     images: [DEFAULT_OG_IMAGE],
   },

@@ -47,6 +47,7 @@
   --color-raised: var(--raised);
   --color-wood: var(--wood);
   --color-wood-dark: var(--wood-dark);
+  --color-well: var(--well);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -83,6 +84,17 @@
   --lamp-ink: oklch(0.17 0.03 60);
   --wood: oklch(0.32 0.05 55);
   --wood-dark: oklch(0.22 0.035 50);
+  --wood-light: oklch(0.43 0.06 58);
+  --well: oklch(0.13 0.012 60);
+  --plank: 18px;
+  --plank-face: linear-gradient(
+    to bottom,
+    var(--wood-light) 0,
+    var(--wood-light) 3px,
+    var(--wood) 4px,
+    var(--wood) 55%,
+    var(--wood-dark) 100%
+  );
   --chart-1: oklch(0.78 0.15 75);
   --chart-2: oklch(0.65 0.10 160);
   --chart-3: oklch(0.62 0.12 30);
@@ -123,6 +135,7 @@
   --lamp: oklch(0.55 0.15 60);
   --lamp-deep: oklch(0.45 0.14 50);
   --lamp-ink: oklch(0.98 0.01 85);
+  --well: oklch(0.90 0.02 85);
   color-scheme: light;
 }
 
@@ -142,6 +155,15 @@
   ::selection {
     background: var(--lamp);
     color: var(--lamp-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--lamp);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  a:focus-visible .book3d-cover {
+    outline: 3px solid var(--lamp);
+    outline-offset: 4px;
   }
 }
 
@@ -213,7 +235,8 @@
     gap: 0.35rem;
     border-radius: 999px;
     border: 1px solid var(--border);
-    padding: 0.35rem 0.8rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.85rem;
     font-family: var(--font-ui);
     font-size: 0.8rem;
     font-weight: 500;
@@ -227,6 +250,10 @@
   .chip:hover {
     color: var(--foreground);
     border-color: var(--muted-foreground);
+  }
+  .chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   .chip[data-active="true"] {
     background: color-mix(in oklch, var(--lamp) 16%, transparent);
@@ -254,7 +281,6 @@
     transform-style: preserve-3d;
     transform: rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--lift, 0px));
     transition: transform 600ms var(--ease);
-    will-change: transform;
   }
   .book3d-cover,
   .book3d-back,
@@ -357,20 +383,75 @@
 
   .shelf-plank {
     position: relative;
-    height: 14px;
-    border-radius: 2px;
-    background: linear-gradient(to bottom, var(--wood) 0%, var(--wood-dark) 100%);
-    box-shadow:
-      inset 0 1px 0 oklch(1 0 0 / 14%),
-      0 18px 30px -8px oklch(0 0 0 / 70%);
+    height: var(--plank);
+    border-radius: 1px;
+    background: var(--plank-face);
+    box-shadow: 0 22px 32px -10px oklch(0 0 0 / 65%);
   }
   .shelf-plank::after {
     content: "";
     position: absolute;
     inset: 100% 0 auto 0;
-    height: 10px;
-    background: linear-gradient(to bottom, var(--wood-dark), transparent);
-    opacity: 0.6;
+    height: 14px;
+    background: linear-gradient(to bottom, oklch(0 0 0 / 45%), transparent);
+  }
+
+  .bookcase {
+    --label: 3.25rem;
+    --row: 18.75rem;
+    padding: var(--plank) 14px 14px;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, var(--wood), var(--wood-dark));
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 12%),
+      inset 0 -1px 0 oklch(0 0 0 / 40%),
+      0 40px 60px -30px oklch(0 0 0 / 70%);
+  }
+  .bookcase-shelves {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    grid-auto-rows: var(--row);
+    padding-bottom: var(--label);
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        oklch(0 0 0 / 55%) 0,
+        oklch(0 0 0 / 0%) 36px,
+        oklch(0 0 0 / 0%) calc(var(--row) - var(--plank)),
+        var(--wood-light) calc(var(--row) - var(--plank)),
+        var(--wood-light) calc(var(--row) - var(--plank) + 3px),
+        var(--wood) calc(var(--row) - var(--plank) + 4px),
+        var(--wood) calc(var(--row) - var(--plank) * 0.45),
+        var(--wood-dark) var(--row)
+      ),
+      var(--well);
+    box-shadow: inset 0 0 56px oklch(0 0 0 / 50%);
+  }
+  .bookcase-slot {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 0.5rem var(--plank);
+  }
+  .bookcase-slot::before {
+    content: "";
+    position: absolute;
+    bottom: calc(var(--plank) - 5px);
+    left: 50%;
+    width: 9rem;
+    height: 14px;
+    transform: translateX(-46%);
+    background: radial-gradient(ellipse at center, oklch(0 0 0 / 55%), transparent 68%);
+    pointer-events: none;
+  }
+  .bookcase-label {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    left: 0.5rem;
+    right: 0.5rem;
   }
 
   .fallback-cover {
@@ -423,15 +504,15 @@
     color: var(--lamp);
     letter-spacing: 0.5em;
   }
-  .prose-lp[data-size="sm"] {
+  [data-size="sm"] .prose-lp {
     font-size: 1.02rem;
     line-height: 1.75;
   }
-  .prose-lp[data-size="md"] {
+  [data-size="md"] .prose-lp {
     font-size: 1.2rem;
     line-height: 1.8;
   }
-  .prose-lp[data-size="lg"] {
+  [data-size="lg"] .prose-lp {
     font-size: 1.4rem;
     line-height: 1.85;
   }

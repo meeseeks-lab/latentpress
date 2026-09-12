@@ -2,46 +2,53 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function CopyBlock({ code, filename }: { code: string; filename: string }) {
+interface CopyButtonProps {
+  text: string;
+  onCopied?: () => void;
+}
+
+function CopyButton({ text }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(code);
+    await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="rounded-lg border border-border/50 bg-[#0a0a0a] overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500/20" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
-            <div className="w-3 h-3 rounded-full bg-green-500/20" />
-          </div>
-          <span className="text-xs text-muted-foreground ml-2 font-mono">{filename}</span>
-        </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-white/5"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-green-400" />
-              <span className="text-green-400">Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy</span>
-            </>
-          )}
-        </button>
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-live="polite"
+      className="flex h-8 items-center gap-1.5 rounded px-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+    >
+      {copied ? (
+        <>
+          <Check className="h-3.5 w-3.5 text-lamp" />
+          <span className="text-lamp">Copied</span>
+        </>
+      ) : (
+        <>
+          <Copy className="h-3.5 w-3.5" />
+          <span>Copy</span>
+        </>
+      )}
+    </button>
+  );
+}
+
+export function CopyBlock({ code, filename }: { code: string; filename: string }) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-border bg-well">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+        <span className="font-mono text-xs text-muted-foreground">{filename}</span>
+        <CopyButton text={code} />
       </div>
-      <pre className="p-6 overflow-x-auto overflow-y-auto max-h-[400px] text-sm leading-relaxed">
-        <code className="text-muted-foreground font-mono">{code}</code>
+      <pre className="max-h-[400px] overflow-auto p-6 text-sm leading-relaxed">
+        <code className="font-mono text-foreground/80">{code}</code>
       </pre>
     </div>
   );
@@ -49,58 +56,31 @@ export function CopyBlock({ code, filename }: { code: string; filename: string }
 
 export function TabbedCopyBlock({ tabs }: { tabs: { label: string; filename: string; code: string }[] }) {
   const [activeTab, setActiveTab] = useState(0);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(tabs[activeTab].code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
-    <div className="rounded-lg border border-border/50 bg-[#0a0a0a] overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500/20" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
-            <div className="w-3 h-3 rounded-full bg-green-500/20" />
-          </div>
-          <div className="flex gap-1">
-            {tabs.map((tab, i) => (
-              <button
-                key={i}
-                onClick={() => { setActiveTab(i); setCopied(false); }}
-                className={`text-xs font-mono px-3 py-1 rounded transition-colors ${
-                  i === activeTab
-                    ? "bg-white/10 text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+    <div className="overflow-hidden rounded-lg border border-border bg-well">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+        <div className="flex gap-1" role="tablist">
+          {tabs.map((tab, i) => (
+            <button
+              key={tab.label}
+              type="button"
+              role="tab"
+              aria-selected={i === activeTab}
+              onClick={() => setActiveTab(i)}
+              className={cn(
+                "rounded px-3 py-1 font-mono text-xs transition-colors",
+                i === activeTab ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-white/5"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-green-400" />
-              <span className="text-green-400">Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy</span>
-            </>
-          )}
-        </button>
+        <CopyButton key={activeTab} text={tabs[activeTab].code} />
       </div>
-      <pre className="p-6 overflow-x-auto text-sm leading-relaxed max-h-[500px]">
-        <code className="text-muted-foreground font-mono">{tabs[activeTab].code}</code>
+      <pre className="max-h-[500px] overflow-auto p-6 text-sm leading-relaxed">
+        <code className="font-mono text-foreground/80">{tabs[activeTab].code}</code>
       </pre>
     </div>
   );

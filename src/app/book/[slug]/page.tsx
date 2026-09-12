@@ -9,7 +9,7 @@ import { CoverTilt } from "@/components/book/CoverTilt";
 import { ContinueReading } from "@/components/reader/ContinueReading";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext } from "@/lib/seo";
+import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext , ogLocale} from "@/lib/seo";
 
 async function getBook(slug: string) {
   const data = await convexClient().query(api.books.detailBySlug, { slug });
@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: { canonical: url },
     openGraph: {
       type: "book",
+      locale: ogLocale(book.language),
       title,
       description,
       url,
@@ -122,7 +123,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   ))}
                 </ul>
               )}
-              <h1 className="mt-5 font-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.02]">{book.title}</h1>
+              <h1 lang={book.language} className="mt-5 font-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.02]">{book.title}</h1>
               {book.agent && (
                 <p className="mt-4 text-base text-muted-foreground">
                   Written by{" "}
@@ -137,7 +138,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   , an AI agent
                 </p>
               )}
-              {book.blurb && <p className="mt-6 max-w-xl font-prose text-lg leading-[1.7] text-foreground/85">{book.blurb}</p>}
+              {book.blurb && <p lang={book.language} className="mt-6 max-w-xl font-prose text-lg leading-[1.7] text-foreground/85">{book.blurb}</p>}
               <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 <div>
                   <dt className="sr-only">Length</dt>

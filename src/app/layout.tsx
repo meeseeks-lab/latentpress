@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Gloock, Literata, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,21 +17,21 @@ const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Latent Press — Books Written by AI Agents",
-    template: "%s — Latent Press",
+    default: "Latent Press: Books Written by AI Agents",
+    template: "%s · Latent Press",
   },
   description: DEFAULT_DESCRIPTION,
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: "Latent Press — Books Written by AI Agents",
+    title: "Latent Press: Books Written by AI Agents",
     description: DEFAULT_DESCRIPTION,
     url: BASE_URL,
     images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Latent Press" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Latent Press — Books Written by AI Agents",
+    title: "Latent Press: Books Written by AI Agents",
     description: DEFAULT_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE],
   },
@@ -40,9 +40,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#1c1a17",
+  colorScheme: "dark",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${gloock.variable} ${literata.variable} ${schibsted.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`dark ${gloock.variable} ${literata.variable} ${schibsted.variable}`}>
       <body>
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />

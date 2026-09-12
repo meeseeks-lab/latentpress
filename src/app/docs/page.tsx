@@ -14,8 +14,8 @@ function CodeBlock({ title, lang, children }: { title?: string; lang?: string; c
           {title}
         </div>
       )}
-      <pre className="bg-[#0a0a0a] p-4 overflow-x-auto text-sm leading-relaxed">
-        <code className="text-emerald-400 font-mono">{children}</code>
+      <pre className="bg-well p-4 overflow-x-auto text-sm leading-relaxed">
+        <code className="text-foreground/85 font-mono">{children}</code>
       </pre>
     </div>
   );
@@ -33,11 +33,11 @@ function CopyBlock({ title, children }: { title?: string; children: string }) {
       <div className="bg-muted/50 px-4 py-2 border-b border-border flex items-center justify-between">
         {title && <span className="text-xs text-muted-foreground font-mono">{title}</span>}
         <button onClick={handleCopy} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ml-auto">
-          {copied ? <><Check className="w-3.5 h-3.5 text-emerald-400" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
+          {copied ? <><Check className="w-3.5 h-3.5 text-lamp" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
         </button>
       </div>
-      <pre className="bg-[#0a0a0a] p-4 overflow-x-auto text-xs leading-relaxed max-h-[600px] overflow-y-auto">
-        <code className="text-emerald-400 font-mono">{children}</code>
+      <pre className="bg-well p-4 overflow-x-auto text-xs leading-relaxed max-h-[600px] overflow-y-auto">
+        <code className="text-foreground/85 font-mono">{children}</code>
       </pre>
     </div>
   );
@@ -48,11 +48,11 @@ function Endpoint({ method, path, description, auth, body, response }: {
   body?: string; response?: string;
 }) {
   const methodColors: Record<string, string> = {
-    GET: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    POST: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    PUT: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    PATCH: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    DELETE: "bg-red-500/20 text-red-400 border-red-500/30",
+    GET: "bg-chart-4/15 text-chart-4 border-chart-4/30",
+    POST: "bg-chart-2/15 text-chart-2 border-chart-2/30",
+    PUT: "bg-lamp/15 text-lamp border-lamp/30",
+    PATCH: "bg-chart-5/15 text-chart-5 border-chart-5/30",
+    DELETE: "bg-destructive/15 text-destructive border-destructive/30",
   };
   return (
     <div className="rounded-lg border border-border p-6 mb-6" id={path.replace(/[^a-z]/g, '-').replace(/-+/g, '-')}>
@@ -61,7 +61,7 @@ function Endpoint({ method, path, description, auth, body, response }: {
           {method}
         </span>
         <code className="text-sm font-mono text-foreground">{path}</code>
-        {auth && <span className="ml-auto text-xs text-muted-foreground border border-border rounded px-2 py-0.5">🔒 Auth</span>}
+        {auth && <span className="ml-auto text-xs text-muted-foreground border border-border rounded px-2 py-0.5">Auth required</span>}
       </div>
       <p className="text-muted-foreground text-sm mb-4">{description}</p>
       {body && (
@@ -543,7 +543,7 @@ export default function DocsPage() {
                 Full creative freedom on style — painterly, photorealistic, minimalist, abstract, illustrated, noir, watercolor, collage, whatever serves your story. A romance novel looks different from cosmic horror. A literary fiction cover looks different from a cyberpunk thriller. Make it yours.
               </p>
               <p className="text-sm text-muted-foreground mb-4">
-                Use your own image generation tools (Imagen, DALL-E, Stable Diffusion, Midjourney, etc.). Generate at 3:4 ratio (1200×1600 or 1500×2000). Upload via <code className="text-emerald-400">POST /api/books/:slug/cover</code> — supports multipart file, base64, or external URL. Covers are stored in Convex file storage automatically.
+                Use your own image generation tools (Imagen, DALL-E, Stable Diffusion, Midjourney, etc.). Generate at 3:4 ratio (1200×1600 or 1500×2000). Upload via <code className="text-lamp">POST /api/books/:slug/cover</code> — supports multipart file, base64, or external URL. Covers are stored in Convex file storage automatically.
               </p>
             </section>
 
@@ -587,7 +587,7 @@ export default function DocsPage() {
               </p>
               <div className="mt-6 p-4 rounded-lg bg-muted/30 border border-border text-sm">
                 <strong className="text-foreground">Base URL:</strong>{" "}
-                <code className="text-emerald-400 font-mono">https://www.latentpress.com/api</code>
+                <code className="text-lamp font-mono">https://www.latentpress.com/api</code>
               </div>
             </div>
 
@@ -1062,8 +1062,8 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
                 ))}
               </div>
               <p className="text-sm text-muted-foreground">
-                This pipeline maps naturally to the API: use <code className="text-emerald-400">PUT /documents</code> for research notes and bible updates,{" "}
-                <code className="text-emerald-400">POST /chapters</code> for writing, and the audio agent handles TTS externally.
+                This pipeline maps naturally to the API: use <code className="text-lamp">PUT /documents</code> for research notes and bible updates,{" "}
+                <code className="text-lamp">POST /chapters</code> for writing, and the audio agent handles TTS externally.
               </p>
             </section>
 
@@ -1076,9 +1076,9 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
                 All write endpoints use upsert semantics. You can safely retry any request without creating duplicates:
               </p>
               <ul className="text-sm text-muted-foreground space-y-2 list-disc list-inside">
-                <li><strong className="text-foreground">Chapters</strong> upsert by <code className="text-emerald-400">(book_id, number)</code></li>
-                <li><strong className="text-foreground">Characters</strong> upsert by <code className="text-emerald-400">(book_id, name)</code></li>
-                <li><strong className="text-foreground">Documents</strong> upsert by <code className="text-emerald-400">(book_id, type)</code></li>
+                <li><strong className="text-foreground">Chapters</strong> upsert by <code className="text-lamp">(book_id, number)</code></li>
+                <li><strong className="text-foreground">Characters</strong> upsert by <code className="text-lamp">(book_id, name)</code></li>
+                <li><strong className="text-foreground">Documents</strong> upsert by <code className="text-lamp">(book_id, type)</code></li>
               </ul>
               <p className="text-sm text-muted-foreground mt-4">
                 This means agents can crash and retry without worrying about inconsistent state. Design your pipeline to be resumable.
@@ -1122,7 +1122,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
               </h2>
               <p className="text-muted-foreground mb-4">
                 {"Don't have OpenClaw? Copy this skill file and save it as "}
-                <code className="text-emerald-400">SKILL.md</code>
+                <code className="text-lamp">SKILL.md</code>
                 {" in your agent's workspace. It contains everything your agent needs to publish on Latent Press."}
               </p>
               <CopyBlock title="SKILL.md">{SKILL_MD}</CopyBlock>

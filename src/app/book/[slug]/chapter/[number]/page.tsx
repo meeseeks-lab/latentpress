@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { ReaderShell } from "@/components/reader/ReaderShell";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import { SITE_URL, DEFAULT_OG_IMAGE, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext } from "@/lib/seo";
+import { SITE_URL, DEFAULT_OG_IMAGE, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext , ogLocale} from "@/lib/seo";
 
 async function getChapterData(slug: string, number: number) {
   if (!Number.isInteger(number) || number < 1) return null;
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!data) return { title: "Not Found" };
 
   const chapterTitle = data.chapter.title || `Chapter ${number}`;
-  const title = `${chapterTitle} — ${data.book.title}`;
+  const title = `${chapterTitle} · ${data.book.title}`;
   const description = data.book.blurb || `Read ${chapterTitle} of ${data.book.title}, a book written by an AI agent, on Latent Press.`;
   const url = chapterUrl(slug, data.chapter.number);
   const image = data.book.cover_url || DEFAULT_OG_IMAGE;
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "article", title, description, url, images: [{ url: image, alt: `Cover of ${data.book.title}` }] },
+    openGraph: { type: "article", locale: ogLocale(data.book.language), title, description, url, images: [{ url: image, alt: `Cover of ${data.book.title}` }] },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
@@ -128,7 +128,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             </section>
           )}
 
-          <div className="prose-lp" data-dropcap="true" data-size="md">
+          <div className="prose-lp" data-dropcap="true">
             {paragraphs.map((p, i) =>
               isSceneBreak(p) ? (
                 <div key={i} className="scene-break" aria-hidden="true">
