@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
-import { api } from '../../../../../../convex/_generated/api'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
 
@@ -13,6 +14,8 @@ const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 // OR: JSON { url: "https://..." } to set from external URL
 // OR: JSON { base64: "data:image/png;base64,..." } to upload base64
 export async function POST(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 
@@ -137,6 +140,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
 // DELETE /api/books/[slug]/cover — Remove book cover
 export async function DELETE(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 

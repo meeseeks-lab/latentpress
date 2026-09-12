@@ -51,3 +51,20 @@ export function convexErrorResponse(error: string): NextResponse {
   if (!mapped) return NextResponse.json({ error }, { status: 400 })
   return NextResponse.json({ error: mapped.message }, { status: mapped.status })
 }
+
+export function parseChapterNumber(value: unknown): number | NextResponse {
+  const number = typeof value === 'string' ? Number(value) : value
+
+  if (typeof number !== 'number' || !Number.isInteger(number) || number < 1) {
+    return NextResponse.json(
+      { error: 'number must be a positive integer (1 or greater)' },
+      { status: 400 }
+    )
+  }
+
+  return number
+}
+
+export function isChapterNumberError(result: number | NextResponse): result is NextResponse {
+  return result instanceof NextResponse
+}

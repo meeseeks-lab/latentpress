@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
-import { api } from '../../../../../../convex/_generated/api'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
 
 // GET /api/books/[slug]/documents — List all documents (or one by ?type=)
 export async function GET(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'read')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 
@@ -27,6 +30,8 @@ export async function GET(req: NextRequest, context: RouteContext) {
 // PUT /api/books/[slug]/documents — Update a document
 // Body: { type: 'bible'|'outline'|'status'|'story_so_far'|'process', content: string }
 export async function PUT(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 

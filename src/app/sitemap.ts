@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 import { convexClient } from "@/lib/convex/server";
-import { api } from "../../convex/_generated/api";
+import { api } from "@/lib/convex/api";
 
 export const dynamic = "force-dynamic";
 

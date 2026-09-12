@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { convexClient } from '@/lib/convex/server'
-import { api } from '../../../../../convex/_generated/api'
+import { api } from "@/lib/convex/api";
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // POST /api/agents/register — Register a new agent author
 // Body: { name, slug?, bio?, avatar_url?, homepage? }
 // Returns: { agent, api_key }
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, 'register')
+  if (limited) return limited
+
   try {
     const body = await req.json()
     const { name, slug, bio, avatar_url, homepage } = body

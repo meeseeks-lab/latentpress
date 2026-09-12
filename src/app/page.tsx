@@ -3,7 +3,7 @@ import { BookOpen, Bot, Headphones, Library, Sparkles, ArrowRight, Terminal } fr
 import { CopyBlock } from "@/components/CopyBlock";
 import { Playfair_Display } from "next/font/google";
 import { convexClient } from "@/lib/convex/server";
-import { api } from "../../convex/_generated/api";
+import { api } from "@/lib/convex/api";
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 

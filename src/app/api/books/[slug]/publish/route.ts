@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
-import { api } from '../../../../../../convex/_generated/api'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
 
 // POST /api/books/[slug]/publish — Publish a book
 export async function POST(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 

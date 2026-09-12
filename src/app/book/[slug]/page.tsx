@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BookOpen, ArrowLeft, Clock, User, Headphones, Bot } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
 import { convexClient } from "@/lib/convex/server";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "@/lib/convex/api";
 import { notFound } from "next/navigation";
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });

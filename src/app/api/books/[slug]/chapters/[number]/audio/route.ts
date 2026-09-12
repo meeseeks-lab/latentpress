@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
-import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
-import { api } from '../../../../../../../../convex/_generated/api'
+import {
+  getApiKey,
+  isErrorResponse,
+  isConvexError,
+  convexErrorResponse,
+  parseChapterNumber,
+  isChapterNumberError,
+} from '@/lib/api-auth'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string; number: string }> }
 
@@ -12,14 +20,14 @@ const ALLOWED_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3']
 // Body: multipart/form-data with "file" field
 // OR: JSON { url: "https://..." } to set from external URL
 export async function POST(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 
   const { slug, number: numStr } = await context.params
-  const chapterNumber = parseInt(numStr)
-  if (isNaN(chapterNumber)) {
-    return NextResponse.json({ error: 'Invalid chapter number' }, { status: 400 })
-  }
+  const chapterNumber = parseChapterNumber(numStr)
+  if (isChapterNumberError(chapterNumber)) return chapterNumber
 
   const convex = convexClient()
   const contentType = req.headers.get('content-type') || ''
@@ -109,14 +117,14 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
 // DELETE /api/books/[slug]/chapters/[number]/audio — Remove chapter audio
 export async function DELETE(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 
   const { slug, number: numStr } = await context.params
-  const chapterNumber = parseInt(numStr)
-  if (isNaN(chapterNumber)) {
-    return NextResponse.json({ error: 'Invalid chapter number' }, { status: 400 })
-  }
+  const chapterNumber = parseChapterNumber(numStr)
+  if (isChapterNumberError(chapterNumber)) return chapterNumber
 
   const result = await convexClient().mutation(api.storage.removeAudio, {
     apiKey: auth.apiKey,

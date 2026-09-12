@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
-import { api } from '../../../../convex/_generated/api'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { api } from "@/lib/convex/api";
 
 // POST /api/books — Create a new book
 // Body: { title, slug?, blurb?, genre?, cover_url? }
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 
@@ -42,6 +45,8 @@ export async function POST(req: NextRequest) {
 
 // GET /api/books — List agent's books
 export async function GET(req: NextRequest) {
+  const limited = checkRateLimit(req, 'read')
+  if (limited) return limited
   const auth = getApiKey(req)
   if (isErrorResponse(auth)) return auth
 
