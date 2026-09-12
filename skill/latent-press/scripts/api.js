@@ -5,7 +5,7 @@
 const fs = require('fs');
 const { readKey } = require('./key');
 
-const API = process.env.LATENTPRESS_API || 'https://www.latentpress.com/api';
+const API = 'https://www.latentpress.com/api';
 
 const USAGE = `Usage: node api.js <command> [args...]
 
@@ -22,7 +22,7 @@ Chapters:
   add-chapter <slug> <number> "Title" "Content"
   list-chapters <slug>
   get-chapter <slug> <number>
-  delete-chapter <slug> <number>
+  delete-chapter <slug> <number> --yes
 
 Context:
   list-docs <slug>
@@ -32,7 +32,7 @@ Context:
 
 Covers and audio:
   set-cover <slug> --file cover.png        (or --url "https://...")
-  remove-cover <slug>
+  remove-cover <slug> --yes
   set-audio <slug> <number> --file ch1.mp3 (or --url "https://...")
   remove-audio <slug> <number>`;
 
@@ -101,6 +101,13 @@ function parseArgs(args) {
     if (args[i].startsWith('--') && i + 1 < args.length) result[args[i].slice(2)] = args[++i];
   }
   return result;
+}
+
+function confirmDestructive(what) {
+  if (process.argv.includes('--yes')) return;
+  console.error(`Refusing to ${what} without confirmation.`);
+  console.error('This cannot be undone. Re-run with --yes if you are sure.');
+  process.exit(1);
 }
 
 function requireChapterNumber(raw) {
@@ -197,7 +204,8 @@ const commands = {
   },
 
   async 'delete-chapter'([slug, number]) {
-    if (!slug || !number) { console.error('Usage: delete-chapter <slug> <number>'); process.exit(1); }
+    if (!slug || !number) { console.error('Usage: delete-chapter <slug> <number> --yes'); process.exit(1); }
+    confirmDestructive(`delete chapter ${number} of "${slug}"`);
     const data = await api('DELETE', `/books/${slug}/chapters/${requireChapterNumber(number)}`);
     show('Deleted:', data);
   },
@@ -250,7 +258,8 @@ const commands = {
   },
 
   async 'remove-cover'([slug]) {
-    if (!slug) { console.error('Usage: remove-cover <slug>'); process.exit(1); }
+    if (!slug) { console.error('Usage: remove-cover <slug> --yes'); process.exit(1); }
+    confirmDestructive(`remove the cover of "${slug}"`);
     show('Cover removed:', await api('DELETE', `/books/${slug}/cover`));
   },
 
@@ -268,7 +277,8 @@ const commands = {
   },
 
   async 'remove-audio'([slug, number]) {
-    if (!slug || !number) { console.error('Usage: remove-audio <slug> <number>'); process.exit(1); }
+    if (!slug || !number) { console.error('Usage: remove-audio <slug> <number> --yes'); process.exit(1); }
+    confirmDestructive(`remove audio from chapter ${number} of "${slug}"`);
     show('Audio removed:', await api('DELETE', `/books/${slug}/chapters/${requireChapterNumber(number)}/audio`));
   },
 

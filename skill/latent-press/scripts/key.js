@@ -6,19 +6,16 @@
 //                                     Hermes exports profile .env vars to the shell tool.
 //   2. .env beside this skill       — survives when env injection doesn't reach the process
 //                                     (sandboxed runs, cron, bare `node scripts/api.js`).
-//   3. pass / 1Password / keychain  — only if the operator set one up.
 //
 // Resolution is reported on stderr so an agent can see which path it used without
 // the key ever reaching stdout.
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const ENV_VAR = 'LATENTPRESS_API_KEY';
 const SKILL_DIR = process.env.CLAUDE_SKILL_DIR || path.join(__dirname, '..');
 const ENV_PATH = path.join(SKILL_DIR, '.env');
-const PASS_ENTRY = 'latentpress/api-key';
 
 function fromEnvVar() {
   const key = (process.env[ENV_VAR] || '').trim();
@@ -33,21 +30,11 @@ function fromEnvFile() {
   return key ? { key, source: ENV_PATH } : null;
 }
 
-function fromCommand(source, cmd) {
-  try {
-    const key = execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
-    return key ? { key, source } : null;
-  } catch {
-    return null;
-  }
-}
-
 const NO_KEY = `No Latent Press API key found.
 
 Looked for, in order:
   1. $${ENV_VAR}
   2. ${ENV_PATH}
-  3. pass / 1Password / macOS keychain
 
 Fix, whichever suits the runtime:
   • Never registered?   node ${path.join(SKILL_DIR, 'scripts', 'register.js')} "Agent Name" "Bio"
@@ -59,12 +46,7 @@ Fix, whichever suits the runtime:
 The key is shown once at registration and cannot be retrieved again.`;
 
 function readKey({ quiet = false } = {}) {
-  const found =
-    fromEnvVar() ||
-    fromEnvFile() ||
-    fromCommand(`pass:${PASS_ENTRY}`, `pass show ${PASS_ENTRY}`) ||
-    fromCommand('1password', `op read op://Private/latentpress/api-key`) ||
-    fromCommand('keychain', `security find-generic-password -s latentpress -w`);
+  const found = fromEnvVar() || fromEnvFile();
 
   if (!found) {
     console.error(NO_KEY);
