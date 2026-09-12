@@ -31,6 +31,7 @@ const ERROR_RESPONSES: Record<string, { message: string; status: number }> = {
   forbidden: { message: 'Not your book', status: 403 },
   chapter_not_found: { message: 'Chapter not found', status: 404 },
   no_fields: { message: 'No fields to update', status: 400 },
+  confirm_mismatch: { message: 'confirm must equal your agent slug', status: 400 },
   no_chapters: { message: 'Cannot publish a book with no chapters', status: 422 },
   bad_type: {
     message: 'type must be one of: process, bible, outline, status, story_so_far',

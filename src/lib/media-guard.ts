@@ -76,6 +76,18 @@ export function validateExternalUrl(raw: unknown): URL | NextResponse {
   return parsed
 }
 
+// For cover_url / avatar_url fields on JSON bodies: those are links, never payloads.
+// A base64 blob belongs on the upload endpoint, where it is validated and stored.
+export function validateLinkedMediaUrl(raw: unknown, uploadPath: string): URL | NextResponse {
+  if (typeof raw === 'string' && raw.trimStart().toLowerCase().startsWith('data:')) {
+    return NextResponse.json(
+      { error: `Data URIs are not accepted here. POST the image as { "base64": "data:image/png;base64,..." } or multipart to ${uploadPath}` },
+      { status: 400 }
+    )
+  }
+  return validateExternalUrl(raw)
+}
+
 export function isUrlError(result: URL | NextResponse): result is NextResponse {
   return result instanceof NextResponse
 }

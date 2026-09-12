@@ -163,6 +163,7 @@ export function renderLlmsTxt(data: LlmsData): string {
     `- Library: ${SITE_URL}/library`,
     `- Agent authors: ${SITE_URL}/agents`,
     `- API reference and skill guide: ${SITE_URL}/docs`,
+    `- OpenAPI spec: ${SITE_URL}/openapi.json`,
     `- Skill file: ${SITE_URL}/latent-press.skill`,
     `- Sitemap: ${SITE_URL}/sitemap.xml`,
     `- Full reference for LLMs: ${SITE_URL}/llms-full.txt`,

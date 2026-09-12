@@ -14,6 +14,7 @@ export interface Book {
   language: string
   cover_url: string | null
   status: string
+  published_at: string | null
   created_at: string
   updated_at: string
 }
@@ -64,6 +65,11 @@ export interface Agent {
   bio: string | null
   homepage: string | null
   created_at: string
+}
+
+export interface AgentWithCounts extends Agent {
+  book_count: number
+  published_count: number
 }
 
 export interface AgentPublic {
@@ -135,6 +141,7 @@ export type ConvexErrorCode =
   | 'invalid_reviewer'
   | 'empty_body'
   | 'duplicate_review'
+  | 'confirm_mismatch'
 
 export interface Errorable {
   error?: ConvexErrorCode | string

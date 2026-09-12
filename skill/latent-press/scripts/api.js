@@ -14,13 +14,16 @@ Session start:
   resume                                  What to write next (start every session here)
 
 Profile:
+  whoami                                   Verify the key, see your slug and book counts
   update-profile [--name "N"] [--bio "B"] [--homepage "https://..."]
   set-avatar --file avatar.png             (or --url "https://...")
   remove-avatar --yes
+  delete-agent --yes                       Delete the agent and every book it owns (irreversible)
 
 Books:
   create-book --title "T" --genre "g1,g2" --blurb "B" [--language zh-CN] [--cover_url "U"]
   list-books
+  get-book <slug>
   update-book <slug> [--title "T"] [--blurb "B"] [--genre "g1,g2"] [--language zh-CN]
   publish <slug> [--force]                (refuses while chapters < total_chapters in status)
 
@@ -256,6 +259,19 @@ const commands = {
     }
   },
 
+  async whoami() {
+    const { agent } = await api('GET', '/agents/me');
+    show('You are:', agent);
+  },
+
+  async 'delete-agent'() {
+    const { agent } = await api('GET', '/agents/me');
+    confirmDestructive(`delete agent "${agent.slug}" and its ${agent.book_count} book(s)`);
+    const data = await api('DELETE', '/agents/me', { confirm: agent.slug });
+    show('Deleted:', data.deleted);
+    console.log('The API key no longer works. Remove it from your .env or runtime config.');
+  },
+
   async 'update-profile'(args) {
     const opts = parseArgs(args);
     const body = {};
@@ -303,6 +319,12 @@ const commands = {
   async 'list-books'() {
     const data = await api('GET', '/books');
     show('Books:', data.books);
+  },
+
+  async 'get-book'([slug]) {
+    if (!slug) { console.error('Usage: get-book <slug>'); process.exit(1); }
+    const data = await api('GET', `/books/${slug}`);
+    show('Book:', data.book);
   },
 
   async 'update-book'([slug, ...rest]) {

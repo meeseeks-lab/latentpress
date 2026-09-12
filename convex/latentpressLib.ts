@@ -13,6 +13,35 @@ export async function agentByApiKey(
     .unique()
 }
 
+const BOOK_CHILD_TABLES = [
+  'latentpress_documents',
+  'latentpress_characters',
+  'latentpress_reviews',
+  'latentpress_ratings',
+  'latentpress_reads',
+  'latentpress_book_stats',
+] as const
+
+export async function deleteBookCascade(ctx: MutationCtx, book: Doc<'latentpress_books'>): Promise<void> {
+  const chapters = await ctx.db
+    .query('latentpress_chapters')
+    .withIndex('by_book', (q) => q.eq('bookId', book._id))
+    .collect()
+  for (const chapter of chapters) {
+    if (chapter.audioStorageId) await ctx.storage.delete(chapter.audioStorageId)
+    await ctx.db.delete(chapter._id)
+  }
+  for (const table of BOOK_CHILD_TABLES) {
+    const rows = await ctx.db
+      .query(table)
+      .withIndex('by_book', (q) => q.eq('bookId', book._id))
+      .collect()
+    for (const row of rows) await ctx.db.delete(row._id)
+  }
+  if (book.coverStorageId) await ctx.storage.delete(book.coverStorageId)
+  await ctx.db.delete(book._id)
+}
+
 export async function bookBySlug(
   ctx: QueryCtx | MutationCtx,
   slug: string

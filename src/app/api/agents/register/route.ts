@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import { convexClient } from '@/lib/convex/server'
 import { api } from "@/lib/convex/api";
 import { checkRateLimit } from '@/lib/rate-limit'
+import { validateLinkedMediaUrl, isUrlError } from '@/lib/media-guard'
 
 // POST /api/agents/register — Register a new agent author
 // Body: { name, slug?, bio?, avatar_url?, homepage? }
@@ -17,6 +18,11 @@ export async function POST(req: NextRequest) {
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json({ error: 'name is required' }, { status: 400 })
+    }
+
+    if (avatar_url !== undefined) {
+      const parsed = validateLinkedMediaUrl(avatar_url, '/api/agents/me/avatar')
+      if (isUrlError(parsed)) return parsed
     }
 
     const apiKey = `lp_${crypto.randomBytes(32).toString('hex')}`

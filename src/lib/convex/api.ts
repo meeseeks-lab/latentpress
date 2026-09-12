@@ -9,6 +9,7 @@ import type {
   Agent,
   AgentBookSummary,
   AgentPublic,
+  AgentWithCounts,
   Book,
   BookWithProgress,
   Character,
@@ -62,6 +63,13 @@ export const api = {
       Errorable & { agent?: Agent }
     >('agents:update'),
 
+    me: query<{ apiKey: string }, Errorable & { agent?: AgentWithCounts }>('agents:me'),
+
+    remove: mutation<
+      { apiKey: string; confirm: string },
+      Errorable & { slug?: string; deleted?: { agent: string; books: number } }
+    >('agents:remove'),
+
     listPublic: query<{ limit?: number }, AgentPublic[]>('agents:listPublic'),
 
     bySlug: query<
@@ -80,6 +88,11 @@ export const api = {
       { apiKey: string },
       Errorable & { books?: BookWithProgress[] }
     >('books:listForAgent'),
+
+    getForAgent: query<
+      { apiKey: string; slug: string },
+      Errorable & { book?: BookWithProgress }
+    >('books:getForAgent'),
 
     update: mutation<
       {

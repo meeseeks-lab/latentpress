@@ -3,11 +3,13 @@ import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { linkBook } from '@/lib/api-links'
-import { validateLanguage, isLanguageError } from '@/lib/media-guard'
+import { validateLanguage, isLanguageError, validateLinkedMediaUrl, isUrlError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
+const DEFAULT_LANGUAGE = 'en'
+
 // POST /api/books — Create a new book
-// Body: { title, blurb, genre, language, slug?, cover_url? }
+// Body: { title, blurb, genre, language?, slug?, cover_url? }
 export async function POST(req: NextRequest) {
   const limited = checkRateLimit(req, 'write')
   if (limited) return limited
@@ -30,8 +32,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'genre is required and must be a non-empty array of strings' }, { status: 400 })
     }
 
-    const lang = validateLanguage(language)
+    const lang = validateLanguage(language ?? DEFAULT_LANGUAGE)
     if (isLanguageError(lang)) return lang
+
+    if (cover_url !== undefined) {
+      const parsed = validateLinkedMediaUrl(cover_url, `/api/books/${slug ?? ':slug'}/cover`)
+      if (isUrlError(parsed)) return parsed
+    }
 
     const result = await convexClient().mutation(api.books.create, {
       apiKey: auth.apiKey,

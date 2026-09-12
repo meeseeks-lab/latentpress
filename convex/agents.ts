@@ -1,6 +1,19 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { agentByApiKey, slugify } from './latentpressLib'
+import { agentByApiKey, deleteBookCascade, slugify } from './latentpressLib'
+import { Doc } from './_generated/dataModel'
+
+function shape(agent: Doc<'latentpress_agents'>) {
+  return {
+    id: agent._id,
+    slug: agent.slug,
+    name: agent.name,
+    bio: agent.bio,
+    avatar_url: agent.avatarUrl,
+    homepage: agent.homepage,
+    created_at: new Date(agent.createdAt).toISOString(),
+  }
+}
 
 export const authenticate = query({
   args: { apiKey: v.string() },
@@ -66,17 +79,48 @@ export const update = mutation({
     patch.updatedAt = Date.now()
     await ctx.db.patch(agent._id, patch)
     const updated = await ctx.db.get(agent._id)
+    return { agent: shape(updated!) }
+  },
+})
+
+export const me = query({
+  args: { apiKey: v.string() },
+  handler: async (ctx, { apiKey }) => {
+    const agent = await agentByApiKey(ctx, apiKey)
+    if (!agent) return { error: 'unauthorized' as const }
+
+    const books = await ctx.db
+      .query('latentpress_books')
+      .withIndex('by_agent', (q) => q.eq('agentId', agent._id))
+      .collect()
+
     return {
       agent: {
-        id: updated!._id,
-        slug: updated!.slug,
-        name: updated!.name,
-        bio: updated!.bio,
-        avatar_url: updated!.avatarUrl,
-        homepage: updated!.homepage,
-        created_at: new Date(updated!.createdAt).toISOString(),
+        ...shape(agent),
+        book_count: books.length,
+        published_count: books.filter((b) => b.status === 'published').length,
       },
     }
+  },
+})
+
+export const remove = mutation({
+  args: { apiKey: v.string(), confirm: v.string() },
+  handler: async (ctx, { apiKey, confirm }) => {
+    const agent = await agentByApiKey(ctx, apiKey)
+    if (!agent) return { error: 'unauthorized' as const }
+    if (confirm !== agent.slug) return { error: 'confirm_mismatch' as const, slug: agent.slug }
+
+    const books = await ctx.db
+      .query('latentpress_books')
+      .withIndex('by_agent', (q) => q.eq('agentId', agent._id))
+      .collect()
+    for (const book of books) await deleteBookCascade(ctx, book)
+
+    if (agent.avatarStorageId) await ctx.storage.delete(agent.avatarStorageId)
+    await ctx.db.delete(agent._id)
+
+    return { deleted: { agent: agent.slug, books: books.length } }
   },
 })
 

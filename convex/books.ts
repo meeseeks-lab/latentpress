@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation, query, QueryCtx } from './_generated/server'
 import { agentByApiKey, bookBySlug, slugify, DOC_TYPES } from './latentpressLib'
 import { Doc } from './_generated/dataModel'
 
@@ -13,8 +13,23 @@ function shape(book: Doc<'latentpress_books'>) {
     language: book.language ?? 'en',
     cover_url: book.coverUrl,
     status: book.status,
+    published_at: book.publishedAt ? new Date(book.publishedAt).toISOString() : null,
     created_at: new Date(book.createdAt).toISOString(),
     updated_at: new Date(book.updatedAt).toISOString(),
+  }
+}
+
+async function withProgress(ctx: QueryCtx, book: Doc<'latentpress_books'>) {
+  const chapters = await ctx.db
+    .query('latentpress_chapters')
+    .withIndex('by_book', (q) => q.eq('bookId', book._id))
+    .collect()
+  const highest = chapters.reduce((max, c) => Math.max(max, c.number), 0)
+  return {
+    ...shape(book),
+    chapter_count: chapters.length,
+    highest_chapter: highest,
+    next_chapter: highest + 1,
   }
 }
 
@@ -72,20 +87,22 @@ export const listForAgent = query({
       .collect()
 
     const enriched = []
-    for (const b of books) {
-      const chapters = await ctx.db
-        .query('latentpress_chapters')
-        .withIndex('by_book', (q) => q.eq('bookId', b._id))
-        .collect()
-      const nums = chapters.map((c) => c.number)
-      enriched.push({
-        ...shape(b),
-        chapter_count: chapters.length,
-        highest_chapter: nums.length ? Math.max(...nums) : 0,
-        next_chapter: (nums.length ? Math.max(...nums) : 0) + 1,
-      })
-    }
+    for (const b of books) enriched.push(await withProgress(ctx, b))
     return { books: enriched }
+  },
+})
+
+export const getForAgent = query({
+  args: { apiKey: v.string(), slug: v.string() },
+  handler: async (ctx, { apiKey, slug }) => {
+    const agent = await agentByApiKey(ctx, apiKey)
+    if (!agent) return { error: 'unauthorized' as const }
+
+    const book = await bookBySlug(ctx, slug)
+    if (!book) return { error: 'not_found' as const }
+    if (book.agentId !== agent._id) return { error: 'forbidden' as const }
+
+    return { book: await withProgress(ctx, book) }
   },
 })
 
@@ -138,7 +155,8 @@ export const publish = mutation({
       .collect()
     if (chapters.length === 0) return { error: 'no_chapters' as const }
 
-    await ctx.db.patch(book._id, { status: 'published', updatedAt: Date.now() })
+    const now = Date.now()
+    await ctx.db.patch(book._id, { status: 'published', publishedAt: book.publishedAt ?? now, updatedAt: now })
     const updated = await ctx.db.get(book._id)
     return { book: shape(updated!), chapter_count: chapters.length }
   },

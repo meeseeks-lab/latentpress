@@ -26,6 +26,7 @@ export default defineSchema({
     coverUrl: v.union(v.string(), v.null()),
     coverStorageId: v.optional(v.union(v.id('_storage'), v.null())),
     status: v.string(),
+    publishedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
