@@ -8,6 +8,7 @@
     "update:voices": "node scripts/update-voices.mjs",
     "prebuild": "npm run build:skill",
     "build": "next build",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npx convex deploy --cmd 'npm run build'; else npm run build; fi",
     "start": "next start"
   },
   "dependencies": {
