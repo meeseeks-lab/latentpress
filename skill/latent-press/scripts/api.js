@@ -21,10 +21,11 @@ Books:
   create-book --title "T" --genre "g1,g2" --blurb "B" [--language zh-CN] [--cover_url "U"]
   list-books
   update-book <slug> [--title "T"] [--blurb "B"] [--genre "g1,g2"] [--language zh-CN]
-  publish <slug>
+  publish <slug> [--force]                (refuses while chapters < total_chapters in status)
 
 Chapters:
   add-chapter <slug> <number> "Title" "Content"
+  add-chapter <slug> <number> --file chapter-3.md   (title = first "# " heading unless --title)
   list-chapters <slug>
   get-chapter <slug> <number>
   delete-chapter <slug> <number> --yes
@@ -33,13 +34,31 @@ Context:
   list-docs <slug>
   get-doc <slug> <type>
   update-doc <slug> <type> "Content"      (bible|outline|status|story_so_far|process)
+  update-doc <slug> <type> --file FILE
+  append-doc <slug> <type> "Text"         (or --file FILE; adds a paragraph, keeps the rest)
   add-character <slug> "Name" "Description" [voice]
+  list-characters <slug>
 
 Covers and audio:
   set-cover <slug> --file cover.png        (or --url "https://...")
   remove-cover <slug> --yes
   set-audio <slug> <number> --file ch1.mp3 (or --url "https://...")
-  remove-audio <slug> <number>`;
+  remove-audio <slug> <number>
+
+Narration:
+  node narrate.js <slug> <number>          Render the chapter to MP3 (see narrate.js --help)`;
+
+const RETRY_AFTER_CAP_SECONDS = 120;
+
+// One retry on 429, honouring Retry-After. A cron night must not die on a single burst.
+async function fetchWithRetry(url, opts) {
+  const res = await fetch(url, opts);
+  if (res.status !== 429) return res;
+  const wait = Math.min(Number(res.headers.get('retry-after')) || 10, RETRY_AFTER_CAP_SECONDS);
+  console.error(`Rate limited (429), waiting ${wait}s before one retry...`);
+  await new Promise((resolve) => setTimeout(resolve, wait * 1000));
+  return fetch(url, opts);
+}
 
 async function api(method, path, body) {
   const opts = {
@@ -48,7 +67,7 @@ async function api(method, path, body) {
   };
   if (body) opts.body = JSON.stringify(body);
 
-  const res = await fetch(`${API}${path}`, opts);
+  const res = await fetchWithRetry(`${API}${path}`, opts);
   const text = await res.text();
   let data;
   try {
@@ -60,9 +79,15 @@ async function api(method, path, body) {
 
   if (!res.ok) {
     console.error(`Error ${res.status}:`, data.error || data);
+    if (data.suggestions) console.error('Voices for that locale:', data.suggestions.join(', '));
+    if (data.tags) console.error('Offending tags:', data.tags.join(', '));
     process.exit(1);
   }
   return data;
+}
+
+function warn(warnings) {
+  for (const w of warnings || []) console.error(`Warning: ${w}`);
 }
 
 async function upload(path, filePath, mimeType) {
@@ -74,7 +99,7 @@ async function upload(path, filePath, mimeType) {
   const filename = filePath.split('/').pop();
   form.append('file', new Blob([fs.readFileSync(filePath)], { type: mimeType }), filename);
 
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetchWithRetry(`${API}${path}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${readKey()}` },
     body: form,
@@ -100,12 +125,62 @@ function mimeFor(file, kind) {
   return mime;
 }
 
+const BARE_FLAGS = new Set(['--yes', '--force']);
+
 function parseArgs(args) {
   const result = {};
   for (let i = 0; i < args.length; i++) {
+    if (BARE_FLAGS.has(args[i])) continue;
     if (args[i].startsWith('--') && i + 1 < args.length) result[args[i].slice(2)] = args[++i];
   }
   return result;
+}
+
+function positionalArgs(args) {
+  const result = [];
+  for (let i = 0; i < args.length; i++) {
+    if (BARE_FLAGS.has(args[i])) continue;
+    if (args[i].startsWith('--')) { i++; continue; }
+    result.push(args[i]);
+  }
+  return result;
+}
+
+function readTextFile(file) {
+  if (!fs.existsSync(file)) {
+    console.error(`No such file: ${file}`);
+    process.exit(1);
+  }
+  return fs.readFileSync(file, 'utf8');
+}
+
+// A chapter file may start with "# Title" — that line becomes the title and is not
+// sent as content, so the reader never shows the heading twice.
+function readChapterFile(file, titleOverride) {
+  const lines = readTextFile(file).split('\n');
+  const first = lines.findIndex((l) => l.trim());
+  const heading = first >= 0 && /^#\s+/.test(lines[first]) ? lines[first].replace(/^#\s+/, '').trim() : null;
+  const content = (heading ? lines.slice(first + 1) : lines).join('\n').trim();
+  return { title: titleOverride || heading || undefined, content };
+}
+
+function textFrom(args, usage) {
+  const opts = parseArgs(args);
+  const text = opts.file ? readTextFile(opts.file).trim() : positionalArgs(args)[0];
+  if (!text) {
+    console.error(usage);
+    process.exit(1);
+  }
+  return text;
+}
+
+function plannedChapters(statusDoc) {
+  const match = (statusDoc || '').match(/total_chapters:\s*(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+function outlineCovers(outline, number) {
+  return new RegExp(`(chapter|ch\\.?|第)\\s*${number}(\\b|章)`, 'i').test(outline || '');
 }
 
 function confirmDestructive(what) {
@@ -144,12 +219,23 @@ const commands = {
       return;
     }
 
-    console.log(`Resume "${draft.title}" (${draft.slug})`);
-    console.log(`  chapters so far: ${draft.chapter_count}`);
-    console.log(`  write chapter:   ${draft.next_chapter}`);
-
     const { documents } = await api('GET', `/books/${draft.slug}/documents`);
     const byType = Object.fromEntries((documents || []).map(d => [d.type, d.content]));
+    const total = plannedChapters(byType.status);
+
+    console.log(`Resume "${draft.title}" (${draft.slug})`);
+    console.log(`  chapters so far: ${draft.chapter_count}`);
+    if (total && draft.chapter_count >= total) {
+      console.log(`  planned total:   ${total} — every planned chapter is written. Publish it.`);
+    } else {
+      console.log(`  write chapter:   ${draft.next_chapter}`);
+      if (total) console.log(`  planned total:   ${total} (${total - draft.chapter_count} to go)`);
+      else console.log('  planned total:   unknown — put "total_chapters: N" in the status doc');
+      if (!byType.outline) console.log('  WARNING: no outline. Write OUTLINE.md for every chapter before writing prose.');
+      else if (!outlineCovers(byType.outline, draft.next_chapter)) {
+        console.log(`  WARNING: the outline has no entry for chapter ${draft.next_chapter}. Extend the outline first, do not improvise the plot.`);
+      }
+    }
     for (const type of ['status', 'story_so_far', 'bible', 'outline']) {
       if (byType[type]) console.log(`\n--- ${type} ---\n${byType[type]}`);
     }
@@ -217,15 +303,22 @@ const commands = {
     show('Book updated:', data.book);
   },
 
-  async 'add-chapter'([slug, number, title, content]) {
+  async 'add-chapter'([slug, number, ...rest]) {
+    const opts = parseArgs(rest);
+    const [positionalTitle, positionalContent] = positionalArgs(rest);
+    const { title, content } = opts.file
+      ? readChapterFile(opts.file, opts.title)
+      : { title: opts.title || positionalTitle, content: positionalContent };
     if (!slug || !number || !content) {
       console.error('Usage: add-chapter <slug> <number> "Title" "Content"');
+      console.error('       add-chapter <slug> <number> --file chapter-3.md [--title "Title"]');
       process.exit(1);
     }
     const body = { number: requireChapterNumber(number), content };
     if (title) body.title = title;
     const data = await api('POST', `/books/${slug}/chapters`, body);
     show('Chapter saved:', data.chapter);
+    warn(data.warnings);
   },
 
   async 'list-chapters'([slug]) {
@@ -261,11 +354,25 @@ const commands = {
     console.log(doc.content);
   },
 
-  async 'update-doc'([slug, type, content]) {
-    if (!slug || !type || !content) {
-      console.error('Usage: update-doc <slug> <type> "Content"');
+  async 'update-doc'([slug, type, ...rest]) {
+    if (!slug || !type) {
+      console.error('Usage: update-doc <slug> <type> "Content"   (or --file FILE)');
       process.exit(1);
     }
+    const content = textFrom(rest, 'Usage: update-doc <slug> <type> "Content"   (or --file FILE)');
+    const data = await api('PUT', `/books/${slug}/documents`, { type, content });
+    show('Document updated:', data.document);
+  },
+
+  async 'append-doc'([slug, type, ...rest]) {
+    if (!slug || !type) {
+      console.error('Usage: append-doc <slug> <type> "Text"   (or --file FILE)');
+      process.exit(1);
+    }
+    const addition = textFrom(rest, 'Usage: append-doc <slug> <type> "Text"   (or --file FILE)');
+    const { documents } = await api('GET', `/books/${slug}/documents?type=${encodeURIComponent(type)}`);
+    const existing = ((documents || []).find(d => d.type === type)?.content || '').trimEnd();
+    const content = existing ? `${existing}\n\n${addition}` : addition;
     const data = await api('PUT', `/books/${slug}/documents`, { type, content });
     show('Document updated:', data.document);
   },
@@ -280,6 +387,12 @@ const commands = {
     if (voice) body.voice = voice;
     const data = await api('POST', `/books/${slug}/characters`, body);
     show('Character saved:', data.character);
+  },
+
+  async 'list-characters'([slug]) {
+    if (!slug) { console.error('Usage: list-characters <slug>'); process.exit(1); }
+    const data = await api('GET', `/books/${slug}/characters`);
+    show('Characters:', data.characters);
   },
 
   async 'set-cover'([slug, ...rest]) {
@@ -320,7 +433,20 @@ const commands = {
   },
 
   async publish([slug]) {
-    if (!slug) { console.error('Usage: publish <slug>'); process.exit(1); }
+    if (!slug) { console.error('Usage: publish <slug> [--force]'); process.exit(1); }
+    if (!process.argv.includes('--force')) {
+      const [{ books }, { documents }] = await Promise.all([
+        api('GET', '/books'),
+        api('GET', `/books/${slug}/documents?type=status`),
+      ]);
+      const written = (books || []).find(b => b.slug === slug)?.chapter_count ?? 0;
+      const total = plannedChapters((documents || []).find(d => d.type === 'status')?.content);
+      if (total && written < total) {
+        console.error(`Refusing to publish "${slug}": ${written} of ${total} planned chapters written (total_chapters in the status doc).`);
+        console.error('Write the remaining chapters, lower total_chapters if the plan changed, or re-run with --force.');
+        process.exit(1);
+      }
+    }
     const data = await api('POST', `/books/${slug}/publish`);
     show('Published:', data);
   },

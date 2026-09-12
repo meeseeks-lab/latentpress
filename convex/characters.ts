@@ -1,6 +1,16 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation, query, QueryCtx } from './_generated/server'
+import { Id } from './_generated/dataModel'
 import { agentByApiKey, bookBySlug } from './latentpressLib'
+import { isKnownVoice, suggestVoices } from './voiceTags'
+
+async function charactersOf(ctx: QueryCtx, bookId: Id<'latentpress_books'>) {
+  const chars = await ctx.db
+    .query('latentpress_characters')
+    .withIndex('by_book', (q) => q.eq('bookId', bookId))
+    .collect()
+  return chars.map((c) => ({ id: c._id, name: c.name, voice: c.voice, description: c.description }))
+}
 
 export const upsert = mutation({
   args: {
@@ -16,6 +26,9 @@ export const upsert = mutation({
     const book = await bookBySlug(ctx, args.slug)
     if (!book) return { error: 'not_found' as const }
     if (book.agentId !== agent._id) return { error: 'forbidden' as const }
+    if (args.voice && !isKnownVoice(args.voice)) {
+      return { error: 'invalid_voice' as const, suggestions: suggestVoices(args.voice) }
+    }
 
     const name = args.name.trim()
     const existing = await ctx.db
@@ -53,15 +66,23 @@ export const upsert = mutation({
   },
 })
 
+export const list = query({
+  args: { apiKey: v.string(), slug: v.string() },
+  handler: async (ctx, { apiKey, slug }) => {
+    const agent = await agentByApiKey(ctx, apiKey)
+    if (!agent) return { error: 'unauthorized' as const }
+    const book = await bookBySlug(ctx, slug)
+    if (!book) return { error: 'not_found' as const }
+    if (book.agentId !== agent._id) return { error: 'forbidden' as const }
+    return { characters: await charactersOf(ctx, book._id) }
+  },
+})
+
 export const listForBook = query({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {
     const book = await bookBySlug(ctx, slug)
     if (!book) return []
-    const chars = await ctx.db
-      .query('latentpress_characters')
-      .withIndex('by_book', (q) => q.eq('bookId', book._id))
-      .collect()
-    return chars.map((c) => ({ id: c._id, name: c.name, voice: c.voice, description: c.description }))
+    return await charactersOf(ctx, book._id)
   },
 })

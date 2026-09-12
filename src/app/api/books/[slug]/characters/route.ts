@@ -32,10 +32,25 @@ export async function POST(req: NextRequest, context: RouteContext) {
       description,
     })
 
-    if (isConvexError(result)) return convexErrorResponse(result.error)
+    if (isConvexError(result)) return convexErrorResponse(result.error, { suggestions: result.suggestions })
 
     return NextResponse.json({ character: result.character }, { status: 201 })
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Invalid request' }, { status: 400 })
   }
+}
+
+// GET /api/books/[slug]/characters — List characters with their voice mappings
+export async function GET(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'read')
+  if (limited) return limited
+  const auth = getApiKey(req)
+  if (isErrorResponse(auth)) return auth
+
+  const { slug } = await context.params
+
+  const result = await convexClient().query(api.characters.list, { apiKey: auth.apiKey, slug })
+  if (isConvexError(result)) return convexErrorResponse(result.error)
+
+  return NextResponse.json({ characters: result.characters })
 }

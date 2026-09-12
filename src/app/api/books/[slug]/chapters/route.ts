@@ -9,6 +9,7 @@ import {
   isChapterNumberError,
 } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { withWarnings } from '@/lib/api-warnings'
 import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
@@ -43,9 +44,9 @@ export async function POST(req: NextRequest, context: RouteContext) {
       audioUrl: audio_url,
     })
 
-    if (isConvexError(result)) return convexErrorResponse(result.error)
+    if (isConvexError(result)) return convexErrorResponse(result.error, { tags: result.tags })
 
-    return NextResponse.json({ chapter: result.chapter }, { status: 201 })
+    return NextResponse.json(withWarnings({ chapter: result.chapter }, result.warnings), { status: 201 })
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Invalid request' }, { status: 400 })
   }

@@ -38,6 +38,14 @@ const ERROR_RESPONSES: Record<string, { message: string; status: number }> = {
   },
   invalid_stars: { message: 'stars must be a whole number from 1 to 5', status: 422 },
   duplicate_review: { message: 'This browser has already reviewed this book', status: 409 },
+  invalid_voice: {
+    message: 'voice must be an edge-tts voice ID such as en-US-AriaNeural. Run `edge-tts --list-voices` for the full list',
+    status: 422,
+  },
+  invalid_voice_tag: {
+    message: 'Voice tags must be uppercase A-Z and underscores on their own line, like [NARRATOR] or [LI_WEI]. Non-ASCII or lowercase tags would show up in the reader as literal brackets',
+    status: 422,
+  },
 }
 
 type MaybeError = { error?: string }
@@ -48,10 +56,10 @@ export function isConvexError<T extends MaybeError>(
   return typeof result?.error === 'string'
 }
 
-export function convexErrorResponse(error: string): NextResponse {
+export function convexErrorResponse(error: string, details: Record<string, unknown> = {}): NextResponse {
   const mapped = ERROR_RESPONSES[error]
-  if (!mapped) return NextResponse.json({ error }, { status: 400 })
-  return NextResponse.json({ error: mapped.message }, { status: mapped.status })
+  if (!mapped) return NextResponse.json({ error, ...details }, { status: 400 })
+  return NextResponse.json({ error: mapped.message, ...details }, { status: mapped.status })
 }
 
 export function parseChapterNumber(value: unknown): number | NextResponse {

@@ -3,6 +3,7 @@ import { internalMutation, internalQuery } from './_generated/server'
 import { Doc, DataModel, Id } from './_generated/dataModel'
 import { GenericMutationCtx } from 'convex/server'
 import { bookBySlug, countWords, DOC_TYPES } from './latentpressLib'
+import { findInvalidVoiceTags, isKnownVoice, suggestVoices } from './voiceTags'
 
 type MutationCtx = GenericMutationCtx<DataModel>
 
@@ -319,6 +320,8 @@ export const upsertChapter = internalMutation({
   handler: async (ctx, { slug, number, title, content }) => {
     const book = await bookBySlug(ctx, slug)
     if (!book) return { error: 'not_found' as const }
+    const invalidTags = findInvalidVoiceTags(content)
+    if (invalidTags.length > 0) return { error: 'invalid_voice_tag' as const, tags: invalidTags }
 
     const existing = await ctx.db
       .query('latentpress_chapters')
@@ -397,6 +400,7 @@ export const addCharacter = internalMutation({
   handler: async (ctx, { slug, name, description, voice }) => {
     const book = await bookBySlug(ctx, slug)
     if (!book) return { error: 'not_found' as const }
+    if (voice && !isKnownVoice(voice)) return { error: 'invalid_voice' as const, suggestions: suggestVoices(voice) }
 
     const existing = await ctx.db
       .query('latentpress_characters')
@@ -610,5 +614,27 @@ export const storageUrlAudit = internalQuery({
         chapters.map((c) => ({ url: c.audioUrl, storageId: c.audioStorageId }))
       ),
     }
+  },
+})
+
+// Recompute wordCount on every chapter with the current countWords. Needed once after the
+// CJK-aware counting landed: chapters written before it carry whitespace-split counts.
+export const recountWords = internalMutation({
+  args: { slug: v.optional(v.string()) },
+  handler: async (ctx, { slug }) => {
+    let chapters = await ctx.db.query('latentpress_chapters').collect()
+    if (slug) {
+      const book = await bookBySlug(ctx, slug)
+      if (!book) return { error: 'not_found' as const }
+      chapters = chapters.filter((c) => c.bookId === book._id)
+    }
+    let changed = 0
+    for (const chapter of chapters) {
+      const wordCount = countWords(chapter.content ?? '')
+      if (wordCount === chapter.wordCount) continue
+      await ctx.db.patch(chapter._id, { wordCount })
+      changed++
+    }
+    return { scanned: chapters.length, changed }
   },
 })

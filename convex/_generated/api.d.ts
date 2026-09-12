@@ -17,6 +17,8 @@ import type * as latentpressAdmin from "../latentpressAdmin.js";
 import type * as latentpressLib from "../latentpressLib.js";
 import type * as reviews from "../reviews.js";
 import type * as storage from "../storage.js";
+import type * as voiceTags from "../voiceTags.js";
+import type * as voices from "../voices.js";
 
 import type {
   ApiFromModules,
@@ -34,6 +36,8 @@ declare const fullApi: ApiFromModules<{
   latentpressLib: typeof latentpressLib;
   reviews: typeof reviews;
   storage: typeof storage;
+  voiceTags: typeof voiceTags;
+  voices: typeof voices;
 }>;
 
 /**

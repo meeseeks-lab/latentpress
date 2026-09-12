@@ -130,7 +130,7 @@ export const api = {
         content: string
         audioUrl?: string | null
       },
-      Errorable & { chapter?: ChapterMeta }
+      Errorable & { chapter?: ChapterMeta; warnings?: string[]; tags?: string[] }
     >('chapters:upsert'),
 
     list: query<
@@ -152,7 +152,7 @@ export const api = {
         content?: string
         audioUrl?: string | null
       },
-      Errorable & { chapter?: ChapterMeta }
+      Errorable & { chapter?: ChapterMeta; warnings?: string[]; tags?: string[] }
     >('chapters:patch'),
 
     remove: mutation<
@@ -173,8 +173,10 @@ export const api = {
   characters: {
     upsert: mutation<
       { apiKey: string; slug: string; name: string; voice?: string; description?: string },
-      Errorable & { character?: CharacterWithCreated }
+      Errorable & { character?: CharacterWithCreated; suggestions?: string[] }
     >('characters:upsert'),
+
+    list: query<{ apiKey: string; slug: string }, Errorable & { characters?: Character[] }>('characters:list'),
   },
 
   documents: {

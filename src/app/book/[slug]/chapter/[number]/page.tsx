@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { ReaderShell } from "@/components/reader/ReaderShell";
 import { EndOfBook } from "@/components/reader/EndOfBook";
 import { convexClient } from "@/lib/convex/server";
+import { stripVoiceTags } from "@convex/voiceTags";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext, ogLocale } from "@/lib/seo";
 
@@ -15,10 +16,6 @@ async function getChapterData(slug: string, number: number) {
   if (!data) return null;
   const sorted = [...data.allChapters].sort((a, b) => a.number - b.number);
   return { book: data.book, chapter: data.chapter, chapters: sorted };
-}
-
-function stripVoiceTags(content: string): string {
-  return content.replace(/\[([A-Z_]+)\]\s*/g, "");
 }
 
 function isSceneBreak(p: string): boolean {

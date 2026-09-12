@@ -22,8 +22,16 @@ async function getBook(slug: string) {
 // Kept out of getBook: generateMetadata calls getBook too, and Convex queries are
 // uncached, so folding this in would fetch the reports twice per request.
 async function getReports(slug: string) {
-  const data = await convexClient().query(api.reviews.byBook, { slug });
-  return data ?? { reviews: [], count: 0, average: null };
+  // Soft-fails on purpose. A deployment that predates the reviews module rejects
+  // this query, and an uncaught rejection here would take the whole book page
+  // down with it. Reports are decoration; the book must still render.
+  try {
+    const data = await convexClient().query(api.reviews.byBook, { slug });
+    if (data) return data;
+  } catch {
+    /* fall through to the empty shape */
+  }
+  return { reviews: [], count: 0, average: null };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

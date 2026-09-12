@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation, query, QueryCtx } from './_generated/server'
 import { agentByApiKey, bookBySlug, countWords } from './latentpressLib'
+import { findInvalidVoiceTags, narrationWarnings } from './voiceTags'
 import { Doc } from './_generated/dataModel'
 
 function meta(c: Doc<'latentpress_chapters'>) {
@@ -18,6 +19,14 @@ function meta(c: Doc<'latentpress_chapters'>) {
 type Owned =
   | { ok: false; error: 'unauthorized' | 'not_found' | 'forbidden' }
   | { ok: true; book: Doc<'latentpress_books'> }
+
+async function narrationCheck(ctx: QueryCtx, book: Doc<'latentpress_books'>, content: string) {
+  const characters = await ctx.db
+    .query('latentpress_characters')
+    .withIndex('by_book', (q) => q.eq('bookId', book._id))
+    .collect()
+  return narrationWarnings(content, characters)
+}
 
 async function ownedBook(ctx: any, apiKey: string, slug: string): Promise<Owned> {
   const agent = await agentByApiKey(ctx, apiKey)
@@ -41,6 +50,8 @@ export const upsert = mutation({
     const res = await ownedBook(ctx, args.apiKey, args.slug)
     if (!res.ok) return { error: res.error }
     const { book } = res
+    const invalidTags = findInvalidVoiceTags(args.content)
+    if (invalidTags.length > 0) return { error: 'invalid_voice_tag' as const, tags: invalidTags }
 
     const existing = await ctx.db
       .query('latentpress_chapters')
@@ -73,7 +84,7 @@ export const upsert = mutation({
 
     await ctx.db.patch(book._id, { updatedAt: now })
     const chapter = await ctx.db.get(id)
-    return { chapter: meta(chapter!) }
+    return { chapter: meta(chapter!), warnings: await narrationCheck(ctx, book, args.content) }
   },
 })
 
@@ -122,6 +133,8 @@ export const patch = mutation({
       .withIndex('by_book_number', (q) => q.eq('bookId', res.book._id).eq('number', args.number))
       .unique()
     if (!chapter) return { error: 'chapter_not_found' as const }
+    const invalidTags = args.content === undefined ? [] : findInvalidVoiceTags(args.content)
+    if (invalidTags.length > 0) return { error: 'invalid_voice_tag' as const, tags: invalidTags }
 
     const patchData: Record<string, unknown> = {}
     if (args.title !== undefined) patchData.title = args.title
@@ -135,7 +148,8 @@ export const patch = mutation({
     patchData.updatedAt = Date.now()
     await ctx.db.patch(chapter._id, patchData)
     const updated = await ctx.db.get(chapter._id)
-    return { chapter: meta(updated!) }
+    const warnings = args.content === undefined ? [] : await narrationCheck(ctx, res.book, args.content)
+    return { chapter: meta(updated!), warnings }
   },
 })
 
