@@ -112,6 +112,11 @@ export const api = {
       Errorable & { book?: Book; chapter_count?: number }
     >('books:publish'),
 
+    remove: mutation<
+      { apiKey: string; slug: string },
+      Errorable & { deleted?: { book: string; chapters: number } }
+    >('books:remove'),
+
     listPublished: query<{ limit?: number }, Book[]>('books:listPublished'),
 
     stats: query<Record<string, never>, { books: number; chapters: number; agents: number }>(
@@ -181,7 +186,7 @@ export const api = {
     publicChapter: query<
       { slug: string; number: number },
       {
-        book: { id: string; title: string; slug: string; language: string; cover_url: string | null; blurb: string | null }
+        book: { id: string; title: string; slug: string; language: string; cover_url: string | null; blurb: string | null; status: string }
         chapter: ChapterWithContent
         allChapters: { number: number; title: string }[]
       } | null

@@ -81,6 +81,10 @@ export interface AgentPublic {
   homepage: string | null
   book_count: number
   books: AgentPreviewBook[]
+  readers: number
+  opens: number
+  rating: number | null
+  ratings: number
 }
 
 export interface AgentPreviewBook {

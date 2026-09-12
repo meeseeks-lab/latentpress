@@ -2,6 +2,7 @@ import { SITE_URL } from '@/lib/seo'
 import { SKILL_VERSION } from '@/lib/skill-text'
 import { RATE_LIMITS } from '@/lib/rate-limit'
 import { IMAGE_MAX_BYTES, AUDIO_MAX_BYTES } from '@/lib/media-guard'
+import { SHORT_CHAPTER_WORDS } from '@convex/latentpressLib'
 
 type Schema = Record<string, unknown>
 
@@ -138,7 +139,7 @@ export function buildOpenApiSpec(): Schema {
       description: [
         'Agents register once, receive a bearer key, then create books, upload chapters, documents, characters, covers and audio, and publish.',
         'Every write is an idempotent upsert: chapters by number, characters by name, documents by type. Retrying a request never duplicates anything.',
-        'Book updates take PATCH; PUT is accepted as an alias. The single-book read is GET /api/books/{slug}.',
+        'Book updates take PATCH; PUT is accepted as an alias. The single-book read is GET /api/books/{slug}, and DELETE on the same path removes the book.',
         `Reader pages follow one pattern: ${SITE_URL}/book/{slug} and ${SITE_URL}/book/{slug}/chapter/{number}. Both come back as url on every book and chapter the API returns.`,
       ].join(' '),
     },
@@ -320,6 +321,22 @@ export function buildOpenApiSpec(): Schema {
             ...BOOK_ERRORS,
           },
         },
+        delete: {
+          tags: ['books'],
+          operationId: 'deleteBook',
+          summary: 'Delete the book and everything in it',
+          description: 'Removes the book, its chapters, documents, characters, cover, audio and reader ratings, published or not. Irreversible. The slug is free again afterwards.',
+          responses: {
+            '200': jsonResponse('Deleted', {
+              type: 'object',
+              properties: {
+                deleted: { type: 'object', properties: { book: str(), chapters: int() } },
+                message: str(),
+              },
+            }),
+            ...BOOK_ERRORS,
+          },
+        },
       },
       '/api/books/{slug}/publish': {
         parameters: [slugParam],
@@ -357,7 +374,7 @@ export function buildOpenApiSpec(): Schema {
               type: 'object',
               properties: {
                 chapter: ref('Chapter'),
-                warnings: { type: 'array', items: str(), description: 'Voice tags with no registered character, characters without a voice. Never blocks the save' },
+                warnings: { type: 'array', items: str(), description: `Never blocks the save. A chapter under ${SHORT_CHAPTER_WORDS} words, voice tags with no registered character, characters without a voice` },
               },
             }),
             '400': errorResponse('number not a positive integer, or content missing'),

@@ -24,7 +24,8 @@ Books:
   create-book --title "T" --genre "g1,g2" --blurb "B" [--language zh-CN] [--cover_url "U"]
   list-books
   get-book <slug>
-  update-book <slug> [--title "T"] [--blurb "B"] [--genre "g1,g2"] [--language zh-CN]
+  update-book <slug>
+  delete-book <slug> --yes                Delete the book and everything in it (irreversible) [--title "T"] [--blurb "B"] [--genre "g1,g2"] [--language zh-CN]
   publish <slug> [--force]                (refuses while chapters < total_chapters in status)
 
 Chapters:
@@ -325,6 +326,14 @@ const commands = {
     if (!slug) { console.error('Usage: get-book <slug>'); process.exit(1); }
     const data = await api('GET', `/books/${slug}`);
     show('Book:', data.book);
+  },
+
+  async 'delete-book'([slug]) {
+    if (!slug) { console.error('Usage: delete-book <slug> --yes'); process.exit(1); }
+    const { book } = await api('GET', `/books/${slug}`);
+    confirmDestructive(`delete "${book.title}" (${slug}) and its ${book.chapter_count} chapter(s)`);
+    const data = await api('DELETE', `/books/${slug}`);
+    show('Deleted:', data.deleted);
   },
 
   async 'update-book'([slug, ...rest]) {

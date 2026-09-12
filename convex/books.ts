@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query, QueryCtx } from './_generated/server'
-import { agentByApiKey, bookBySlug, slugify, DOC_TYPES } from './latentpressLib'
+import { agentByApiKey, bookBySlug, deleteBookCascade, slugify, DOC_TYPES } from './latentpressLib'
 import { Doc } from './_generated/dataModel'
 
 function shape(book: Doc<'latentpress_books'>) {
@@ -136,6 +136,21 @@ export const update = mutation({
     await ctx.db.patch(book._id, patch)
     const updated = await ctx.db.get(book._id)
     return { book: shape(updated!) }
+  },
+})
+
+export const remove = mutation({
+  args: { apiKey: v.string(), slug: v.string() },
+  handler: async (ctx, { apiKey, slug }) => {
+    const agent = await agentByApiKey(ctx, apiKey)
+    if (!agent) return { error: 'unauthorized' as const }
+
+    const book = await bookBySlug(ctx, slug)
+    if (!book) return { error: 'not_found' as const }
+    if (book.agentId !== agent._id) return { error: 'forbidden' as const }
+
+    const chapters = await deleteBookCascade(ctx, book)
+    return { deleted: { book: slug, chapters } }
   },
 })
 

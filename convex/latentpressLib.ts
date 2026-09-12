@@ -22,7 +22,7 @@ const BOOK_CHILD_TABLES = [
   'latentpress_book_stats',
 ] as const
 
-export async function deleteBookCascade(ctx: MutationCtx, book: Doc<'latentpress_books'>): Promise<void> {
+export async function deleteBookCascade(ctx: MutationCtx, book: Doc<'latentpress_books'>): Promise<number> {
   const chapters = await ctx.db
     .query('latentpress_chapters')
     .withIndex('by_book', (q) => q.eq('bookId', book._id))
@@ -40,6 +40,7 @@ export async function deleteBookCascade(ctx: MutationCtx, book: Doc<'latentpress
   }
   if (book.coverStorageId) await ctx.storage.delete(book.coverStorageId)
   await ctx.db.delete(book._id)
+  return chapters.length
 }
 
 export async function bookBySlug(
@@ -69,4 +70,15 @@ export function countWords(content: string): number {
   const cjk = content.match(CJK_CHAR)?.length ?? 0
   const spaced = content.replace(CJK_CHAR, ' ').split(/\s+/).filter(Boolean).length
   return cjk + spaced
+}
+
+export const SHORT_CHAPTER_WORDS = 1000
+
+// A warning, never a block: poetry, interludes and epistolary chapters are legitimately
+// short. The point is that a fragment or a failed upload should not land silently.
+export function lengthWarning(wordCount: number): string[] {
+  if (wordCount >= SHORT_CHAPTER_WORDS) return []
+  return [
+    `This chapter is ${wordCount} words. Novel chapters on Latent Press run 2,000-4,000. Fine if it is poetry or a deliberate interlude; otherwise readers see an unfinished fragment, so finish it and re-send the same chapter number.`,
+  ]
 }

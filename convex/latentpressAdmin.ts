@@ -2,7 +2,7 @@ import { v } from 'convex/values'
 import { internalMutation, internalQuery } from './_generated/server'
 import { Doc, DataModel, Id } from './_generated/dataModel'
 import { GenericMutationCtx } from 'convex/server'
-import { bookBySlug, countWords, DOC_TYPES } from './latentpressLib'
+import { bookBySlug, countWords, deleteBookCascade, DOC_TYPES } from './latentpressLib'
 import { findInvalidVoiceTags, isKnownVoice, suggestVoices } from './voiceTags'
 
 type MutationCtx = GenericMutationCtx<DataModel>
@@ -11,57 +11,26 @@ type MutationCtx = GenericMutationCtx<DataModel>
 // public HTTP surface — run them from the Convex dashboard or `npx convex run`.
 
 async function purgeBook(ctx: MutationCtx, bookId: Id<'latentpress_books'>): Promise<number> {
-  const chapters = await ctx.db
-    .query('latentpress_chapters')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const chapter of chapters) {
-    if (chapter.audioStorageId) await ctx.storage.delete(chapter.audioStorageId)
-    await ctx.db.delete(chapter._id)
-  }
-
-  const characters = await ctx.db
-    .query('latentpress_characters')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const character of characters) await ctx.db.delete(character._id)
-
-  const documents = await ctx.db
-    .query('latentpress_documents')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const document of documents) await ctx.db.delete(document._id)
-
-  const reviews = await ctx.db
-    .query('latentpress_reviews')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const review of reviews) await ctx.db.delete(review._id)
-
-  const ratings = await ctx.db
-    .query('latentpress_ratings')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const rating of ratings) await ctx.db.delete(rating._id)
-
-  const reads = await ctx.db
-    .query('latentpress_reads')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const read of reads) await ctx.db.delete(read._id)
-
-  const stats = await ctx.db
-    .query('latentpress_book_stats')
-    .withIndex('by_book', (q) => q.eq('bookId', bookId))
-    .collect()
-  for (const row of stats) await ctx.db.delete(row._id)
-
   const book = await ctx.db.get(bookId)
-  if (book?.coverStorageId) await ctx.storage.delete(book.coverStorageId)
-  await ctx.db.delete(bookId)
-
-  return chapters.length
+  if (!book) return 0
+  return await deleteBookCascade(ctx, book)
 }
+
+// Books published before publishedAt existed carry no stamp. The book's updatedAt is the
+// closest thing on record: a published book that nobody has patched since keeps its
+// publish-time updatedAt. Approximate on purpose, and only fills in nulls.
+export const backfillPublishedAt = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const published = await ctx.db
+      .query('latentpress_books')
+      .withIndex('by_status', (q) => q.eq('status', 'published'))
+      .collect()
+    const missing = published.filter((b) => !b.publishedAt)
+    for (const book of missing) await ctx.db.patch(book._id, { publishedAt: book.updatedAt })
+    return { published: published.length, backfilled: missing.length }
+  },
+})
 
 export const deleteBookBySlug = internalMutation({
   args: { slug: v.string() },

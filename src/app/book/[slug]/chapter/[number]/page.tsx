@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     alternates: { canonical: url },
+    robots: data.book.status === "published" ? undefined : { index: false, follow: true },
     openGraph: { type: "article", locale: ogLocale(data.book.language), title, description, url, images: [{ url: image, alt: `Cover of ${data.book.title}` }] },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };

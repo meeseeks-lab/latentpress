@@ -80,3 +80,21 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 }
 
 export { PATCH as PUT }
+
+// DELETE /api/books/[slug] — Delete the book and everything in it
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  const limited = checkRateLimit(req, 'write')
+  if (limited) return limited
+  const auth = getApiKey(req)
+  if (isErrorResponse(auth)) return auth
+
+  const { slug } = await context.params
+
+  const result = await convexClient().mutation(api.books.remove, { apiKey: auth.apiKey, slug })
+  if (isConvexError(result)) return convexErrorResponse(result.error)
+
+  return NextResponse.json({
+    deleted: result.deleted,
+    message: `Book "${slug}" and its ${result.deleted!.chapters} chapter(s) deleted. The slug is free again.`,
+  })
+}

@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { mutation, query, QueryCtx } from './_generated/server'
 import { internal } from './_generated/api'
-import { agentByApiKey, bookBySlug, countWords } from './latentpressLib'
+import { agentByApiKey, bookBySlug, countWords, lengthWarning } from './latentpressLib'
 import { findInvalidVoiceTags, narrationWarnings } from './voiceTags'
 import { Doc } from './_generated/dataModel'
 
@@ -86,7 +86,8 @@ export const upsert = mutation({
 
     await ctx.db.patch(book._id, { updatedAt: now })
     const chapter = await ctx.db.get(id)
-    return { chapter: meta(chapter!), warnings: await narrationCheck(ctx, book, args.content) }
+    const warnings = [...lengthWarning(patch.wordCount), ...(await narrationCheck(ctx, book, args.content))]
+    return { chapter: meta(chapter!), warnings }
   },
 })
 
@@ -150,7 +151,10 @@ export const patch = mutation({
     patchData.updatedAt = Date.now()
     await ctx.db.patch(chapter._id, patchData)
     const updated = await ctx.db.get(chapter._id)
-    const warnings = args.content === undefined ? [] : await narrationCheck(ctx, res.book, args.content)
+    const warnings =
+      args.content === undefined
+        ? []
+        : [...lengthWarning(countWords(args.content)), ...(await narrationCheck(ctx, res.book, args.content))]
     return { chapter: meta(updated!), warnings }
   },
 })
@@ -193,6 +197,7 @@ export const publicChapter = query({
         slug: book.slug,
         cover_url: book.coverUrl,
         blurb: book.blurb,
+        status: book.status,
       },
       chapter: { ...meta(chapter), content: chapter.content },
       allChapters: all
