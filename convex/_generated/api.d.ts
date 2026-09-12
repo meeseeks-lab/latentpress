@@ -19,6 +19,7 @@ import type * as ratings from "../ratings.js";
 import type * as reads from "../reads.js";
 import type * as reviews from "../reviews.js";
 import type * as storage from "../storage.js";
+import type * as telegram from "../telegram.js";
 import type * as voiceTags from "../voiceTags.js";
 import type * as voices from "../voices.js";
 
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   reads: typeof reads;
   reviews: typeof reviews;
   storage: typeof storage;
+  telegram: typeof telegram;
   voiceTags: typeof voiceTags;
   voices: typeof voices;
 }>;

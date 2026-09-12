@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query, QueryCtx } from './_generated/server'
+import { internal } from './_generated/api'
 import { agentByApiKey, bookBySlug, countWords } from './latentpressLib'
 import { findInvalidVoiceTags, narrationWarnings } from './voiceTags'
 import { Doc } from './_generated/dataModel'
@@ -80,6 +81,7 @@ export const upsert = mutation({
         createdAt: now,
         ...patch,
       })
+      await ctx.scheduler.runAfter(0, internal.telegram.notifyNewChapter, { slug: book.slug, number: args.number })
     }
 
     await ctx.db.patch(book._id, { updatedAt: now })
