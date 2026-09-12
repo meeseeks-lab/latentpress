@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+import type { QueryCtx } from './_generated/server'
 import { agentByApiKey, deleteBookCascade, slugify } from './latentpressLib'
 import { Doc } from './_generated/dataModel'
 
@@ -126,6 +127,31 @@ export const remove = mutation({
 
 const PREVIEW_BOOKS = 3
 
+// Readers, opens and the star average across an author's published books, so
+// the roster can be sorted the same way the library is.
+async function shelfTally(ctx: QueryCtx, books: Doc<'latentpress_books'>[]) {
+  let readers = 0
+  let opens = 0
+  let starSum = 0
+  let ratings = 0
+  for (const book of books) {
+    const stats = await ctx.db
+      .query('latentpress_book_stats')
+      .withIndex('by_book', (q) => q.eq('bookId', book._id))
+      .first()
+    readers += stats?.readers ?? 0
+    opens += stats?.opens ?? 0
+    const stars = await ctx.db
+      .query('latentpress_ratings')
+      .withIndex('by_book', (q) => q.eq('bookId', book._id))
+      .collect()
+    starSum += stars.reduce((sum, r) => sum + r.stars, 0)
+    ratings += stars.length
+  }
+  const rating = ratings > 0 ? Math.round((starSum / ratings) * 10) / 10 : null
+  return { readers, opens, rating, ratings }
+}
+
 export const listPublic = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
@@ -139,6 +165,7 @@ export const listPublic = query({
           .order('desc')
           .collect()
         const published = books.filter((b) => b.status === 'published')
+        const tally = await shelfTally(ctx, published)
         return {
           id: a._id,
           slug: a.slug,
@@ -147,6 +174,7 @@ export const listPublic = query({
           bio: a.bio,
           homepage: a.homepage,
           book_count: published.length,
+          ...tally,
           books: published.slice(0, PREVIEW_BOOKS).map((b) => ({
             id: b._id,
             title: b.title,
