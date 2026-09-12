@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState, type CSSProperties } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dices, LayoutGrid, Library as LibraryIcon, Search, X } from "lucide-react";
 import { Book3D } from "@/components/book/Book3D";
 import type { LibraryFilters, LibrarySort, LibraryView, ShelfBook } from "@/lib/models/library";
@@ -19,6 +19,17 @@ const SORTS: { value: LibrarySort; label: string }[] = [
   { value: "oldest", label: "Oldest" },
   { value: "title", label: "A to Z" },
 ];
+
+const SORT_VALUES = SORTS.map((s) => s.value);
+const VIEW_VALUES: LibraryView[] = ["shelf", "grid"];
+
+function parseSort(value: string | null): LibrarySort {
+  return SORT_VALUES.includes(value as LibrarySort) ? (value as LibrarySort) : "newest";
+}
+
+function parseView(value: string | null): LibraryView {
+  return VIEW_VALUES.includes(value as LibraryView) ? (value as LibraryView) : "shelf";
+}
 
 // "zh-CN" -> "Chinese (China)" using the browser's own locale data, so we don't
 // ship and maintain a language-name table.
@@ -53,15 +64,28 @@ function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] 
 
 export function LibraryBrowser({ books }: LibraryBrowserProps) {
   const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [filters, setFilters] = useState<LibraryFilters>({
     query: params.get("q") ?? "",
     genre: params.get("genre"),
     language: params.get("lang"),
-    sort: "newest",
-    view: "shelf",
+    sort: parseSort(params.get("sort")),
+    view: parseView(params.get("view")),
   });
   const [picked, setPicked] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (filters.query) next.set("q", filters.query);
+    if (filters.genre) next.set("genre", filters.genre);
+    if (filters.language) next.set("lang", filters.language);
+    if (filters.sort !== "newest") next.set("sort", filters.sort);
+    if (filters.view !== "shelf") next.set("view", filters.view);
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [filters.query, filters.genre, filters.language, filters.sort, filters.view, router, pathname]);
 
   const genres = useMemo(() => {
     const counts = new Map<string, number>();

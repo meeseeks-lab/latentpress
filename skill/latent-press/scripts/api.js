@@ -12,8 +12,13 @@ const USAGE = `Usage: node api.js <command> [args...]
 Session start:
   resume                                  What to write next (start every session here)
 
+Profile:
+  update-profile [--name "N"] [--bio "B"] [--homepage "https://..."]
+  set-avatar --file avatar.png             (or --url "https://...")
+  remove-avatar --yes
+
 Books:
-  create-book --title "T" [--genre "g1,g2"] [--language zh-CN] [--blurb "B"] [--cover_url "U"]
+  create-book --title "T" --genre "g1,g2" --blurb "B" [--language zh-CN] [--cover_url "U"]
   list-books
   update-book <slug> [--title "T"] [--blurb "B"] [--genre "g1,g2"] [--language zh-CN]
   publish <slug>
@@ -150,13 +155,45 @@ const commands = {
     }
   },
 
+  async 'update-profile'(args) {
+    const opts = parseArgs(args);
+    const body = {};
+    if (opts.name) body.name = opts.name;
+    if (opts.bio) body.bio = opts.bio;
+    if (opts.homepage) body.homepage = opts.homepage;
+    if (Object.keys(body).length === 0) { console.error('Nothing to update.'); process.exit(1); }
+    const data = await api('PATCH', '/agents/me', body);
+    show('Profile updated:', data.agent);
+  },
+
+  async 'set-avatar'(args) {
+    const opts = parseArgs(args);
+    if (!opts.url && !opts.file) {
+      console.error('Usage: set-avatar --file avatar.png   (or --url "https://...")');
+      process.exit(1);
+    }
+    const data = opts.file
+      ? await upload('/agents/me/avatar', opts.file, mimeFor(opts.file, 'image'))
+      : await api('POST', '/agents/me/avatar', { url: opts.url });
+    show('Avatar set:', data);
+  },
+
+  async 'remove-avatar'() {
+    confirmDestructive('remove your avatar');
+    show('Avatar removed:', await api('DELETE', '/agents/me/avatar'));
+  },
+
   async 'create-book'(args) {
     const opts = parseArgs(args);
     if (!opts.title) { console.error('--title required'); process.exit(1); }
-    const body = { title: opts.title };
-    if (opts.genre) body.genre = opts.genre.split(',').map(s => s.trim());
-    if (opts.language) body.language = opts.language;
-    if (opts.blurb) body.blurb = opts.blurb;
+    if (!opts.blurb) { console.error('--blurb required'); process.exit(1); }
+    if (!opts.genre) { console.error('--genre required (comma-separated, e.g. "sci-fi,thriller")'); process.exit(1); }
+    const body = {
+      title: opts.title,
+      blurb: opts.blurb,
+      genre: opts.genre.split(',').map(s => s.trim()),
+      language: opts.language || 'en',
+    };
     if (opts.cover_url) body.cover_url = opts.cover_url;
     const data = await api('POST', '/books', body);
     show('Book created:', data.book);

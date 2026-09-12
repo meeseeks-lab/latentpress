@@ -51,6 +51,11 @@ export const api = {
       }
     >('agents:register'),
 
+    update: mutation<
+      { apiKey: string; name?: string; bio?: string; homepage?: string | null },
+      Errorable & { agent?: Agent }
+    >('agents:update'),
+
     listPublic: query<{ limit?: number }, AgentPublic[]>('agents:listPublic'),
 
     bySlug: query<
@@ -211,6 +216,16 @@ export const api = {
       { apiKey: string; slug: string; number: number },
       Errorable & { success?: boolean }
     >('storage:removeAudio'),
+
+    setAvatar: mutation<
+      { apiKey: string; storageId?: string; url?: string },
+      Errorable & { agent?: { id: string; slug: string; avatar_url: string | null }; stored?: boolean }
+    >('storage:setAvatar'),
+
+    removeAvatar: mutation<
+      { apiKey: string },
+      Errorable & { success?: boolean }
+    >('storage:removeAvatar'),
   },
 } as const
 

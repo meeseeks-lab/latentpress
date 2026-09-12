@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
-import { ArrowLeft, Moon, Sun, Type } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, List, Moon, Sun, Type } from "lucide-react";
 import type { ProseSize, ReaderPrefs, ReadingPosition } from "@/lib/models/reader";
 import { readPrefs, savePosition, savePrefs } from "@/lib/reading-storage";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 interface ReaderShellProps {
   book: { slug: string; title: string; coverUrl: string | null };
   chapter: { number: number; title: string };
+  chapters: { number: number; title: string }[];
   totalChapters: number;
   prevHref: string | null;
   nextHref: string | null;
@@ -20,10 +21,11 @@ interface ReaderShellProps {
 const SIZES: ProseSize[] = ["sm", "md", "lg"];
 const SIZE_LABELS: Record<ProseSize, string> = { sm: "small", md: "medium", lg: "large" };
 
-export function ReaderShell({ book, chapter, totalChapters, prevHref, nextHref, children }: ReaderShellProps) {
+export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, nextHref, children }: ReaderShellProps) {
   const router = useRouter();
   const [prefs, setPrefs] = useState<ReaderPrefs>({ size: "md", room: "paper" });
   const [progress, setProgress] = useState(0);
+  const tocRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     setPrefs(readPrefs());
@@ -86,6 +88,11 @@ export function ReaderShell({ book, chapter, totalChapters, prevHref, nextHref, 
     update({ size: SIZES[(idx + 1) % SIZES.length] });
   };
 
+  const goToChapter = (number: number) => {
+    tocRef.current?.removeAttribute("open");
+    router.push(`/book/${book.slug}/chapter/${number}`);
+  };
+
   return (
     <div data-room={prefs.room} className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <div
@@ -110,6 +117,35 @@ export function ReaderShell({ book, chapter, totalChapters, prevHref, nextHref, 
             <span className="mr-2 hidden text-xs tabular-nums text-muted-foreground sm:inline">
               {chapter.number} / {totalChapters}
             </span>
+            <details ref={tocRef} className="relative">
+              <summary
+                className="chip h-8 list-none gap-1.5 [&::-webkit-details-marker]:hidden"
+                aria-label="Jump to chapter"
+                title="Contents"
+              >
+                <List className="h-3.5 w-3.5" />
+              </summary>
+              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-10 max-h-[70vh] w-64 overflow-y-auto rounded-lg border border-border bg-raised p-2 shadow-lg">
+                <p className="eyebrow px-2 pb-2 pt-1">Contents</p>
+                <ul>
+                  {chapters.map((c) => (
+                    <li key={c.number}>
+                      <button
+                        type="button"
+                        onClick={() => goToChapter(c.number)}
+                        className={cn(
+                          "flex w-full items-baseline gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent",
+                          c.number === chapter.number ? "text-lamp" : "text-foreground/85",
+                        )}
+                      >
+                        <span className="tabular-nums text-muted-foreground">{c.number}.</span>
+                        <span className="truncate">{c.title}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
             <button
               type="button"
               onClick={cycleSize}

@@ -95,6 +95,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     <ReaderShell
       book={{ slug, title: book.title, coverUrl: book.cover_url }}
       chapter={{ number: num, title: chapterTitle }}
+      chapters={chapters.map((c) => ({ number: c.number, title: c.title || `Chapter ${c.number}` }))}
       totalChapters={chapters.length}
       prevHref={prevHref}
       nextHref={nextHref}

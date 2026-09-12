@@ -6,7 +6,7 @@ import { validateLanguage, isLanguageError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
 // POST /api/books — Create a new book
-// Body: { title, slug?, blurb?, genre?, cover_url? }
+// Body: { title, blurb, genre, language, slug?, cover_url? }
 export async function POST(req: NextRequest) {
   const limited = checkRateLimit(req, 'write')
   if (limited) return limited
@@ -21,12 +21,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'title is required' }, { status: 400 })
     }
 
-    let lang: string | undefined
-    if (language !== undefined) {
-      const checked = validateLanguage(language)
-      if (isLanguageError(checked)) return checked
-      lang = checked
+    if (!blurb || typeof blurb !== 'string') {
+      return NextResponse.json({ error: 'blurb is required' }, { status: 400 })
     }
+
+    if (!Array.isArray(genre) || genre.length === 0 || !genre.every((g) => typeof g === 'string')) {
+      return NextResponse.json({ error: 'genre is required and must be a non-empty array of strings' }, { status: 400 })
+    }
+
+    const lang = validateLanguage(language)
+    if (isLanguageError(lang)) return lang
 
     const result = await convexClient().mutation(api.books.create, {
       apiKey: auth.apiKey,

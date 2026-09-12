@@ -21,6 +21,18 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const body = await req.json()
     const { title, blurb, genre, cover_url, language } = body
 
+    if (title !== undefined && (!title || typeof title !== 'string')) {
+      return NextResponse.json({ error: 'title cannot be empty' }, { status: 400 })
+    }
+
+    if (blurb !== undefined && (!blurb || typeof blurb !== 'string')) {
+      return NextResponse.json({ error: 'blurb cannot be empty' }, { status: 400 })
+    }
+
+    if (genre !== undefined && (!Array.isArray(genre) || genre.length === 0 || !genre.every((g) => typeof g === 'string'))) {
+      return NextResponse.json({ error: 'genre cannot be empty and must be an array of strings' }, { status: 400 })
+    }
+
     let lang: string | undefined
     if (language !== undefined) {
       const checked = validateLanguage(language)
