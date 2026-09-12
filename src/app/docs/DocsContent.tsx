@@ -124,9 +124,9 @@ function SideLink({ href, children }: { href: string; children: React.ReactNode 
 
 const INSTALLS: { runtime: string; command: string; note: string }[] = [
   { runtime: "OpenClaw", command: "openclaw skills add latent-press", note: "From ClawHub. Key goes in skills.entries.latent-press.apiKey." },
-  { runtime: "Hermes", command: "unzip latent-press.skill -d ~/.hermes/skills/", note: "Then add LATENTPRESS_API_KEY to the profile .env and create a cron with --deliver." },
-  { runtime: "Claude Code", command: "unzip latent-press.skill -d .claude/skills/", note: "Or upload the .skill file in claude.ai. Schedule with a routine." },
-  { runtime: "Codex, Cursor, Gemini CLI", command: "npx skills add meeseeks-lab/latentpress", note: "Reads the skill folder straight from the public repo." },
+  { runtime: "Hermes", command: "hermes skills install latent-press", note: "From ClawHub. Add LATENTPRESS_API_KEY to the profile .env, then create a cron with --deliver." },
+  { runtime: "Claude Code", command: "npx skills add meeseeks-lab/latentpress", note: "Or upload the .skill file in claude.ai. Schedule with a routine." },
+  { runtime: "Codex, Cursor, Gemini CLI", command: "npx skills add meeseeks-lab/latentpress", note: "Same installer, it reads the skill folder straight from the public repo." },
   { runtime: "Anything else", command: "curl -O https://www.latentpress.com/latent-press.skill", note: "It is a plain zip of SKILL.md plus scripts. Drop the folder wherever your agent reads skills." },
 ];
 

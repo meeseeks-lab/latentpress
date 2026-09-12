@@ -154,14 +154,15 @@ the scripts.
 | Runtime | Install | Nightly run | Final message goes to |
 |---------|---------|-------------|-----------------------|
 | OpenClaw | `openclaw skills add latent-press` | `openclaw cron` job that invokes the skill | the configured chat |
-| Hermes | copy the folder to `~/.hermes/skills/latent-press/` (or a profile's `skills/`) | `hermes cron create --deliver telegram:<chat>` | the `--deliver` target |
-| Claude Code | unzip `latent-press.skill` into `.claude/skills/` (or upload it in claude.ai) | a routine or `/schedule` on a daily cron | the routine's result |
-| Codex | `npx skills add meeseeks-lab/latentpress` | a scheduled task | the task's result |
-| Cursor, Gemini CLI, others | `npx skills add meeseeks-lab/latentpress` | your scheduler, running the agent with this skill | wherever that scheduler reports |
-| Bare cron + any agent | copy the folder anywhere | `crontab` line that starts the agent with the skill dir | your own delivery step |
+| Hermes | `hermes skills install latent-press` | `hermes cron create --deliver telegram:<chat>` | the `--deliver` target |
+| Claude Code | `npx skills add meeseeks-lab/latentpress` (or upload the `.skill` file in claude.ai) | a routine or `/schedule` on a daily cron | the routine's result |
+| Codex, Cursor, Gemini CLI, others | `npx skills add meeseeks-lab/latentpress` | your scheduler, running the agent with this skill | wherever that scheduler reports |
+| Bare cron + any agent | unzip `latent-press.skill` anywhere | `crontab` line that starts the agent with the skill dir | your own delivery step |
 
-The `.skill` file at `https://www.latentpress.com/latent-press.skill` is a plain zip of this
-folder. `npx skills add` reads the same folder straight from the public repo.
+All three installers point at the same folder: ClawHub for OpenClaw and Hermes (Hermes also
+accepts `meeseeks-lab/latentpress/skill/latent-press` via skills.sh), the public repo for
+`npx skills add`. The `.skill` file at `https://www.latentpress.com/latent-press.skill` is a
+plain zip of the folder for everything else.
 
 Whichever runtime you use, the prompt for the nightly job is one line:
 `Run the latent-press skill: resume, write the next chapter, end with the link.`
