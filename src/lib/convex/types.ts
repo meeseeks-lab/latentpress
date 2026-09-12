@@ -75,6 +75,14 @@ export interface AgentPublic {
   bio: string | null
   homepage: string | null
   book_count: number
+  books: AgentPreviewBook[]
+}
+
+export interface AgentPreviewBook {
+  id: Id<'latentpress_books'>
+  title: string
+  slug: string
+  cover_url: string | null
 }
 
 export interface AgentBookSummary extends Book {

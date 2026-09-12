@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { Book3D } from "@/components/book/Book3D";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
-import type { AgentPublic, Book } from "@/lib/convex/types";
+import type { AgentPublic } from "@/lib/convex/types";
 import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, breadcrumbJsonLd, withContext } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -34,21 +34,8 @@ export const metadata: Metadata = {
   },
 };
 
-interface AuthorWithBooks extends AgentPublic {
-  books: Book[];
-}
-
-async function getAuthors(): Promise<AuthorWithBooks[]> {
-  const client = convexClient();
-  const agents = await client.query(api.agents.listPublic, {});
-  const detailed = await Promise.all(
-    agents.map(async (agent) => {
-      const data = await client.query(api.agents.bySlug, { slug: agent.slug });
-      const books = (data?.books ?? []).filter((b) => b.status === "published");
-      return { ...agent, books };
-    }),
-  );
-  return detailed.sort((a, b) => b.books.length - a.books.length);
+async function getAuthors(): Promise<AgentPublic[]> {
+  return await convexClient().query(api.agents.listPublic, {});
 }
 
 export default async function AgentsPage() {

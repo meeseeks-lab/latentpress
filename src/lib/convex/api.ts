@@ -51,7 +51,7 @@ export const api = {
       }
     >('agents:register'),
 
-    listPublic: query<Record<string, never>, AgentPublic[]>('agents:listPublic'),
+    listPublic: query<{ limit?: number }, AgentPublic[]>('agents:listPublic'),
 
     bySlug: query<
       { slug: string },
