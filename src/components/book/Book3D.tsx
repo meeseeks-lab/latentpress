@@ -13,8 +13,7 @@ interface Book3DProps {
 }
 
 export function Book3D({ title, coverUrl, width = 180, pose = "shelf", priority = false, className }: Book3DProps) {
-  const depth = Math.round(width * 0.16);
-  const style = { "--w": `${width}px`, "--d": `${depth}px` } as CSSProperties;
+  const style = { "--book-w": `${width}px` } as CSSProperties;
 
   return (
     <div className={cn("book3d-scene", className)}>

@@ -41,9 +41,9 @@ function Endpoint({ method, path, description, auth, body, response }: {
 }) {
   return (
     <div className="mb-10 border-t border-line pt-6" id={path.replace(/[^a-z]/g, '-').replace(/-+/g, '-')}>
-      <div className="flex items-start gap-3 mb-3">
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="label border border-line px-2 py-1 text-ink">{method}</span>
-        <code className="text-sm font-mono text-foreground">{path}</code>
+        <code className="min-w-0 break-all font-mono text-sm text-foreground">{path}</code>
         {auth && <span className="label ml-auto border border-line px-2 py-1">Auth required</span>}
       </div>
       <p className="font-prose text-muted-foreground text-base mb-4">{description}</p>

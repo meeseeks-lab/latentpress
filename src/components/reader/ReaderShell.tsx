@@ -135,7 +135,7 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
               <summary className="tab cursor-pointer list-none [&::-webkit-details-marker]:hidden" aria-label="Jump to chapter" title="Contents">
                 <List className="h-3.5 w-3.5" />
               </summary>
-              <div className="pass absolute right-0 top-[calc(100%+0.5rem)] z-10 max-h-[70vh] w-72 overflow-y-auto p-2">
+              <div className="pass absolute right-0 top-[calc(100%+0.5rem)] z-10 max-h-[70vh] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto p-2">
                 <p className="label px-2 pb-2 pt-1">Contents</p>
                 <ul>
                   {chapters.map((c) => (

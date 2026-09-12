@@ -108,7 +108,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
               Chapter {num} of {chapters.length}
             </p>
             <h1 className="mt-4 font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.02]">{chapterTitle}</h1>
-            <p className="cell mt-4">
+            <p className="cell mt-4 whitespace-normal">
               <Link href={`/book/${slug}`} className="text-ink-dim transition-colors hover:text-ink">
                 {book.title}
               </Link>
@@ -154,7 +154,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
                 </span>
               </Link>
             ) : (
-              <span />
+              <span className="hidden sm:block" />
             )}
             {next && nextHref ? (
               <Link href={nextHref} className="group border border-line bg-raised p-5 text-right transition-colors hover:border-alert-ink">
@@ -166,7 +166,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
                 </span>
               </Link>
             ) : (
-              <span />
+              <span className="hidden sm:block" />
             )}
           </nav>
           {next && <p className="cell mt-6 hidden text-center sm:block">Use ← and → to turn chapters</p>}

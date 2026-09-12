@@ -147,7 +147,7 @@ export default async function Home() {
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
               <h2 className="label text-board-dim">Arrivals</h2>
               {hasStats && (
-                <p className="cell text-board-dim">
+                <p className="cell whitespace-normal text-board-dim">
                   {lead && (
                     <>
                       Last chapter landed <Timestamp iso={rows[0]?.at ?? ""} className="text-board-text" /> ·{" "}

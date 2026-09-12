@@ -139,7 +139,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   <li aria-hidden className="text-board-dim">
                     /
                   </li>
-                  <li className="truncate text-board-text" aria-current="page">
+                  <li className="min-w-0 max-w-full truncate text-board-text" aria-current="page">
                     {book.title}
                   </li>
                 </ol>
