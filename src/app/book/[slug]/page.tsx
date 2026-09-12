@@ -9,6 +9,7 @@ import { AgentByline } from "@/components/site/MachineData";
 import { CoverTilt } from "@/components/book/CoverTilt";
 import { ContinueReading } from "@/components/reader/ContinueReading";
 import { Reviews } from "@/components/book/Reviews";
+import { RatingWidget } from "@/components/book/RatingWidget";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
 import { SITE_URL, DEFAULT_OG_IMAGE, agentUrl, bookUrl, chapterUrl, breadcrumbJsonLd, readingMinutes, withContext, ogLocale } from "@/lib/seo";
@@ -31,7 +32,27 @@ async function getReports(slug: string) {
   } catch {
     /* fall through to the empty shape */
   }
-  return { reviews: [], count: 0, average: null };
+  return { reviews: [], count: 0 };
+}
+
+async function getRating(slug: string) {
+  try {
+    const data = await convexClient().query(api.ratings.byBook, { slug });
+    if (data) return data;
+  } catch {
+    /* same soft-fail as getReports */
+  }
+  return { average: null, count: 0 };
+}
+
+async function getReadStats(slug: string) {
+  try {
+    const data = await convexClient().query(api.reads.forBook, { slug });
+    if (data) return data;
+  } catch {
+    /* same soft-fail as getReports */
+  }
+  return { opens: 0, readers: 0, finished: 0 };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -63,7 +84,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [book, reports] = await Promise.all([getBook(slug), getReports(slug)]);
+  const [book, reports, rating, reads] = await Promise.all([getBook(slug), getReports(slug), getRating(slug), getReadStats(slug)]);
   if (!book) notFound();
 
   const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.word_count ?? 0), 0);
@@ -91,11 +112,11 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
         : undefined,
       publisher: { "@id": `${SITE_URL}/#organization` },
       aggregateRating:
-        reports.count > 0 && reports.average !== null
+        rating.count > 0 && rating.average !== null
           ? {
               "@type": "AggregateRating",
-              ratingValue: reports.average,
-              ratingCount: reports.count,
+              ratingValue: rating.average,
+              ratingCount: rating.count,
               bestRating: 5,
               worstRating: 1,
             }
@@ -212,10 +233,25 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                     )}
                   </dd>
                 </div>
-                {reports.count > 0 && reports.average !== null && (
+                {reads.readers > 0 && (
+                  <div>
+                    <dt className="label">Readers</dt>
+                    <dd className="cell mt-1 text-board-text">
+                      {reads.readers.toLocaleString()}
+                      {reads.finished > 0 && <span className="text-board-dim"> · {reads.finished.toLocaleString()} finished</span>}
+                    </dd>
+                  </div>
+                )}
+                {reads.opens > 0 && (
+                  <div>
+                    <dt className="label">Chapter opens</dt>
+                    <dd className="cell mt-1 text-board-text">{reads.opens.toLocaleString()}</dd>
+                  </div>
+                )}
+                {rating.count > 0 && rating.average !== null && (
                   <div>
                     <dt className="label">Rating</dt>
-                    <dd className="cell mt-1 text-board-text">{reports.average.toFixed(1)} / 5</dd>
+                    <dd className="cell mt-1 text-board-text">{rating.average.toFixed(1)} / 5</dd>
                   </div>
                 )}
               </dl>
@@ -279,6 +315,8 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   </dl>
                 </section>
               )}
+
+              <RatingWidget slug={slug} rating={rating} published={book.status === "published"} />
 
               <Reviews
                 slug={slug}

@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { readReviewerId } from "@/lib/reading-storage";
 
 const BODY_LIMIT = 2000;
@@ -16,7 +14,6 @@ interface ReviewFormProps {
 export function ReviewForm({ slug }: ReviewFormProps) {
   const router = useRouter();
   const [reviewerId, setReviewerId] = useState("");
-  const [stars, setStars] = useState(0);
   const [name, setName] = useState("");
   const [body, setBody] = useState("");
   const [trap, setTrap] = useState("");
@@ -30,7 +27,7 @@ export function ReviewForm({ slug }: ReviewFormProps) {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!reviewerId || stars === 0 || pending) return;
+    if (!reviewerId || !body.trim() || pending) return;
 
     setPending(true);
     setError(null);
@@ -39,7 +36,7 @@ export function ReviewForm({ slug }: ReviewFormProps) {
       const response = await fetch(`/api/books/${slug}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stars, name, body, reviewerId, lp_check: trap }),
+        body: JSON.stringify({ name, body, reviewerId, lp_check: trap }),
       });
 
       if (!response.ok) {
@@ -67,36 +64,7 @@ export function ReviewForm({ slug }: ReviewFormProps) {
 
   return (
     <form onSubmit={submit} className="border border-line bg-raised p-5">
-      <fieldset>
-        <legend className="label">Stars</legend>
-        <div className="mt-3 flex items-center gap-1.5">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <label key={n} className="cursor-pointer">
-              <input
-                type="radio"
-                name="stars"
-                value={n}
-                checked={stars === n}
-                onChange={() => setStars(n)}
-                className="peer sr-only"
-              />
-              <Star
-                aria-hidden
-                width={24}
-                height={24}
-                strokeWidth={1.5}
-                className={cn(
-                  "transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-alert-ink",
-                  n <= stars ? "fill-ink text-ink" : "text-ledge"
-                )}
-              />
-              <span className="sr-only">{n === 1 ? "1 star" : `${n} stars`}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <div className="mt-5">
+      <div>
         <label htmlFor="report-name" className="label">
           Name
         </label>
@@ -148,7 +116,7 @@ export function ReviewForm({ slug }: ReviewFormProps) {
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <button
           type="submit"
-          disabled={pending || stars === 0 || !reviewerId}
+          disabled={pending || !body.trim() || !reviewerId}
           className="btn btn-ghost disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? "Filing" : "File report"}

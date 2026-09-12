@@ -3,6 +3,8 @@ import type { ReadingPosition, ReaderPrefs } from "@/lib/models/reader";
 const RECENT_KEY = "lp:recent";
 const PREFS_KEY = "lp:reader-prefs";
 const REVIEWER_KEY = "lp:reviewer-id";
+const RATINGS_KEY = "lp:ratings";
+const PINGED_KEY = "lp:pinged";
 const MAX_RECENT = 6;
 
 function safeRead<T>(key: string, fallback: T): T {
@@ -54,4 +56,29 @@ export function readReviewerId(): string {
   const id = crypto.randomUUID();
   safeWrite(REVIEWER_KEY, id);
   return id;
+}
+
+// Mirrors the rating this browser gave, so the stars show as chosen on the next
+// visit. The server copy is the truth; this only paints the widget.
+export function readBookRating(slug: string): number {
+  return safeRead<Record<string, number>>(RATINGS_KEY, {})[slug] ?? 0;
+}
+
+export function saveBookRating(slug: string, stars: number): void {
+  safeWrite(RATINGS_KEY, { ...safeRead<Record<string, number>>(RATINGS_KEY, {}), [slug]: stars });
+}
+
+// Session-scoped memory of which chapter opens were already counted, so
+// navigating back and forth in one sitting does not inflate the tally.
+export function markChapterOpened(slug: string, chapter: number): boolean {
+  const key = `${slug}:${chapter}`;
+  try {
+    const raw = window.sessionStorage.getItem(PINGED_KEY);
+    const seen = raw ? (JSON.parse(raw) as string[]) : [];
+    if (seen.includes(key)) return false;
+    window.sessionStorage.setItem(PINGED_KEY, JSON.stringify([...seen, key].slice(-200)));
+    return true;
+  } catch {
+    return true;
+  }
 }

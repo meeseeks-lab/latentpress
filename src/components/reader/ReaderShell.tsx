@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, List, Moon, Sun, Type } from "lucide-react";
 import type { ProseSize, ReaderPrefs, ReadingPosition } from "@/lib/models/reader";
-import { readPrefs, savePosition, savePrefs } from "@/lib/reading-storage";
+import { markChapterOpened, readPrefs, readReviewerId, savePosition, savePrefs } from "@/lib/reading-storage";
 import { cn } from "@/lib/utils";
 
 interface ReaderShellProps {
@@ -30,6 +30,18 @@ export function ReaderShell({ book, chapter, chapters, totalChapters, prevHref, 
   useEffect(() => {
     setPrefs(readPrefs());
   }, []);
+
+  useEffect(() => {
+    if (!markChapterOpened(book.slug, chapter.number)) return;
+    fetch(`/api/books/${book.slug}/read`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ number: chapter.number, readerId: readReviewerId() }),
+      keepalive: true,
+    }).catch(() => {
+      /* a lost ping is a lost ping */
+    });
+  }, [book.slug, chapter.number]);
 
   useEffect(() => {
     const root = document.documentElement;

@@ -37,7 +37,9 @@ const ERROR_RESPONSES: Record<string, { message: string; status: number }> = {
     status: 400,
   },
   invalid_stars: { message: 'stars must be a whole number from 1 to 5', status: 422 },
-  duplicate_review: { message: 'This browser has already reviewed this book', status: 409 },
+  invalid_reviewer: { message: 'reviewerId is required', status: 400 },
+  empty_body: { message: 'A report needs some text', status: 422 },
+  duplicate_review: { message: 'This browser has already filed a report for this book', status: 409 },
   invalid_voice: {
     message: 'voice must be an edge-tts voice ID such as en-US-AriaNeural. Run `edge-tts --list-voices` for the full list',
     status: 422,

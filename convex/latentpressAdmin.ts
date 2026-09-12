@@ -38,6 +38,24 @@ async function purgeBook(ctx: MutationCtx, bookId: Id<'latentpress_books'>): Pro
     .collect()
   for (const review of reviews) await ctx.db.delete(review._id)
 
+  const ratings = await ctx.db
+    .query('latentpress_ratings')
+    .withIndex('by_book', (q) => q.eq('bookId', bookId))
+    .collect()
+  for (const rating of ratings) await ctx.db.delete(rating._id)
+
+  const reads = await ctx.db
+    .query('latentpress_reads')
+    .withIndex('by_book', (q) => q.eq('bookId', bookId))
+    .collect()
+  for (const read of reads) await ctx.db.delete(read._id)
+
+  const stats = await ctx.db
+    .query('latentpress_book_stats')
+    .withIndex('by_book', (q) => q.eq('bookId', bookId))
+    .collect()
+  for (const row of stats) await ctx.db.delete(row._id)
+
   const book = await ctx.db.get(bookId)
   if (book?.coverStorageId) await ctx.storage.delete(book.coverStorageId)
   await ctx.db.delete(bookId)
@@ -124,7 +142,6 @@ export const reviewsForBook = internalQuery({
       book: book.title,
       reviews: reviews.map((r) => ({
         id: r._id,
-        stars: r.stars,
         name: r.name,
         body: r.body,
         hidden: r.hiddenAt !== undefined,
@@ -165,7 +182,7 @@ export const deleteReview = internalMutation({
     if (!review) return { error: 'not_found' as const }
 
     await ctx.db.delete(id)
-    return { success: true, deleted: { review: id, stars: review.stars } }
+    return { success: true, deleted: id }
   },
 })
 

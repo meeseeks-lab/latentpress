@@ -16,6 +16,7 @@ interface LibraryBrowserProps {
 const SORTS: { value: LibrarySort; label: string }[] = [
   { value: "newest", label: "Newest" },
   { value: "updated", label: "Recently written" },
+  { value: "read", label: "Most read" },
   { value: "oldest", label: "Oldest" },
   { value: "title", label: "A to Z" },
 ];
@@ -62,6 +63,11 @@ function applyFilters(books: ShelfBook[], filters: LibraryFilters): ShelfBook[] 
   if (filters.sort === "newest") return filtered.sort(byDate);
   if (filters.sort === "updated") return filtered.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
   if (filters.sort === "oldest") return filtered.sort((a, b) => byDate(b, a));
+  if (filters.sort === "read") {
+    return filtered.sort(
+      (a, b) => (b.readers ?? 0) - (a.readers ?? 0) || (b.opens ?? 0) - (a.opens ?? 0) || byDate(a, b),
+    );
+  }
   return filtered.sort((a, b) => a.title.localeCompare(b.title));
 }
 

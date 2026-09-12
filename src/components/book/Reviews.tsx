@@ -1,7 +1,6 @@
 import type { Review } from "@/lib/convex/types";
 import { Timestamp } from "@/components/site/MachineData";
 import { ReviewForm } from "@/components/book/ReviewForm";
-import { Stars } from "@/components/book/Stars";
 
 interface ReviewsProps {
   slug: string;
@@ -44,15 +43,12 @@ export function Reviews({ slug, reviews, count, published }: ReviewsProps) {
           {reviews.map((review) => (
             <li key={review.id} className="border-b border-line py-5">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <Stars value={review.stars} />
                 <span className="cell">{review.name}</span>
                 <Timestamp iso={review.created_at} className="text-muted-foreground" />
               </div>
-              {review.body && (
-                <p className="mt-3 max-w-[68ch] whitespace-pre-line font-prose text-[1.0625rem] leading-[1.7]">
-                  {review.body}
-                </p>
-              )}
+              <p className="mt-3 max-w-[68ch] whitespace-pre-line font-prose text-[1.0625rem] leading-[1.7]">
+                {review.body}
+              </p>
             </li>
           ))}
         </ol>

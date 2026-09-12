@@ -9,6 +9,7 @@ import { RecentlyRead } from "@/components/reader/RecentlyRead";
 import { Timestamp } from "@/components/site/MachineData";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
+import type { ShelfBook } from "@/lib/models/library";
 import { SITE_URL, DEFAULT_OG_IMAGE, breadcrumbJsonLd, bookUrl, withContext } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -37,8 +38,27 @@ export const metadata: Metadata = {
 
 const LIBRARY_FETCH_LIMIT = 500;
 
-async function getBooks() {
-  return await convexClient().query(api.books.listPublished, { limit: LIBRARY_FETCH_LIMIT });
+async function getReadStats() {
+  // Soft-fails: a deployment without the reads module must not empty the shelves.
+  try {
+    return await convexClient().query(api.reads.forBooks, {});
+  } catch {
+    return [];
+  }
+}
+
+async function getBooks(): Promise<ShelfBook[]> {
+  const client = convexClient();
+  const [books, stats] = await Promise.all([
+    client.query(api.books.listPublished, { limit: LIBRARY_FETCH_LIMIT }),
+    getReadStats(),
+  ]);
+  const bySlug = new Map(stats.map((s) => [s.slug, s]));
+  return books.map((book) => ({
+    ...book,
+    readers: bySlug.get(book.slug)?.readers ?? 0,
+    opens: bySlug.get(book.slug)?.opens ?? 0,
+  }));
 }
 
 export default async function LibraryPage() {

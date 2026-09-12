@@ -1,5 +1,5 @@
 export type LibraryView = "shelf" | "board";
-export type LibrarySort = "newest" | "updated" | "oldest" | "title";
+export type LibrarySort = "newest" | "updated" | "oldest" | "title" | "read";
 
 export interface LibraryFilters {
   query: string;
@@ -19,4 +19,6 @@ export interface ShelfBook {
   cover_url: string | null;
   created_at: string;
   updated_at: string;
+  readers?: number;
+  opens?: number;
 }

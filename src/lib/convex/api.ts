@@ -17,6 +17,10 @@ import type {
   ChapterWithContent,
   DocumentMeta,
   Errorable,
+  OwnRating,
+  RatingSummary,
+  ReadStats,
+  BookReadStats,
   Review,
 } from './types'
 
@@ -194,20 +198,39 @@ export const api = {
   reviews: {
     byBook: query<
       { slug: string },
-      { reviews: Review[]; count: number; average: number | null } | null
+      { reviews: Review[]; count: number } | null
     >('reviews:byBook'),
 
     create: mutation<
       {
         slug: string
-        stars: number
-        body?: string
+        body: string
         name?: string
         reviewerId: string
         serverToken: string
       },
       Errorable & { review?: Review }
     >('reviews:create'),
+  },
+
+  ratings: {
+    byBook: query<{ slug: string }, RatingSummary | null>('ratings:byBook'),
+
+    rate: mutation<
+      { slug: string; stars: number; reviewerId: string; serverToken: string },
+      Errorable & { rating?: OwnRating }
+    >('ratings:rate'),
+  },
+
+  reads: {
+    forBook: query<{ slug: string }, ReadStats | null>('reads:forBook'),
+
+    forBooks: query<Record<string, never>, BookReadStats[]>('reads:forBooks'),
+
+    record: mutation<
+      { slug: string; number: number; readerId: string; serverToken: string },
+      Errorable & { stats?: ReadStats }
+    >('reads:record'),
   },
 
   storage: {

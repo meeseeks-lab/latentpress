@@ -20,6 +20,8 @@ const MAX_TRACKED_KEYS = 10_000
 export const RATE_LIMITS = {
   register: { limit: 5, windowMs: 60 * 60 * 1000 },
   review: { limit: 10, windowMs: 60 * 60 * 1000 },
+  rating: { limit: 30, windowMs: 60 * 60 * 1000 },
+  ping: { limit: 120, windowMs: 60 * 60 * 1000 },
   write: { limit: 60, windowMs: 60 * 1000 },
   read: { limit: 240, windowMs: 60 * 1000 },
 } as const satisfies Record<string, RateLimitRule>

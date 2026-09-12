@@ -6,47 +6,40 @@ import { api } from '@/lib/convex/api'
 
 type RouteContext = { params: Promise<{ slug: string }> }
 
-// POST /api/books/[slug]/reviews — File a reader report.
-// Takes no API key because reports are open to anyone. Stars live on
-// /ratings; a report is text only. Lengths are the mutation's call, not this file's.
-// Body: { body, reviewerId, name?, lp_check? (honeypot) }
+// POST /api/books/[slug]/ratings — Rate a book from 1 to 5 stars.
+// Open to anyone, one rating per browser per book; rating again replaces it.
+// Body: { stars, reviewerId }
 export async function POST(req: NextRequest, context: RouteContext) {
-  const limited = checkRateLimit(req, 'review')
+  const limited = checkRateLimit(req, 'rating')
   if (limited) return limited
 
   const { slug } = await context.params
 
   try {
     const payload = await req.json()
-    const { body, name, reviewerId, lp_check } = payload ?? {}
-
-    if (typeof lp_check === 'string' && lp_check.trim()) {
-      return NextResponse.json({ review: null }, { status: 201 })
-    }
+    const { stars, reviewerId } = payload ?? {}
 
     if (typeof reviewerId !== 'string' || !reviewerId.trim()) {
       return NextResponse.json({ error: 'reviewerId is required' }, { status: 400 })
     }
 
-    if (typeof body !== 'string' || !body.trim()) {
-      return NextResponse.json({ error: 'A report needs some text' }, { status: 422 })
+    if (!Number.isInteger(stars)) {
+      return NextResponse.json(
+        { error: 'stars must be a whole number from 1 to 5' },
+        { status: 422 }
+      )
     }
 
-    if (name != null && typeof name !== 'string') {
-      return NextResponse.json({ error: 'name must be a string' }, { status: 400 })
-    }
-
-    const result = await convexClient().mutation(api.reviews.create, {
+    const result = await convexClient().mutation(api.ratings.rate, {
       slug,
-      body,
-      name: name ?? undefined,
+      stars,
       reviewerId,
       serverToken: process.env.REVIEWS_SERVER_TOKEN ?? '',
     })
 
     if (isConvexError(result)) return convexErrorResponse(result.error)
 
-    return NextResponse.json({ review: result.review }, { status: 201 })
+    return NextResponse.json({ rating: result.rating })
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Invalid request'
     return NextResponse.json({ error: message }, { status: 400 })

@@ -69,8 +69,7 @@ export default defineSchema({
 
   latentpress_reviews: defineTable({
     bookId: v.id('latentpress_books'),
-    stars: v.number(),
-    body: v.union(v.string(), v.null()),
+    body: v.string(),
     name: v.string(),
     reviewerId: v.string(),
     hiddenAt: v.optional(v.number()),
@@ -78,4 +77,33 @@ export default defineSchema({
   })
     .index('by_book', ['bookId'])
     .index('by_book_reviewer', ['bookId', 'reviewerId']),
+
+  latentpress_ratings: defineTable({
+    bookId: v.id('latentpress_books'),
+    stars: v.number(),
+    reviewerId: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_book', ['bookId'])
+    .index('by_book_reviewer', ['bookId', 'reviewerId']),
+
+  latentpress_reads: defineTable({
+    bookId: v.id('latentpress_books'),
+    readerId: v.string(),
+    chapters: v.array(v.number()),
+    finished: v.boolean(),
+    firstAt: v.number(),
+    lastAt: v.number(),
+  })
+    .index('by_book', ['bookId'])
+    .index('by_book_reader', ['bookId', 'readerId']),
+
+  latentpress_book_stats: defineTable({
+    bookId: v.id('latentpress_books'),
+    opens: v.number(),
+    readers: v.number(),
+    finished: v.number(),
+    updatedAt: v.number(),
+  }).index('by_book', ['bookId']),
 })

@@ -92,10 +92,28 @@ export interface AgentBookSummary extends Book {
 
 export interface Review {
   id: Id<'latentpress_reviews'>
-  stars: number
-  body: string | null
+  body: string
   name: string
   created_at: string
+}
+
+export interface RatingSummary {
+  average: number | null
+  count: number
+}
+
+export interface OwnRating extends RatingSummary {
+  stars: number
+}
+
+export interface ReadStats {
+  opens: number
+  readers: number
+  finished: number
+}
+
+export interface BookReadStats extends ReadStats {
+  slug: string
 }
 
 export type ConvexErrorCode =
@@ -108,6 +126,8 @@ export type ConvexErrorCode =
   | 'bad_type'
   | 'conflict'
   | 'invalid_stars'
+  | 'invalid_reviewer'
+  | 'empty_body'
   | 'duplicate_review'
 
 export interface Errorable {
