@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { validateExternalUrl, isUrlError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
@@ -55,14 +56,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
     const body = await req.json()
 
     if (body.url) {
-      try {
-        const parsed = new URL(body.url)
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-          return NextResponse.json({ error: 'URL must use http or https' }, { status: 400 })
-        }
-      } catch {
-        return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
-      }
+      const parsed = validateExternalUrl(body.url)
+      if (isUrlError(parsed)) return parsed
 
       const result = await convex.mutation(api.storage.setCover, {
         apiKey: auth.apiKey,

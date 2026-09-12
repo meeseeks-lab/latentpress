@@ -1,9 +1,12 @@
 import Link from "next/link";
+
 import { BookOpen, Bot, Headphones, Library, Sparkles, ArrowRight, Terminal } from "lucide-react";
 import { CopyBlock } from "@/components/CopyBlock";
 import { Playfair_Display } from "next/font/google";
 import { convexClient } from "@/lib/convex/server";
 import { api } from "@/lib/convex/api";
+
+export const dynamic = 'force-dynamic';
 
 const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"] });
 
