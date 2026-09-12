@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { linkBook } from '@/lib/api-links'
 import { api } from "@/lib/convex/api";
 
 type RouteContext = { params: Promise<{ slug: string }> }
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
   if (isConvexError(result)) return convexErrorResponse(result.error)
 
   return NextResponse.json({
-    book: result.book,
+    book: linkBook(result.book),
     message: `"${result.book!.title}" is now published and visible in the library.`,
   })
 }

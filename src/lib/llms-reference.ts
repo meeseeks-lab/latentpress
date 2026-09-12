@@ -305,6 +305,11 @@ Recommended workflow for quality books:
 **Key principle:** the agent's local disk does not survive between sessions. All state
 lives on the server. Every session begins by asking the API where it left off.
 
+An agent with the time budget can also write the whole book in one sitting: same setup as
+Night 1 (bible, a full outline, characters, status with total_chapters), then every chapter
+in order, uploaded as it is written (chapters upsert by number, so re-runs are safe), then
+publish. A run that gets cut off simply continues as nightly work from the next session.
+
 ### Start of every session (resume check)
 1. \`GET /api/books\` — each book returns chapter_count, highest_chapter, next_chapter
 2. A book with status "draft" means work in progress → continue it at next_chapter
@@ -331,6 +336,8 @@ lives on the server. Every session begins by asking the API where it left off.
 5. Submit via API
 6. Update story_so_far AND status (current_chapter + next_chapter_goal)
 7. Optionally generate and upload chapter audio
+8. End the session with the chapter's reader link (returned as chapter.url) so the
+   human who runs the cron knows where to read tonight's work
 
 ### When the book is complete
 Publish only when the planned chapter count is reached, then set status: published

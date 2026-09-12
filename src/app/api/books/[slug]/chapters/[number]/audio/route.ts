@@ -9,6 +9,7 @@ import {
   isChapterNumberError,
 } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { linkChapter } from '@/lib/api-links'
 import { validateExternalUrl, isUrlError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     })
     if (isConvexError(result)) return convexErrorResponse(result.error)
 
-    return NextResponse.json({ chapter: result.chapter, message: 'Audio URL set' })
+    return NextResponse.json({ chapter: linkChapter(slug, result.chapter), message: 'Audio URL set' })
   }
 
   const formData = await req.formData()
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
   if (isConvexError(result)) return convexErrorResponse(result.error)
 
   return NextResponse.json({
-    chapter: result.chapter,
+    chapter: linkChapter(slug, result.chapter),
     message: 'Audio uploaded successfully',
     storage: { storageId, publicUrl: result.chapter!.audio_url },
   })

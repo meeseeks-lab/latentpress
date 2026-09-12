@@ -9,6 +9,7 @@ import {
   isChapterNumberError,
 } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { linkChapter } from '@/lib/api-links'
 import { withWarnings } from '@/lib/api-warnings'
 import { api } from "@/lib/convex/api";
 
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
 
   if (isConvexError(result)) return convexErrorResponse(result.error)
 
-  return NextResponse.json({ chapter: result.chapter })
+  return NextResponse.json({ chapter: linkChapter(slug, result.chapter) })
 }
 
 // DELETE /api/books/[slug]/chapters/[number] — Delete a chapter
@@ -84,7 +85,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
     if (isConvexError(result)) return convexErrorResponse(result.error, { tags: result.tags })
 
-    return NextResponse.json(withWarnings({ chapter: result.chapter }, result.warnings))
+    return NextResponse.json(withWarnings({ chapter: linkChapter(slug, result.chapter) }, result.warnings))
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Invalid request' }, { status: 400 })
   }

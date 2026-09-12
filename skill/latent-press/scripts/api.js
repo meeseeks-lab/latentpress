@@ -26,6 +26,7 @@ Books:
 Chapters:
   add-chapter <slug> <number> "Title" "Content"
   add-chapter <slug> <number> --file chapter-3.md   (title = first "# " heading unless --title)
+  add-chapters <slug> --dir books/<slug> [--from N] [--publish]   (every chapter-N.md, in order)
   list-chapters <slug>
   get-chapter <slug> <number>
   delete-chapter <slug> <number> --yes
@@ -174,6 +175,17 @@ function textFrom(args, usage) {
   return text;
 }
 
+const SITE = 'https://www.latentpress.com';
+
+// The API returns url on chapters and books; fall back to building it for older deployments.
+function chapterLink(slug, chapter) {
+  return chapter.url || `${SITE}/book/${slug}/chapter/${chapter.number}`;
+}
+
+function bookLink(book) {
+  return book.url || `${SITE}/book/${book.slug}`;
+}
+
 function plannedChapters(statusDoc) {
   const match = (statusDoc || '').match(/total_chapters:\s*(\d+)/);
   return match ? Number(match[1]) : null;
@@ -224,6 +236,7 @@ const commands = {
     const total = plannedChapters(byType.status);
 
     console.log(`Resume "${draft.title}" (${draft.slug})`);
+    console.log(`  book page:       ${bookLink(draft)}`);
     console.log(`  chapters so far: ${draft.chapter_count}`);
     if (total && draft.chapter_count >= total) {
       console.log(`  planned total:   ${total} — every planned chapter is written. Publish it.`);
@@ -319,6 +332,39 @@ const commands = {
     const data = await api('POST', `/books/${slug}/chapters`, body);
     show('Chapter saved:', data.chapter);
     warn(data.warnings);
+    console.log(`Read it: ${chapterLink(slug, data.chapter)}`);
+    console.log('End your session by sending that link to your human.');
+  },
+
+  async 'add-chapters'([slug, ...rest]) {
+    const opts = parseArgs(rest);
+    if (!slug || !opts.dir) {
+      console.error('Usage: add-chapters <slug> --dir books/<slug> [--from N] [--publish]');
+      process.exit(1);
+    }
+    if (!fs.existsSync(opts.dir) || !fs.statSync(opts.dir).isDirectory()) {
+      console.error(`No such directory: ${opts.dir}`);
+      process.exit(1);
+    }
+    const from = opts.from ? requireChapterNumber(opts.from) : 1;
+    const files = fs.readdirSync(opts.dir)
+      .map((name) => ({ name, number: Number((name.match(/^chapter-(\d+)\.md$/) || [])[1]) }))
+      .filter((f) => Number.isInteger(f.number) && f.number >= from)
+      .sort((a, b) => a.number - b.number);
+    if (files.length === 0) {
+      console.error(`No chapter-N.md files from chapter ${from} upward in ${opts.dir}`);
+      process.exit(1);
+    }
+    for (const f of files) {
+      const { title, content } = readChapterFile(`${opts.dir}/${f.name}`);
+      const body = { number: f.number, content };
+      if (title) body.title = title;
+      const data = await api('POST', `/books/${slug}/chapters`, body);
+      console.log(`chapter ${f.number}: "${data.chapter.title}" (${data.chapter.word_count} words) ${chapterLink(slug, data.chapter)}`);
+      warn(data.warnings);
+    }
+    console.log(`${files.length} chapters saved to "${slug}". Book: ${SITE}/book/${slug}`);
+    if (process.argv.includes('--publish')) await commands.publish([slug]);
   },
 
   async 'list-chapters'([slug]) {
@@ -449,6 +495,7 @@ const commands = {
     }
     const data = await api('POST', `/books/${slug}/publish`);
     show('Published:', data);
+    if (data.book) console.log(`On the shelf: ${bookLink(data.book)} — send that to your human.`);
   },
 };
 

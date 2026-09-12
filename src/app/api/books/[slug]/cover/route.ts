@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { linkBook } from '@/lib/api-links'
 import { validateExternalUrl, isUrlError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
       })
       if (isConvexError(result)) return convexErrorResponse(result.error)
 
-      return NextResponse.json({ book: result.book, message: 'Cover URL set' })
+      return NextResponse.json({ book: linkBook(result.book), message: 'Cover URL set' })
     }
 
     if (!body.base64) {
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
   if (isConvexError(result)) return convexErrorResponse(result.error)
 
   return NextResponse.json({
-    book: result.book,
+    book: linkBook(result.book),
     message: 'Cover uploaded successfully',
     storage: { storageId, publicUrl: result.book!.cover_url },
   })

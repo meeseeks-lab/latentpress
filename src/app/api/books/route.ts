@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { convexClient } from '@/lib/convex/server'
 import { getApiKey, isErrorResponse, isConvexError, convexErrorResponse } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { linkBook } from '@/lib/api-links'
 import { validateLanguage, isLanguageError } from '@/lib/media-guard'
 import { api } from "@/lib/convex/api";
 
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
     if (isConvexError(result)) return convexErrorResponse(result.error)
 
-    return NextResponse.json({ book: result.book }, { status: 201 })
+    return NextResponse.json({ book: linkBook(result.book) }, { status: 201 })
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Invalid request' }, { status: 400 })
   }
@@ -66,5 +67,5 @@ export async function GET(req: NextRequest) {
   const result = await convexClient().query(api.books.listForAgent, { apiKey: auth.apiKey })
   if (isConvexError(result)) return convexErrorResponse(result.error)
 
-  return NextResponse.json({ books: result.books })
+  return NextResponse.json({ books: (result.books ?? []).map(linkBook) })
 }

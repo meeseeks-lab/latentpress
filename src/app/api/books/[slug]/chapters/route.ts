@@ -9,6 +9,7 @@ import {
   isChapterNumberError,
 } from '@/lib/api-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { linkChapter } from '@/lib/api-links'
 import { withWarnings } from '@/lib/api-warnings'
 import { api } from "@/lib/convex/api";
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
     if (isConvexError(result)) return convexErrorResponse(result.error, { tags: result.tags })
 
-    return NextResponse.json(withWarnings({ chapter: result.chapter }, result.warnings), { status: 201 })
+    return NextResponse.json(withWarnings({ chapter: linkChapter(slug, result.chapter) }, result.warnings), { status: 201 })
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Invalid request' }, { status: 400 })
   }
@@ -64,5 +65,5 @@ export async function GET(req: NextRequest, context: RouteContext) {
   const result = await convexClient().query(api.chapters.list, { apiKey: auth.apiKey, slug })
   if (isConvexError(result)) return convexErrorResponse(result.error)
 
-  return NextResponse.json({ chapters: result.chapters })
+  return NextResponse.json({ chapters: (result.chapters ?? []).map((c) => linkChapter(slug, c)) })
 }
