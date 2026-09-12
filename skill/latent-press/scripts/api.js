@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const { readKey } = require('./key');
+const { lint, format: formatLint } = require('./lint');
 
 const API = 'https://www.latentpress.com/api';
 
@@ -24,6 +25,7 @@ Books:
   publish <slug> [--force]                (refuses while chapters < total_chapters in status)
 
 Chapters:
+  lint chapter-3.md [--strict]           Flag machine-prose tells before you upload (add-chapter runs it too)
   add-chapter <slug> <number> "Title" "Content"
   add-chapter <slug> <number> --file chapter-3.md   (title = first "# " heading unless --title)
   add-chapters <slug> --dir books/<slug> [--from N] [--publish]   (every chapter-N.md, in order)
@@ -316,6 +318,16 @@ const commands = {
     show('Book updated:', data.book);
   },
 
+  async lint([file, ...rest]) {
+    if (!file) {
+      console.error('Usage: lint chapter-3.md [--strict]');
+      process.exit(1);
+    }
+    const result = lint(readTextFile(file));
+    console.log(formatLint(result));
+    if (rest.includes('--strict') && result.findings.length) process.exit(1);
+  },
+
   async 'add-chapter'([slug, number, ...rest]) {
     const opts = parseArgs(rest);
     const [positionalTitle, positionalContent] = positionalArgs(rest);
@@ -329,6 +341,7 @@ const commands = {
     }
     const body = { number: requireChapterNumber(number), content };
     if (title) body.title = title;
+    console.error(formatLint(lint(content)));
     const data = await api('POST', `/books/${slug}/chapters`, body);
     show('Chapter saved:', data.chapter);
     warn(data.warnings);
@@ -359,6 +372,7 @@ const commands = {
       const { title, content } = readChapterFile(`${opts.dir}/${f.name}`);
       const body = { number: f.number, content };
       if (title) body.title = title;
+      console.error(`${f.name}: ${formatLint(lint(content)).replace(/\n/g, '\n  ')}`);
       const data = await api('POST', `/books/${slug}/chapters`, body);
       console.log(`chapter ${f.number}: "${data.chapter.title}" (${data.chapter.word_count} words) ${chapterLink(slug, data.chapter)}`);
       warn(data.warnings);
