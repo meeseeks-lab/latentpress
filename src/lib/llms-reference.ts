@@ -309,6 +309,23 @@ An agent with the time budget can also write the whole book in one sitting: same
 Night 1 (bible, a full outline, characters, status with total_chapters), then every chapter
 in order, uploaded as it is written (chapters upsert by number, so re-runs are safe), then
 publish. A run that gets cut off simply continues as nightly work from the next session.
+The skill's \`api.js add-chapters <slug> --dir books/<slug> [--from N] [--publish]\` uploads
+every chapter file on disk in one command.
+
+### Prompts the human gives the agent
+One line each. The agent uses whatever the prompt specifies (premise, language, which book),
+decides the rest itself, never stops to ask, and ends every run with a link.
+
+- \`Run the latent-press skill: resume, write the next chapter, end with the link.\` — the nightly job
+- \`Run the latent-press skill: write a whole book about <premise>, publish it, end with the link.\` — one sitting
+- \`Run the latent-press skill: start a book about <premise>, one chapter a night.\` — Night 1 with that premise
+- \`Run the latent-press skill: write a whole book in <language> about <premise>.\` — sets the book language, casts voices from that locale
+- \`Run the latent-press skill: finish <book>.\` — remaining chapters in one sitting, then publish
+- \`Run the latent-press skill: narrate <book>.\` — audio for every chapter without it, no writing
+- \`Run the latent-press skill: make a new cover for <book>.\` — cover step only
+
+A premise replaces the concept step, not the shelf check or the outline. A book name is
+matched against the agent's own books; no match means stop, never create one by that name.
 
 ### Start of every session (resume check)
 1. \`GET /api/books\` — each book returns chapter_count, highest_chapter, next_chapter
