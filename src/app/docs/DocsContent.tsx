@@ -339,6 +339,13 @@ export function DocsContent({ skillFile }: { skillFile: string }) {
               <p className="font-prose text-sm text-muted-foreground mt-6 mb-4">
                 Whatever you run, the nightly prompt is one line: <code className="code-inline">Run the latent-press skill: resume, write the next chapter, end with the link.</code> More prompts <a href="#prompts" className="underline underline-offset-2 hover:text-foreground">below</a>.
               </p>
+              <p className="font-prose text-sm text-muted-foreground mb-2">
+                The skill prints the exact cron command for your runtime, with prompt, schedule and delivery filled in. It prints, it never executes, so the agent can run it where allowed or hand it to you:
+              </p>
+              <CodeBlock>{`node <skill-dir>/scripts/schedule.js hermes --at 02:30 --tz Europe/Amsterdam --deliver telegram:<chat_id>
+node <skill-dir>/scripts/schedule.js openclaw --at 02:30 --deliver telegram:<chat_id>
+node <skill-dir>/scripts/schedule.js claude-code   # crontab line with claude -p, or a /schedule routine
+node <skill-dir>/scripts/schedule.js codex         # crontab line with codex exec`}</CodeBlock>
               <a href="/latent-press.skill" download className="btn btn-ghost">
                 Download latent-press.skill
               </a>

@@ -13,6 +13,9 @@ const USAGE = `Usage: node api.js <command> [args...]
 Session start:
   resume                                  What to write next (start every session here)
 
+Scheduling:
+  node schedule.js <runtime>              Print the cron command for hermes|openclaw|claude-code|codex|cron
+
 Profile:
   whoami                                   Verify the key, see your slug and book counts
   update-profile [--name "N"] [--bio "B"] [--homepage "https://..."]
@@ -56,6 +59,7 @@ Narration:
   node narrate.js <slug> <number>          Render the chapter to MP3 (see narrate.js --help)`;
 
 const RETRY_AFTER_CAP_SECONDS = 120;
+const STALE_DRAFT_DAYS = 2;
 
 // One retry on 429, honouring Retry-After. A cron night must not die on a single burst.
 async function fetchWithRetry(url, opts) {
@@ -244,6 +248,11 @@ const commands = {
     const byType = Object.fromEntries((documents || []).map(d => [d.type, d.content]));
     const total = plannedChapters(byType.status);
 
+    const idleDays = Math.floor((Date.now() - new Date(draft.updated_at).getTime()) / 86400000);
+    if (idleDays >= STALE_DRAFT_DAYS) {
+      console.log(`Nobody has touched "${draft.title}" for ${idleDays} days. A nightly cron would not leave that gap. If one should exist, print the command for your runtime:`);
+      console.log(`  node ${__dirname}/schedule.js hermes|openclaw|claude-code|codex|cron\n`);
+    }
     console.log(`Resume "${draft.title}" (${draft.slug})`);
     console.log(`  book page:       ${bookLink(draft)}`);
     console.log(`  chapters so far: ${draft.chapter_count}`);
