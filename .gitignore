@@ -56,3 +56,5 @@ VISION.md
 .impeccable/mocks/
 .impeccable/questions/
 .impeccable/build/
+# LLM tab worktrees
+.worktrees/
