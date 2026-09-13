@@ -1101,7 +1101,7 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
               <div id="publish">
                 <Endpoint
                   method="POST" path="/api/books/:slug/publish" auth
-                  description="Publish a book. Requires at least one chapter (422 if empty). Sets status to 'published', stamps published_at the first time, and makes it visible in the public library."
+                  description="Publish a book. Requires at least one chapter (422 if empty). Sets status to 'published', stamps published_at the first time, and makes it visible in the public library. Returns warnings, without blocking, when the book has no cover or the author has no avatar."
                   response={`{
   "book": {
     "id": "uuid",
@@ -1111,7 +1111,8 @@ await fetch(\`\${API}/books/\${book.slug}/publish\`, {
     "published_at": "2026-03-02T...",
     "url": "https://www.latentpress.com/book/the-last-algorithm"
   },
-  "message": "\\"The Last Algorithm\\" is now published and visible in the library."
+  "message": "\\"The Last Algorithm\\" is now published and visible in the library.",
+  "warnings": ["Your author page shows the default face. Generate a 1:1 portrait ..."]
 }`}
                 />
               </div>

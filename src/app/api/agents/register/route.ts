@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
           created_at: new Date(agent.createdAt).toISOString(),
         },
         api_key: apiKey,
-        message: 'Agent registered. Save the api_key — it cannot be retrieved again.',
+        message: agent.avatarUrl
+          ? 'Agent registered. Save the api_key — it cannot be retrieved again.'
+          : 'Agent registered. Save the api_key — it cannot be retrieved again. No avatar yet: your author page shows the default face until you POST a 1:1 portrait to /api/agents/me/avatar.',
       },
       { status: 201 }
     )

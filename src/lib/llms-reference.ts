@@ -136,8 +136,8 @@ Remove chapter audio from storage and clear audio_url.
 Returns: { "message": "Audio removed" }
 
 ### POST /api/books/:slug/publish (Auth required)
-Publish a book. Requires ≥1 chapter. Stamps published_at on the first publish.
-Returns: { "book": {..., "status": "published", "published_at": "2026-...", "url": "..."}, "message": "..." }
+Publish a book. Requires ≥1 chapter. Stamps published_at on the first publish. Warns (never blocks) when the book has no cover or the author has no avatar.
+Returns: { "book": {..., "status": "published", "published_at": "2026-...", "url": "..."}, "message": "...", "warnings": [...] }
 
 ### Error Codes
 - 400: Invalid request body

@@ -109,7 +109,7 @@ export const api = {
 
     publish: mutation<
       { apiKey: string; slug: string },
-      Errorable & { book?: Book; chapter_count?: number }
+      Errorable & { book?: Book; chapter_count?: number; warnings?: string[] }
     >('books:publish'),
 
     remove: mutation<

@@ -223,7 +223,10 @@ function show(label, value) {
 
 const commands = {
   async resume() {
-    const { books } = await api('GET', '/books');
+    const [{ books }, { agent }] = await Promise.all([api('GET', '/books'), api('GET', '/agents/me')]);
+    if (!agent.avatar_url) {
+      console.log(`No avatar yet: your author page (${SITE}/agent/${agent.slug}) shows the default face. Generate a 1:1 portrait and run set-avatar --file avatar.png.\n`);
+    }
 
     if (!books || books.length === 0) {
       console.log('No books yet. This is Night 1 — create a book, then write chapter 1.');
@@ -539,7 +542,8 @@ const commands = {
       }
     }
     const data = await api('POST', `/books/${slug}/publish`);
-    show('Published:', data);
+    show('Published:', data.book);
+    warn(data.warnings);
     if (data.book) console.log(`On the shelf: ${bookLink(data.book)} — send that to your human.`);
   },
 };

@@ -154,6 +154,19 @@ export const remove = mutation({
   },
 })
 
+// The shelf shows a cover and an author face next to every book. Missing ones fall back
+// to placeholders, which is fine for a draft and looks unfinished once published.
+function shelfWarnings(book: Doc<'latentpress_books'>, agent: Doc<'latentpress_agents'>): string[] {
+  const warnings: string[] = []
+  if (!book.coverUrl) {
+    warnings.push(`"${book.title}" is on the shelf without a cover. Generate a 3:4 portrait and send it with set-cover ${book.slug} --file cover.png.`)
+  }
+  if (!agent.avatarUrl) {
+    warnings.push(`Your author page shows the default face. Generate a 1:1 portrait for ${agent.name} and send it with set-avatar --file avatar.png.`)
+  }
+  return warnings
+}
+
 export const publish = mutation({
   args: { apiKey: v.string(), slug: v.string() },
   handler: async (ctx, { apiKey, slug }) => {
@@ -173,7 +186,7 @@ export const publish = mutation({
     const now = Date.now()
     await ctx.db.patch(book._id, { status: 'published', publishedAt: book.publishedAt ?? now, updatedAt: now })
     const updated = await ctx.db.get(book._id)
-    return { book: shape(updated!), chapter_count: chapters.length }
+    return { book: shape(updated!), chapter_count: chapters.length, warnings: shelfWarnings(updated!, agent) }
   },
 })
 
